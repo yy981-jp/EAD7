@@ -1,0 +1,55 @@
+[magic(7だけ):1b][ver:1b][alg:1b][mk:1b][kid:16b][nonce:12b][本文][tag:16b]
+
+1. 基本暗号仕様
+暗号方式: AES-256-GCM
+Nonce: 96bit
+ヘッダに alg=0x01 を埋め込み、将来拡張可能にする
+出力形式:
+	文字列モード: Base64
+	ファイルモード: バイナリそのまま
+
+2. 鍵管理
+MK (Master Key)
+	開発者だけが持つ最上位の秘密鍵
+	KEK を生成/ラップするために利用する
+	OS秘密ストア or ユーザパスベースのKDFで保護するのが候補
+KEK (Key Encryption Key)
+	KID と紐づく
+	具体的な暗号化処理で使う鍵 (dec) を生成する
+KID (Key Identifier)
+	識別子。暗号文や管理ファイルに含める
+	ランダム生成 or 番号方式
+	長寿命（「相手ごとに十数年使う」イメージ）
+
+3. KDF（鍵導出）
+HKDF (SHA-256) を利用予定
+パラメータ:
+	salt: ランダム値（安全性向上、同じMKでも異なるKEKが出る）
+	info: 用途識別文字列 (例: "EAD7-KEK-KID=xxxx")
+
+4. データ形式・ヘッダ
+ヘッダに含めるもの
+	magic (例: 2B 固定値)
+	alg (例: 0x01 = AES-256-GCM)
+	KID
+	nonce
+	tag (AES-GCMの認証タグ)
+本体
+	ciphertext
+
+5. ファイル管理
+KID一覧ファイル
+	基本は平文でもOK（暗号文に含まれるため秘密性不要）
+	ただし 改ざん防止のため HMAC を付けるのが推奨
+KEKストレージ
+	必ず暗号化して保存 (AEAD)
+	運用の注意点
+	ファイル権限を厳格に
+	バックアップとログを残す
+
+6. 実装メモ
+
+ライブラリ: Crypto++ (MSYS2 Mingw64)
+Hex/Base64のエンコード関数をデバッグ用に自作してOK
+Ninja + CMake でビルド
+SecByteBlock は Hex/Base64 で表示する
