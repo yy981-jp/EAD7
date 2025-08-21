@@ -24,8 +24,6 @@ void manageKEK() {
 	// recal
 	// INS1
 }
-void createMK() {}
-void createKEK() {}
 
 
 std::string calcHMAC(const std::string &data, const SecByteBlock &key) {
@@ -81,7 +79,8 @@ void mmain() {
 	switch (i) {
 		case 1: manageMK(); break;
 		case 2: manageKEK(); break;
-		case 3: createMK(); break;
+		// case 3: createMK(); break;
 		case 4: createKEK(); break;
 	}
+	std::cout << "\n\n\n";
 }

@@ -6,10 +6,11 @@ set(CMAKE_CXX_STANDARD 23)
 
 # ソースファイル
 set(SOURCES
-	test.cpp
+	# test.cpp
 	main.cpp
 	base.cpp
 	master.cpp
+	MK.cpp
 )
 
 add_compile_options(-fexec-charset=cp932)
