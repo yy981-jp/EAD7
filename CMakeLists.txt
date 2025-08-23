@@ -11,6 +11,8 @@ set(SOURCES
 	base.cpp
 	master.cpp
 	MK.cpp
+	HKDF.cpp
+	io.cpp
 )
 
 add_compile_options(-fexec-charset=cp932)

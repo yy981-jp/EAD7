@@ -1,3 +1,5 @@
 #pragma once
-#include <vector>
-typedef std::vector<unsigned char> BIN;
+#include <cryptopp/secblock.h>
+using namespace CryptoPP;
+using BIN = SecByteBlock;
+namespace fs = std::filesystem;

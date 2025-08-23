@@ -7,7 +7,6 @@
 
 #include "master.h"
 #include "base.h"
-#include "def.h"
 
 // helpers: Base64 encode/decode using libsodium
 std::string bin2base64(const unsigned char* bin, size_t binlen) {
@@ -135,22 +134,22 @@ BIN UnwrapMK_WithPass(const std::string &password,
 }
 
 
-BIN readMK(const std::string& pass, const MKEntryB64& res) {
+BIN readMKCore(const std::string& pass, const MKEntryB64& res) {
 	// unwrap
-	auto mk = UnwrapMK_WithPass(pass, res.salt, res.nonce, res.ct);
+	BIN mk = UnwrapMK_WithPass(pass, res.salt, res.nonce, res.ct);
 
 	// clear mk2
 	// sodium_memzero(mk.data(), mk.size());
 	return mk;
 }
 
-MKEntryB64 createMK(const std::string& pass) {
+MKEntryB64 createMKCore(const std::string& pass) {
 	if (sodium_init() < 0) {
 		std::cerr << "libsodium init failed\n";
 		return MKEntryB64(false);
 	}
 
-	auto mk = GenerateRandomMK();
+	BIN mk = GenerateRandomMK();
 
 
 	std::cout << "Generated MK (raw hex): ";
@@ -164,6 +163,5 @@ MKEntryB64 createMK(const std::string& pass) {
 */
 	// wipe mk from memory after wrap
 	sodium_memzero(mk.data(), mk.size());
-	std::cout << "Unwrapped MK (hex): " << base::enHex(readMK(pass,res)) << "\n";
 	return res;
 }

@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <cryptopp/secblock.h>
 
-using namespace CryptoPP;
+#include "def.h"
+
 
 
 struct KIDList {
@@ -18,10 +18,15 @@ struct MKEntryB64 {
 	operator bool() {return status;}
 };
 
-extern MKEntryB64 createMK(const std::string& pass);
-extern std::vector<unsigned char> readMK(const std::string& pass, const MKEntryB64& res);
+extern MKEntryB64 createMKCore(const std::string& pass);
+extern BIN readMKCore(const std::string& pass, const MKEntryB64& res);
+
+extern void createMK(const std::string& path, int index, const std::string& pass);
+extern BIN readMK(const std::string& path, int index, const std::string& pass);
+
+extern BIN createKEK(const std::string& KID);
 
 
 void mmain();
 
-std::vector<KIDList> parseKIDList(const std::string& fn, const SecByteBlock &hmacKey);
+std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey);

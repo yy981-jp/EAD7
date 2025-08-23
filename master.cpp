@@ -2,16 +2,18 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <fstream>
+
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/sha.h>
 #include <cryptopp/hmac.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/base64.h>
 
+
 #include <yy981/proc.h>
 
-using namespace CryptoPP;
-
+#include "def.h"
 
 void manageMK() {}
 void manageKEK() {
@@ -26,7 +28,7 @@ void manageKEK() {
 }
 
 
-std::string calcHMAC(const std::string &data, const SecByteBlock &key) {
+std::string calcHMAC(const std::string &data, const BIN &key) {
 	std::string mac;
 	HMAC<SHA256> hmac(key, key.size());
 
@@ -42,7 +44,7 @@ std::string calcHMAC(const std::string &data, const SecByteBlock &key) {
 	return mac;
 }
 
-std::vector<KIDList> parseKIDList(const std::string& fn, const SecByteBlock &hmacKey) {
+std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey) {
 	std::ifstream f(fn);
 	if (!f) throw std::runtime_error("File open failed");
 
@@ -80,7 +82,7 @@ void mmain() {
 		case 1: manageMK(); break;
 		case 2: manageKEK(); break;
 		// case 3: createMK(); break;
-		case 4: createKEK(); break;
+		// case 4: createKEK(); break;
 	}
 	std::cout << "\n\n\n";
 }

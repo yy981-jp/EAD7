@@ -1,8 +1,14 @@
 #include "def.h"
+#include <cryptopp/hkdf.h>
+#include <cryptopp/sha.h>
+
+#include "master.h"
+
+#include <iostream>
 
 // HKDFで鍵を生成
-SecByteBlock deriveKey(const SecByteBlock &ikm, const std::string &info, size_t keyLen) {
-    SecByteBlock derived(keyLen);
+BIN deriveKey(const BIN &ikm, const std::string &info, size_t keyLen) {
+    BIN derived(keyLen);
 
     HKDF<SHA256> hkdf;
     // saltはnullptrで長さ0にして省略
@@ -13,16 +19,16 @@ SecByteBlock deriveKey(const SecByteBlock &ikm, const std::string &info, size_t 
 }
 
 
-BIN createKEK(const std::string& KID) {
-	BIN mk = readMK();
+BIN createKEKCore(const std::string& KID, const BIN& mk) {
     std::string infoKEK = "EAD7|KEK|" + KID;
-    SecByteBlock KEK = deriveKey(MK, infoKEK, 32);
-    std::cout << "KEK: " << base::enHex(KEK) << std::endl;
+    BIN KEK = deriveKey(mk, infoKEK, 32);
+    // std::cout << "KEK: " << base::enHex(KEK) << std::endl;
+	return KEK;
 }
-
+/*
 {
     // MK (32Bランダム例)
-    // SecByteBlock MK(32);
+    // BIN MK(32);
     // for (size_t i = 0; i < MK.size(); ++i) MK[i] = i; // サンプル値
 	// std::cout << "MK:  " << base::enHex(MK) << "\n";
 
@@ -32,13 +38,14 @@ BIN createKEK(const std::string& KID) {
 
     // 1️⃣ KEK生成
     // std::string infoKEK = "EAD7|KEK|" + KID;
-    // SecByteBlock KEK = deriveKey(MK, infoKEK, 32);
+    // BIN KEK = deriveKey(MK, infoKEK, 32);
     // std::cout << "KEK: " << base::enHex(KEK) << std::endl;
 
     // 2️⃣ DEK生成
     std::string infoDEK = "EAD7|DEK|" + Nonce;
-    SecByteBlock DEK = deriveKey(KEK, infoDEK, 32);
+    BIN DEK = deriveKey(KEK, infoDEK, 32);
     std::cout << "DEK: " << base::enHex(DEK) << std::endl;
 
     return 0;
 }
+*/

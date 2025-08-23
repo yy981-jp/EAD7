@@ -2,9 +2,11 @@
 #include <cryptopp/base64.h>
 #include <cryptopp/hex.h>
 
+#include "def.h"
+
 namespace base {
 	// バイト列を16進文字列に変換
-	std::string enHex(const SecByteBlock &block) {
+	std::string enHex(const BIN &block) {
 		std::string hex;
 		for (size_t i = 0; i < block.size(); ++i) {
 			char buf[3];
@@ -15,7 +17,6 @@ namespace base {
 	}
 	
 	std::string enHex(const std::vector<unsigned char>& data) {
-		using namespace CryptoPP;
 		std::string encoded;
 
 		StringSource ss(data.data(), data.size(), true,
