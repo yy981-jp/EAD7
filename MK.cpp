@@ -1,5 +1,3 @@
-// libsodium_wrap.cpp
-// build: g++ -std=c++23 libsodium_wrap.cpp -lsodium -o libsodium_wrap
 #include <sodium.h>
 #include <string>
 #include <vector>
@@ -8,28 +6,6 @@
 #include "master.h"
 #include "base.h"
 
-// helpers: Base64 encode/decode using libsodium
-std::string bin2base64(const unsigned char* bin, size_t binlen) {
-	std::string out;
-	size_t olen = sodium_base64_ENCODED_LEN(binlen, sodium_base64_VARIANT_URLSAFE_NO_PADDING);
-	out.resize(olen);
-	sodium_bin2base64(&out[0], olen, bin, binlen, sodium_base64_VARIANT_URLSAFE_NO_PADDING);
-	// remove trailing nulls
-	while (!out.empty() && out.back() == '\0') out.pop_back();
-	return out;
-}
-BIN base642bin(const std::string &b64) {
-	BIN out(b64.size()); // upper bound
-	size_t binlen = 0;
-	if (sodium_base642bin(out.data(), out.size(),
-						  b64.c_str(), b64.size(),
-						  nullptr, &binlen, nullptr,
-						  sodium_base64_VARIANT_URLSAFE_NO_PADDING) != 0) {
-		throw std::runtime_error("Base64 decode failed");
-	}
-	out.resize(binlen);
-	return out;
-}
 
 // パラメータ（実運用で調整可能）
 // libsodium 定義を使うのが簡単: MODERATE / SENSITIVE など
@@ -85,9 +61,9 @@ MKEntryB64 WrapMK_WithPass(const BIN &mk,
 	sodium_memzero(wrapKey.data(), wrapKey.size());
 
 	MKEntryB64 r;
-	r.salt = bin2base64(salt.data(), salt.size());
-	r.nonce = bin2base64(nonce.data(), nonce.size());
-	r.ct = bin2base64(ct.data(), ct.size());
+	r.salt = base::enc64(salt);
+	r.nonce = base::enc64(nonce);
+	r.ct = base::enc64(ct);
 	return r;
 }
 
@@ -97,9 +73,9 @@ BIN UnwrapMK_WithPass(const std::string &password,
 											 const std::string &nonce_b64,
 											 const std::string &ct_b64)
 {
-	auto salt = base642bin(salt_b64);
-	auto nonce = base642bin(nonce_b64);
-	auto ct = base642bin(ct_b64);
+	auto salt = base::dec64(salt_b64);
+	auto nonce = base::dec64(nonce_b64);
+	auto ct = base::dec64(ct_b64);
 
 	// derive wrapKey
 	BIN wrapKey(32);
@@ -134,7 +110,7 @@ BIN UnwrapMK_WithPass(const std::string &password,
 }
 
 
-BIN readMKCore(const std::string& pass, const MKEntryB64& res) {
+BIN loadMKCore(const std::string& pass, const MKEntryB64& res) {
 	// unwrap
 	BIN mk = UnwrapMK_WithPass(pass, res.salt, res.nonce, res.ct);
 
@@ -151,16 +127,12 @@ MKEntryB64 createMKCore(const std::string& pass) {
 
 	BIN mk = GenerateRandomMK();
 
-
 	std::cout << "Generated MK (raw hex): ";
 	for (auto b : mk) printf("%02X", b);
 	std::cout << "\n";
 
 	MKEntryB64 res = WrapMK_WithPass(mk, pass);
-/*	std::cout << "salt_b64: " << res.salt << "\n";
-	std::cout << "nonce_b64: " << res.nonce << "\n";
-	std::cout << "ct_b64: " << res.ct << "\n";
-*/
+
 	// wipe mk from memory after wrap
 	sodium_memzero(mk.data(), mk.size());
 	return res;

@@ -19,14 +19,15 @@ struct MKEntryB64 {
 };
 
 extern MKEntryB64 createMKCore(const std::string& pass);
-extern BIN readMKCore(const std::string& pass, const MKEntryB64& res);
+extern BIN loadMKCore(const std::string& pass, const MKEntryB64& res);
 
 extern void createMK(const std::string& path, int index, const std::string& pass);
-extern BIN readMK(const std::string& path, int index, const std::string& pass);
+extern BIN loadMK(const std::string& path, int index, const std::string& pass);
 
 extern BIN createKEK(const std::string& KID);
 
+extern BIN deriveKey(const BIN &ikm, const std::string &info, size_t keyLen);
 
 void mmain();
 
-std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey);
+// std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey);

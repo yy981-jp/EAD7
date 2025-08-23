@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 	std::vector<std::string> input = st::charV(argc,argv);
 
 	// for (const KIDList& e: parseKIDList("../test.kid.m.txt")) std::cout << e.dat << "|" << e.ex << "\n";
-	createMK("MK.E7",1,"pass12345");
+	std::cout << base::encHex(loadMK("MK.e7",2,"pass12345"));
 	return 100;
 	if (argc==2 || is_or(input[1],"manage","master")) {
 		mmain();

@@ -5,18 +5,7 @@
 #include "def.h"
 
 namespace base {
-	// バイト列を16進文字列に変換
-	std::string enHex(const BIN &block) {
-		std::string hex;
-		for (size_t i = 0; i < block.size(); ++i) {
-			char buf[3];
-			sprintf(buf, "%02X", block[i]);
-			hex += buf;
-		}
-		return hex;
-	}
-	
-	std::string enHex(const std::vector<unsigned char>& data) {
+	std::string encHex(const BIN& data) {
 		std::string encoded;
 
 		StringSource ss(data.data(), data.size(), true,
@@ -30,7 +19,7 @@ namespace base {
 
 
 	
-	std::string en64(const std::vector<unsigned char>& data) {
+	std::string enc64(const BIN& data) {
 		std::string encoded;
 
 		StringSource ss(data.data(), data.size(), true,
@@ -40,5 +29,13 @@ namespace base {
 		);
 
 		return encoded;
+	}
+	
+	BIN dec64(const std::string& s) {
+		std::string bin;
+		StringSource ss(s, true,
+			new Base64Decoder(new StringSink(bin))
+		);
+		return BIN(reinterpret_cast<const unsigned char*>(bin.data()), bin.size());
 	}
 }

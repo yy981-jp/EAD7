@@ -6,7 +6,7 @@
 
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/sha.h>
-#include <cryptopp/hmac.h>
+// #include <cryptopp/hmac.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/base64.h>
 
@@ -27,51 +27,6 @@ void manageKEK() {
 	// INS1
 }
 
-
-std::string calcHMAC(const std::string &data, const BIN &key) {
-	std::string mac;
-	HMAC<SHA256> hmac(key, key.size());
-
-	StringSource ss(
-		data, true,
-		new HashFilter(hmac,
-			new Base64Encoder(
-				new StringSink(mac), false // false = 改行なし
-			)
-		)
-	);
-
-	return mac;
-}
-
-std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey) {
-	std::ifstream f(fn);
-	if (!f) throw std::runtime_error("File open failed");
-
-	std::string firstLine;
-	if (!std::getline(f, firstLine)) throw std::runtime_error("Empty file");
-
-	// 本文全体を読み込み
-	std::string body, line;
-	while (std::getline(f, line)) {
-		body += line + "\n"; // 改行も含めてHMAC対象
-	}
-
-	// HMAC検証
-	std::string expected = calcHMAC(body, hmacKey);
-	if (expected != firstLine) {
-		throw std::runtime_error("HMAC verification failed");
-	}
-
-	// パース
-	std::vector<KIDList> result;
-	std::istringstream iss(body);
-	while (std::getline(iss, line)) {
-		if (line.size() < 24) continue; // 不正行はスキップ
-		result.push_back({ line.substr(0, 24), line.substr(25) });
-	}
-	return result;
-}
 
 void mmain() {
 	std::cout << "[EAD7管理画面]\n1. MK管理\n2. KEK(KID)管理\n3. MK生成(非常時)\n4. KEK生成";

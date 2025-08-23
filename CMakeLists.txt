@@ -9,10 +9,11 @@ set(SOURCES
 	# test.cpp
 	main.cpp
 	base.cpp
+	util.cpp
 	master.cpp
 	MK.cpp
-	HKDF.cpp
 	io.cpp
+	KID.cpp
 )
 
 add_compile_options(-fexec-charset=cp932)

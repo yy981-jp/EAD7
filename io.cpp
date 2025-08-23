@@ -2,6 +2,10 @@
 #include <fstream>
 #include <filesystem>
 #include <nlohmann/json.hpp>
+#include <cryptopp/hmac.h>
+#include <cryptopp/sha.h>
+#include <cryptopp/filters.h>
+#include <cryptopp/base64.h>
 
 #include "def.h"
 #include "master.h"
@@ -9,10 +13,10 @@
 using json = nlohmann::json;
 
 
-BIN readMK(const std::string& path, int index, const std::string& pass) {
+BIN loadMK(const std::string& path, int index, const std::string& pass) {
 	std::string sindex = std::to_string(index);
 	std::ifstream ifile(path);
-	if (!ifile) throw std::runtime_error("readMK()::ifstream");
+	if (!ifile) throw std::runtime_error("loadMK()::ifstream");
 	json jsondat;
 	ifile >> jsondat;
 	json entryj = jsondat.at(sindex);
@@ -21,7 +25,7 @@ BIN readMK(const std::string& path, int index, const std::string& pass) {
 	entry.salt = entryj.at("salt").get<std::string>();
 	entry.nonce = entryj.at("nonce").get<std::string>();
 	entry.ct = entryj.at("ct").get<std::string>();
-	return readMKCore(pass,entry);
+	return loadMKCore(pass,entry);
 }
 
 void createMK(const std::string& path, int index, const std::string& pass) {
