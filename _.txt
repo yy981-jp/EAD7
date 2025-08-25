@@ -3,3 +3,48 @@
 MK.e7		json	管理者	マスターキーリスト 1ファイルのみ存在
 .kid.e7		json	管理者	KEK-ID(KID)リスト マスターキーごとに存在
 .kek.e7		json	ユーザ	KEKリスト 割り当てられたKEKを保持
+
+. -> MK				管理者
+MK + KID -> KEK		管理者
+KEK + nonce -> DEC	利用者(システム内部で処理)
+
+
+kek
+	{
+		"12345ABCDEFGHI...(KEK-base64)": {
+			"name": "test",
+			"created": 1724300000 //unix時間
+			"status": "active",
+			"note": "デバッグ用"
+		}
+	}
+
+
+kidPath			MK=1 の KID.label=test の場合、 01test
+
+
+%localappdata%/yy981/EAD7
+	1.kek.e7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CLI先に実装?

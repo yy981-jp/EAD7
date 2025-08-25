@@ -4,25 +4,41 @@ add_compile_options(-fdiagnostics-color=always)
 
 set(CMAKE_CXX_STANDARD 23)
 
+# Qt6を使う（必要に応じてWidgetsなど追加）
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets)
+
+# Qt用の自動MOCを有効にする
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
 # ソースファイル
 set(SOURCES
 	# test.cpp
+	main.ui
 	main.cpp
 	base.cpp
+	def.cpp
 	util.cpp
 	master.cpp
 	MK.cpp
 	io.cpp
 	KID.cpp
+	HKDF.cpp
 )
 
 add_compile_options(-fexec-charset=cp932)
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+target_include_directories(${PROJECT_NAME} PRIVATE "C:/msys64/mingw64/include/qt6")
 
 # ライブラリをリンク
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME}
 	cryptopp
 	sodium
+	Qt6Core
+	Qt6Gui
+	Qt6Widgets
+	Qt6OpenGLWidgets
 )

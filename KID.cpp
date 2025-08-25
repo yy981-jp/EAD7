@@ -26,18 +26,26 @@ inline BIN deriveKidlistHmacKey(const BIN& MK) {
 }
 
 
-ordered_json loadKidFile_checked(const std::string& path, const BIN& MK) {
+ordered_json loadKID(const int& mkid, const BIN& MK) {
+	bool check = true;
+	const std::string path = sdm + std::to_string(mkid) + ".kid.e7";
+	if (!fs::exists(path)) {
+		std::ofstream ofile(path);
+		if (!ofile) throw std::runtime_error("writeKEK()::ini::ofstream");
+		ofile << "{\"hmac\":\"\",\"body\":{\"version\":1,\"kids\":{}}}";
+	}
 	std::ifstream ifs(path);
 	if (!ifs) throw std::runtime_error("KIDファイルを開けません: " + path);
 
 	ordered_json j;
 	ifs >> j;
 
-	if (!j.contains("hmac") || !j.contains("body"))
-		throw std::runtime_error("KIDファイル形式不正: hmac/body 不足");
+	if (!j.contains("hmac") || !j.contains("body")) throw std::runtime_error("KIDファイル形式不正: hmac/body 不足");
 
 	std::string hmac_b64 = j.at("hmac").get<std::string>();
 	ordered_json body = j.at("body");
+	
+	if (!check) return body;
 
 	// HMAC再計算
 	BIN hkey = deriveKidlistHmacKey(MK);
@@ -45,7 +53,7 @@ ordered_json loadKidFile_checked(const std::string& path, const BIN& MK) {
 	BIN mac = hmac_sha256(hkey, body_dump);
 
 	// 後始末（MK→hkeyを消す）
-	sodium_memzero(hkey.data(), hkey.size());
+	delm(hkey);
 
 	// 比較
 	BIN mac_stored = base::dec64(hmac_b64);
@@ -55,12 +63,13 @@ ordered_json loadKidFile_checked(const std::string& path, const BIN& MK) {
 	return body;
 }
 
-void saveKidFile(const std::string& path, const ordered_json& body, const BIN& MK) {
+void saveKIDconst (const int &mkid, const ordered_json& body, const BIN& MK) {
+	const std::string path = sdm + std::to_string(mkid) + ".kid.e7";
 	// HMAC計算
 	BIN hkey = deriveKidlistHmacKey(MK);
 	std::string body_dump = body.dump();
 	BIN mac = hmac_sha256(hkey, body_dump);
-	sodium_memzero(hkey.data(), hkey.size());
+	delm(hkey);
 
 	// JSON組み立て
 	ordered_json j;

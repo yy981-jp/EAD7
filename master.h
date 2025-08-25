@@ -1,9 +1,19 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <sodium.h>
 
 #include "def.h"
 
+
+
+
+
+#define delm(bin) sodium_memzero((bin).data(), (bin).size())
+
+inline std::string getMkid(const std::string& KIDPath) {
+	return std::to_string(std::stoi(KIDPath.substr(0,2)));
+}
 
 
 struct KIDList {

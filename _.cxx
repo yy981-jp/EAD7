@@ -94,3 +94,15 @@ std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey) {
 	}
 	return result;
 }
+
+
+
+
+
+
+
+
+
+
+
+sodium_runtime_has_aesni() // trueだとAES-NI無し

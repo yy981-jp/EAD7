@@ -58,7 +58,7 @@ MKEntryB64 WrapMK_WithPass(const BIN &mk,
 	(void)outlen;
 
 	// clear wrapKey from memory
-	sodium_memzero(wrapKey.data(), wrapKey.size());
+	delm(wrapKey);
 
 	MKEntryB64 r;
 	r.salt = base::enc64(salt);
@@ -100,12 +100,12 @@ BIN UnwrapMK_WithPass(const std::string &password,
 												   nonce.data(),
 												   wrapKey.data()) != 0) {
 		// auth failed
-		sodium_memzero(wrapKey.data(), wrapKey.size());
+		delm(wrapKey);
 		throw std::runtime_error("decryption failed (auth mismatch)");
 	}
 
 	// clear wrapKey
-	sodium_memzero(wrapKey.data(), wrapKey.size());
+	delm(wrapKey);
 	return mk;
 }
 
@@ -114,8 +114,6 @@ BIN loadMKCore(const std::string& pass, const MKEntryB64& res) {
 	// unwrap
 	BIN mk = UnwrapMK_WithPass(pass, res.salt, res.nonce, res.ct);
 
-	// clear mk2
-	// sodium_memzero(mk.data(), mk.size());
 	return mk;
 }
 
@@ -134,6 +132,6 @@ MKEntryB64 createMKCore(const std::string& pass) {
 	MKEntryB64 res = WrapMK_WithPass(mk, pass);
 
 	// wipe mk from memory after wrap
-	sodium_memzero(mk.data(), mk.size());
+	delm(mk);
 	return res;
 }
