@@ -29,7 +29,6 @@ void manageKEK() {
 
 
 void mmain() {
-	fs::create_directory(sdm);
 	std::cout << "[EAD7管理画面]\n1. MK管理\n2. KEK(KID)管理\n3. MK生成(非常時)\n4. KEK生成";
 	std::string in;
 	std::cin >> in;

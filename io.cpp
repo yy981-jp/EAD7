@@ -12,15 +12,19 @@
 
 using json = nlohmann::json;
 
-
-BIN loadMK(const std::string& path, int index, const std::string& pass) {
+BIN loadMK(int index, const std::string& pass) {
+	const std::string path = SD+"MK.E7";
 	std::string sindex = std::to_string(index);
-	std::ifstream ifile(path);
-	if (!ifile) throw std::runtime_error("loadMK()::ifstream");
 	json jsondat;
-	ifile >> jsondat;
+	if (fs::exists(path)) {
+		std::ifstream ifile(path);
+		if (!ifile) throw std::runtime_error("loadMK()::ifstream");
+		ifile >> jsondat;
+	}
+	if (!jsondat.contains(sindex)) return BIN(0);
+
 	json entryj = jsondat.at(sindex);
-	
+
 	MKEntryB64 entry;
 	entry.salt = entryj.at("salt").get<std::string>();
 	entry.nonce = entryj.at("nonce").get<std::string>();
@@ -28,7 +32,8 @@ BIN loadMK(const std::string& path, int index, const std::string& pass) {
 	return loadMKCore(pass,entry);
 }
 
-void createMK(const std::string& path, int index, const std::string& pass) {
+void createMK(int index, const std::string& pass) {
+	const std::string path = SD+"MK.E7";
 	std::string sindex = std::to_string(index);
 	if (!fs::exists(path)) {
 		std::ofstream ofile(path);

@@ -17,7 +17,7 @@ using json = nlohmann::json;
 // HKDFで鍵を生成
 
 
-BIN createKEKCore(const std::string& KID, const BIN& mk) {
+BIN createKEKCore(const BIN& mk, const std::string& KID) {
     std::string infoKEK = "EAD7|KEK|" + KID;
     BIN KEK = deriveKey(mk, infoKEK, 32);
     // std::cout << "KEK: " << base::encHex(KEK) << std::endl;
@@ -25,7 +25,7 @@ BIN createKEKCore(const std::string& KID, const BIN& mk) {
 }
 
 void writeKEK(const json& entry, int mkid) {
-	const std::string path = sd + std::to_string(mkid) + ".kek.e7";
+	const std::string path = SD + std::to_string(mkid) + ".kek.e7";
 	
 	if (!fs::exists(path)) {
 		std::ofstream ofile(path);
@@ -48,7 +48,7 @@ void writeKEK(const json& entry, int mkid) {
 }
 
 bool createKEK(const BIN& mk, const std::string& KIDPath) {
-	std::ifstream ifile(sdm + getMkid(KIDPath) + ".kid.e7");
+	std::ifstream ifile(SD + getMkid(KIDPath) + ".kid.e7");
 	if (!ifile) throw std::runtime_error("createKEK()::ifstream");
 	json j;
 	ifile >> j;

@@ -2,9 +2,11 @@
 #include <string>
 #include <vector>
 #include <sodium.h>
+#include <nlohmann/json.hpp>
 
 #include "def.h"
 
+using ordered_json = nlohmann::ordered_json;
 
 
 
@@ -16,9 +18,22 @@ inline std::string getMkid(const std::string& KIDPath) {
 }
 
 
-struct KIDList {
-	std::string dat,ex;
+enum class Status : uint8_t {
+	Active,
+	Disabled,
+	Revoked,
 };
+
+struct KIDEntry {
+	std::string label, status, note/*, b64*/;
+	// int64_t created;
+
+	KIDEntry(std::string label, std::string note, std::string status = "active"): label(label), note(note), status(status) {}
+	operator bool() {
+		return (status == "active");
+	}
+};
+
 
 struct MKEntryB64 {
 	std::string salt,nonce,ct;
@@ -31,12 +46,16 @@ struct MKEntryB64 {
 extern MKEntryB64 createMKCore(const std::string& pass);
 extern BIN loadMKCore(const std::string& pass, const MKEntryB64& res);
 
-extern void createMK(const std::string& path, int index, const std::string& pass);
-extern BIN loadMK(const std::string& path, int index, const std::string& pass);
+extern void createMK(int index, const std::string& pass);
+extern BIN loadMK(int index, const std::string& pass);
 
-extern BIN createKEK(const std::string& KID);
+extern void saveKID(const BIN& mk, const int &mkid, const ordered_json& body);
+extern ordered_json loadKID(const BIN& mk, const int& mkid);
+extern void createKID(const BIN& mk, int mkid, const KIDEntry& kid_e);
 
 extern BIN deriveKey(const BIN &ikm, const std::string &info, size_t keyLen);
+
+extern BIN randomBIN(size_t size);
 
 void mmain();
 

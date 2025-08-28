@@ -1,18 +1,20 @@
+set(CMAKE_BUILD_TYPE Debug)
+
+
+
 cmake_minimum_required(VERSION 3.16)
 project(EAD7) # Encryption and decryption ver7
 add_compile_options(-fdiagnostics-color=always)
 
 set(CMAKE_CXX_STANDARD 23)
 
-# Qt6を使う（必要に応じてWidgetsなど追加）
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets)
 
-# Qt用の自動MOCを有効にする
+# MOC
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# ソースファイル
 set(SOURCES
 	# test.cpp
 	main.ui
@@ -27,18 +29,18 @@ set(SOURCES
 	HKDF.cpp
 )
 
-add_compile_options(-fexec-charset=cp932)
+# add_compile_options(-fexec-charset=cp932)
 # set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PRIVATE "C:/msys64/mingw64/include/qt6")
 
-# ライブラリをリンク
+# ライブラリ
 target_link_libraries(${PROJECT_NAME}
 	cryptopp
 	sodium
-	Qt6Core
-	Qt6Gui
-	Qt6Widgets
-	Qt6OpenGLWidgets
+	# Qt6Core
+	# Qt6Gui
+	# Qt6Widgets
+	# Qt6OpenGLWidgets
 )

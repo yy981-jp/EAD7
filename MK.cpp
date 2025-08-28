@@ -12,15 +12,6 @@
 const unsigned long long PW_OPSLIMIT = crypto_pwhash_OPSLIMIT_MODERATE;
 const size_t PW_MEMLIMIT = crypto_pwhash_MEMLIMIT_MODERATE;
 
-// 生成: ランダム MK (32B)
-BIN GenerateRandomMK() {
-	BIN mk(32);
-	randombytes_buf(mk.data(), mk.size());
-	return mk;
-}
-
-// wrap: パスワード -> wrapKey (Argon2id) -> AEAD encrypt MK
-// 戻り: salt_base64, nonce_base64, ct_base64
 
 MKEntryB64 WrapMK_WithPass(const BIN &mk,
 						   const std::string &password)
@@ -123,7 +114,7 @@ MKEntryB64 createMKCore(const std::string& pass) {
 		return MKEntryB64(false);
 	}
 
-	BIN mk = GenerateRandomMK();
+	BIN mk = randomBIN(32);
 
 	std::cout << "Generated MK (raw hex): ";
 	for (auto b : mk) printf("%02X", b);
