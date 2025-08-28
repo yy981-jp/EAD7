@@ -26,29 +26,52 @@ inline BIN deriveKidlistHmacKey(const BIN& MK) {
 }
 
 
-ordered_json loadKID(const int& mkid, const BIN& MK) {
-	bool check = true;
-	const std::string path = sdm + std::to_string(mkid) + ".kid.e7";
-	if (!fs::exists(path)) {
-		std::ofstream ofile(path);
-		if (!ofile) throw std::runtime_error("writeKEK()::ini::ofstream");
-		ofile << "{\"hmac\":\"\",\"body\":{\"version\":1,\"kids\":{}}}";
-	}
-	std::ifstream ifs(path);
-	if (!ifs) throw std::runtime_error("KIDファイルを開けません: " + path);
 
+// KIDエントリJSON（label/created/status/note）
+std::pair<std::string,ordered_json> makeKidEntry(const KIDEntry& kid_e) {
 	ordered_json j;
-	ifs >> j;
+	std::string b64 = base::enc64(randomBIN(16));
+	j["label"] = kid_e.label;
+	j["created"] = static_cast<int64_t>(std::time(nullptr));
+	j["status"] = kid_e.status; // "active" | "disabled" | "revoked"
+	j["note"] = kid_e.note;
+	return {b64,j};
+}
+
+void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
+	for (const ordered_json& e: body.items()) if (e.contains(kid_e["label"])) return_e("すでに同じラベルのKIDが存在します");
+	std::pair<std::string,ordered_json> entry = makeKidEntry(kid_e);
+	body["kids"][entry.first] = entry.second;
+}
+
+
+
+ordered_json loadKID(const BIN& mk, const int& mkid) {
+	const std::string path = SD + std::to_string(mkid) + ".kid.e7";
+	ordered_json j;
+	if (!fs::exists(path)) {
+		j = {
+			{"hmac",""},
+			{"body",{
+				{"version",1},
+					{"kids",ordered_json::object()}
+				}
+			}
+		};
+		return j;
+	} else {
+		std::ifstream ifs(path);
+		if (!ifs) throw std::runtime_error("KIDファイルを開けません: " + path);
+		ifs >> j;
+	}
 
 	if (!j.contains("hmac") || !j.contains("body")) throw std::runtime_error("KIDファイル形式不正: hmac/body 不足");
 
 	std::string hmac_b64 = j.at("hmac").get<std::string>();
 	ordered_json body = j.at("body");
 	
-	if (!check) return body;
-
 	// HMAC再計算
-	BIN hkey = deriveKidlistHmacKey(MK);
+	BIN hkey = deriveKidlistHmacKey(mk);
 	std::string body_dump = body.dump();
 	BIN mac = hmac_sha256(hkey, body_dump);
 
@@ -63,8 +86,8 @@ ordered_json loadKID(const int& mkid, const BIN& MK) {
 	return body;
 }
 
-void saveKIDconst (const int &mkid, const ordered_json& body, const BIN& MK) {
-	const std::string path = sdm + std::to_string(mkid) + ".kid.e7";
+void saveKID(const BIN& mk, const int &mkid, const ordered_json& body) {
+	const std::string path = SD + std::to_string(mkid) + ".kid.e7";
 	// HMAC計算
 	BIN hkey = deriveKidlistHmacKey(MK);
 	std::string body_dump = body.dump();
@@ -79,5 +102,5 @@ void saveKIDconst (const int &mkid, const ordered_json& body, const BIN& MK) {
 	// 保存
 	std::ofstream ofs(path);
 	if (!ofs) throw std::runtime_error("KIDファイルを書き込めません: " + path);
-	ofs << j.dump(0); // 最小化（HMACはbody.dump()基準なので外側の整形は自由）
+	ofs << j;
 }

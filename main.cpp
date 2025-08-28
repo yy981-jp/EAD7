@@ -2,9 +2,12 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <windows.h>
 
 #include <cryptopp/cryptlib.h>
 #include <sodium.h>
+
+#include <nlohmann/json.hpp>
 
 #include <yy981/string.h>
 #include <yy981/return.h>
@@ -13,18 +16,25 @@
 #include "base.h"
 #include "master.h"
 
+using json = nlohmann::json;
+using ordered_json = nlohmann::ordered_json;
+
+
 bool GUI = false;
 
 
 int main(int argc, char* argv[]) {
-	
-	
-	
-	return 100;
-	fs::create_directory(sd);
-	std::vector<std::string> input = st::charV(argc,argv);
-	std::cout << sd;
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
 
+	fs::create_directory(SD);
+	std::vector<std::string> input = st::charV(argc,argv);
+
+	BIN mk = loadMK(1,"testabc");
+	createKID(mk,1,KIDEntry("testKey","試験用"),);
+
+	
+	
 /*
 	switch (argc) {
 		case 1: GUI = true; break;
