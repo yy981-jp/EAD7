@@ -47,7 +47,7 @@ void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
 
 
 ordered_json loadKID(const BIN& mk, const int& mkid) {
-	const std::string path = SD + std::to_string(mkid) + ".kid.e7";
+	const std::string path = SDM + std::to_string(mkid) + ".kid.e7";
 	ordered_json j;
 	if (!fs::exists(path)) {
 		j = {
@@ -87,7 +87,7 @@ ordered_json loadKID(const BIN& mk, const int& mkid) {
 }
 
 void saveKID(const BIN& mk, const int &mkid, const ordered_json& body) {
-	const std::string path = SD + std::to_string(mkid) + ".kid.e7";
+	const std::string path = SDM + std::to_string(mkid) + ".kid.e7";
 	// HMAC計算
 	BIN hkey = deriveKidlistHmacKey(MK);
 	std::string body_dump = body.dump();
