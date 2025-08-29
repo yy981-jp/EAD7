@@ -25,7 +25,7 @@ BIN createKEKCore(const BIN& mk, const std::string& KID) {
 }
 
 void writeKEK(const json& entry, int mkid) {
-	const std::string path = SD + std::to_string(mkid) + ".kek.e7";
+	const std::string path = SDM + std::to_string(mkid) + ".kek.e7";
 	
 	if (!fs::exists(path)) {
 		std::ofstream ofile(path);
@@ -48,7 +48,7 @@ void writeKEK(const json& entry, int mkid) {
 }
 
 bool createKEK(const BIN& mk, const std::string& KIDPath) {
-	std::ifstream ifile(SD + getMkid(KIDPath) + ".kid.e7");
+	std::ifstream ifile(SDM + getMkid(KIDPath) + ".kid.e7");
 	if (!ifile) throw std::runtime_error("createKEK()::ifstream");
 	json j;
 	ifile >> j;

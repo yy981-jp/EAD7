@@ -13,7 +13,7 @@
 using json = nlohmann::json;
 
 BIN loadMK(int index, const std::string& pass) {
-	const std::string path = SD+"MK.E7";
+	const std::string path = SDM+"MK.E7";
 	std::string sindex = std::to_string(index);
 	json jsondat;
 	if (fs::exists(path)) {
@@ -33,7 +33,7 @@ BIN loadMK(int index, const std::string& pass) {
 }
 
 void createMK(int index, const std::string& pass) {
-	const std::string path = SD+"MK.E7";
+	const std::string path = SDM+"MK.E7";
 	std::string sindex = std::to_string(index);
 	if (!fs::exists(path)) {
 		std::ofstream ofile(path);

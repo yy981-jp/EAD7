@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 
-	fs::create_directory(SD);
+	fs::create_directories(SDM);
 	std::vector<std::string> input = st::charV(argc,argv);
 
 	BIN mk = loadMK(1,"testabc");
