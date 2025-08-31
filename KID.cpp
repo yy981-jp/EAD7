@@ -41,7 +41,7 @@ std::pair<std::string,ordered_json> makeKidEntry(const KIDEntry& kid_e) {
 }
 
 void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
-	for (const ordered_json& e: body.items()) if (e.contains(kid_e.label)) return_e("すでに同じラベルのKIDが存在します");
+    for (auto& [key, val] : body["kids"].items()) if (val["label"] == kid_e.label) return_e("すでに同じラベルのKIDが存在します");
 	std::pair<std::string,ordered_json> entry = makeKidEntry(kid_e);
 	body["kids"][entry.first] = entry.second;
 }
@@ -60,7 +60,7 @@ ordered_json loadKID(const BIN& mk, const int& mkid) {
 				}
 			}
 		};
-		return j;
+		return j["body"];
 	} else {
 		std::ifstream ifs(path);
 		if (!ifs) throw std::runtime_error("KIDファイルを開けません: " + path);
