@@ -15,6 +15,8 @@
 #include "def.h"
 #include "base.h"
 #include "master.h"
+#include "interface.h"
+
 
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
@@ -31,7 +33,7 @@ int main(int argc, char* argv[]) {
 	std::vector<std::string> input = st::charV(argc,argv);
 
 	BIN mk = loadMK(1,"testabc");
-	createKID(mk,1,KIDEntry("testKey","試験用"),);
+	createKID(mk,1,KIDEntry("testKey","試験用"));
 
 	
 	

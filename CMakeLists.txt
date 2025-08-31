@@ -27,6 +27,7 @@ set(SOURCES
 	io.cpp
 	KID.cpp
 	HKDF.cpp
+	token.cpp
 )
 
 # add_compile_options(-fexec-charset=cp932)
@@ -44,3 +45,5 @@ target_link_libraries(${PROJECT_NAME}
 	# Qt6Widgets
 	# Qt6OpenGLWidgets
 )
+
+# target_link_options(${PROJECT_NAME} PRIVATE -mconsole)

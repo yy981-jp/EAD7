@@ -51,10 +51,11 @@ extern BIN loadMK(int index, const std::string& pass);
 
 extern void saveKID(const BIN& mk, const int &mkid, const ordered_json& body);
 extern ordered_json loadKID(const BIN& mk, const int& mkid);
-extern void createKID(const BIN& mk, int mkid, const KIDEntry& kid_e);
+extern void addNewKid(ordered_json& body, const KIDEntry& kid_e);
+
+
 
 extern BIN deriveKey(const BIN &ikm, const std::string &info, size_t keyLen);
-
 extern BIN randomBIN(size_t size);
 
 void mmain();
