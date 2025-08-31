@@ -29,6 +29,9 @@ int main(int argc, char* argv[]) {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 
+	BIN bin = base::dec64("mZ3v8Jp1N+4xQ6t8H2l9aYvK0sF3bQ7d9XwR1oPj2Zs=");
+	std::cout << base::enc64(bin);
+
 	fs::create_directories(SDM);
 	std::vector<std::string> input = st::charV(argc,argv);
 
