@@ -6,6 +6,8 @@
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
+#include <yy981/return.h>
+
 #include "base.h"
 #include "master.h"
 
@@ -39,7 +41,7 @@ std::pair<std::string,ordered_json> makeKidEntry(const KIDEntry& kid_e) {
 }
 
 void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
-	for (const ordered_json& e: body.items()) if (e.contains(kid_e["label"])) return_e("すでに同じラベルのKIDが存在します");
+	for (const ordered_json& e: body.items()) if (e.contains(kid_e.label)) return_e("すでに同じラベルのKIDが存在します");
 	std::pair<std::string,ordered_json> entry = makeKidEntry(kid_e);
 	body["kids"][entry.first] = entry.second;
 }
@@ -89,7 +91,7 @@ ordered_json loadKID(const BIN& mk, const int& mkid) {
 void saveKID(const BIN& mk, const int &mkid, const ordered_json& body) {
 	const std::string path = SDM + std::to_string(mkid) + ".kid.e7";
 	// HMAC計算
-	BIN hkey = deriveKidlistHmacKey(MK);
+	BIN hkey = deriveKidlistHmacKey(mk);
 	std::string body_dump = body.dump();
 	BIN mac = hmac_sha256(hkey, body_dump);
 	delm(hkey);
