@@ -99,10 +99,40 @@ std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey) {
 
 
 
+inline void exec() {
+	switch (argc) {
+		case 1: GUI = true; break;
+		
+		case 2:
+			if (is_or(input[1],"manage","master")) {
+				mmain();
+				return 981;
+			}
+		
+		
+		
+		break; case 3:
+			if (is_or(input[1]),"enc","en","e","E") {}
+			else if (is_or(input[1]),"dec","de","d","D") {}
+		
+		
+		
+		break; default: return_e("CLI引数エラー");
+	}
+}
 
 
 
 
 
 
-sodium_runtime_has_aesni() // trueだとAES-NI無し
+sodium_runtime_has_aesni() // trueだとAES-NI在り
+
+
+
+CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const std::string& text, const std::string& AAD) {
+	BIN text_bin(reinterpret_cast<const byte*>(text.data()), text.size());
+	BIN aad_bin(reinterpret_cast<const byte*>(AAD.data()), AAD.size());
+	return AES256GCM(key,nonce,text_bin,aad_bin);
+}
+
