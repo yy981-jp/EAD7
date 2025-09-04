@@ -1,7 +1,7 @@
 #include <sodium.h>
 #include <string>
 #include <vector>
-#include <iostream>
+// #include <iostream>
 
 #include "master.h"
 #include "base.h"
@@ -109,17 +109,12 @@ BIN loadMKCore(const std::string& pass, const MKEntryB64& res) {
 }
 
 MKEntryB64 createMKCore(const std::string& pass) {
-	if (sodium_init() < 0) {
-		std::cerr << "libsodium init failed\n";
-		return MKEntryB64(false);
-	}
-
 	BIN mk = randomBIN(32);
-
+/*
 	std::cout << "Generated MK (raw hex): ";
 	for (auto b : mk) printf("%02X", b);
 	std::cout << "\n";
-
+*/
 	MKEntryB64 res = WrapMK_WithPass(mk, pass);
 
 	// wipe mk from memory after wrap

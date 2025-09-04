@@ -24,14 +24,12 @@ set(SOURCES
 	util.cpp
 	master.cpp
 	MK.cpp
-	io.cpp
+	MK_io.cpp
 	KID.cpp
-	HKDF.cpp
+	KEK.cpp
 	token.cpp
+	AES256GCM.cpp
 )
-
-# add_compile_options(-fexec-charset=cp932)
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PRIVATE "C:/msys64/mingw64/include/qt6")
@@ -45,5 +43,3 @@ target_link_libraries(${PROJECT_NAME}
 	# Qt6Widgets
 	# Qt6OpenGLWidgets
 )
-
-# target_link_options(${PROJECT_NAME} PRIVATE -mconsole)

@@ -10,7 +10,6 @@
 #include "def.h"
 #include "master.h"
 
-using json = nlohmann::json;
 
 BIN loadMK(int index, const std::string& pass) {
 	const std::string path = SDM+"MK.E7";

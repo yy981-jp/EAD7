@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include <filesystem>
 #include <windows.h>
 
@@ -18,46 +19,20 @@
 #include "interface.h"
 
 
-using json = nlohmann::json;
-using ordered_json = nlohmann::ordered_json;
-
-
 bool GUI = false;
 
 
-int main(int argc, char* argv[]) {
+inline void init() {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 
-	BIN bin = base::dec64("mZ3v8Jp1N+4xQ6t8H2l9aYvK0sF3bQ7d9XwR1oPj2Zs=");
-	std::cout << base::enc64(bin);
-
 	fs::create_directories(SDM);
-	std::vector<std::string> input = st::charV(argc,argv);
 
-	BIN mk = loadMK(1,"testabc");
-	createKID(mk,1,KIDEntry("testKey","試験用"));
+	if (sodium_init() < 0) return_e("libsodium init failed\n");
+	AESNI = sodium_runtime_has_aesni();
+}
 
+int main(int argc, char* argv[]) {
+	init();
 	
-	
-/*
-	switch (argc) {
-		case 1: GUI = true; break;
-		
-		case 2:
-			if (is_or(input[1],"manage","master")) {
-				mmain();
-				return 981;
-			}
-		
-		
-		
-		break; case 3:
-			if (is_or(input[1]),"enc","en","e","E") {}
-			else if (is_or(input[1]),"dec","de","d","D") {}
-		
-		
-		
-		break; default: return_e("CLI引数エラー");
-	}*/
 }
