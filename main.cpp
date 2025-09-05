@@ -8,7 +8,6 @@
 #include <cryptopp/cryptlib.h>
 #include <sodium.h>
 
-#include <nlohmann/json.hpp>
 
 #include <yy981/string.h>
 #include <yy981/return.h>

@@ -56,7 +56,7 @@ json createRawKEK(const BIN& mk, json kek_json, const json& kid_json);
 
 extern BIN deriveKey(const BIN& ikm, const std::string &info, size_t keyLen, const BIN& salt = BIN());
 extern CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD);
-extern BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD);
+extern BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD, const BIN& tag);
 extern BIN randomBIN(size_t size);
 
 void mmain();

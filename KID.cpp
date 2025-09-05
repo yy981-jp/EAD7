@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sodium.h>
 
-#include <nlohmann/json.hpp>
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
