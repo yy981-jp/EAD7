@@ -1,0 +1,41 @@
+{ // raw
+	"version": 1,
+	"type": "raw",
+	"keks": {
+		"<base64>": { // KID
+			"label": "example-label",
+			"status": "active",
+			"created": 1756617060
+			"kek": "<base64>", // 平文 KEK
+		}
+	}
+}
+
+{ // adm
+	"version": 1,
+	"type": "adm",
+	"keks": {
+		"<base64>": { // KID (AAD)
+			"label": "example-label", // (AAD)
+			"status": "active", // (AAD)
+			"created": 1756617060 // (AAD)
+			"enc": {
+				"ct": "<base64>",
+				"tag": "<base64>",
+				"nonce": "<base64>"
+			}
+		}
+	}
+}
+
+{ //cus
+	"version": 1,
+	"type": "cus",
+	"custom": {
+		"<kid_base64>": {
+			"note": "これは自分用メモ",
+			"alias": "仕事用アカウント",
+			"icon": "<base64>"
+		}
+	}
+}

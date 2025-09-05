@@ -1,7 +1,6 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
-#include <nlohmann/json.hpp>
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 #include <cryptopp/filters.h>
