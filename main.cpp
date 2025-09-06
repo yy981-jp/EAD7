@@ -33,5 +33,8 @@ inline void init() {
 
 int main(int argc, char* argv[]) {
 	init();
-	
+    std::cout << "  /\\  \n";
+    std::cout << " /  \\ \n";
+    std::cout << "/____\\\n";
+	// mmain();
 }

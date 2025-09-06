@@ -1,4 +1,3 @@
-#include "master.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -6,8 +5,7 @@
 
 #include <yy981/proc.h>
 
-#include "def.h"
-
+#include "master.h"
 /*
 void mmain() {
 	std::cout << "[EAD7管理画面]\n1. MK管理\n2. KEK(KID)管理\n3. MK生成(非常時)\n4. KEK生成";
