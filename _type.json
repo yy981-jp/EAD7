@@ -61,7 +61,7 @@
 	"kdf": {
 		"opslimit": "<opslimitの数値>",
 		"memlimit": "<memlimitの数値>",
-		"salt": "<base64文字列（16バイト）>"
+		"salt": "<base64>"
 	},
 	"keks": {
 		"<base64>": { // KID (AAD)
