@@ -73,5 +73,3 @@ extern void saveToken(const BIN& token);
 extern BIN loadToken();
 
 void mmain();
-
-// std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey);

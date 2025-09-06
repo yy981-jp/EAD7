@@ -51,6 +51,32 @@
 	}
 }
 
+{ // dst
+	"version": 1,        // (AAD)
+	"type": "dst",       // (AAD)
+	"meta": {
+		"created": 1756617060,       // (AAD)
+		"last_updated": 1756619953   // (AAD)
+	},
+	"kdf": {
+		"opslimit": "<opslimitの数値>",
+		"memlimit": "<memlimitの数値>",
+		"salt": "<base64文字列（16バイト）>"
+	},
+	"keks": {
+		"<base64>": { // KID (AAD)
+			"label": "example-label", // (AAD)
+			"status": "active", // (AAD)
+			"created": 1756617060 // (AAD)
+			"enc": {
+				"ct": "<base64>",
+				"tag": "<base64>",
+				"nonce": "<base64>"
+			}
+		}
+	}
+}
+
 { //cus
 	"version": 1,
 	"type": "cus",
