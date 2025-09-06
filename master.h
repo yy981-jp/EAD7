@@ -41,23 +41,36 @@ struct CryptoGCM {
 	BIN cipher, tag;
 };
 
+extern BIN deriveKey(const BIN& ikm, const std::string &info, size_t keyLen, const BIN& salt = BIN());
+extern BIN randomBIN(size_t size);
+extern CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD);
+extern BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD, const BIN& tag);
+
+
 extern MKEntryB64 createMKCore(const std::string& pass);
 extern BIN loadMKCore(const std::string& pass, const MKEntryB64& res);
 
+
 extern void createMK(int index, const std::string& pass);
 extern BIN loadMK(int index, const std::string& pass);
+
 
 extern void saveKID(const BIN& mk, const int &mkid, const ordered_json& body);
 extern ordered_json loadKID(const BIN& mk, const int& mkid);
 extern void addNewKid(ordered_json& body, const KIDEntry& kid_e);
 
-json createRawKEK(const BIN& mk, json kek_json, const json& kid_json);
+
+extern json createRawKEK(const BIN& mk, json kek_json, const json& kid_json);
+extern json createAdmKEK(const BIN& mk, const json& raw_json);
+extern json decAdmKEK(const BIN& mk, const json& adm_json);
+extern json createPKEK(const json& raw_json);
+extern json decPKEK(const json& p_json);
+extern json createDstKEK(const std::string &password, unsigned long long opslimit, size_t memlimit);
+extern json decDstKEK(const std::string &password, const json &dst_json);
 
 
-extern BIN deriveKey(const BIN& ikm, const std::string &info, size_t keyLen, const BIN& salt = BIN());
-extern CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD);
-extern BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD, const BIN& tag);
-extern BIN randomBIN(size_t size);
+extern void saveToken(const BIN& token);
+extern BIN loadToken();
 
 void mmain();
 

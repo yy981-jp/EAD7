@@ -1,6 +1,10 @@
 { // raw
 	"version": 1,
 	"type": "raw",
+	"meta": {
+		"created": 1756617060,
+		"last_updated": 1756619953
+	},
 	"keks": {
 		"<base64>": { // KID
 			"label": "example-label",
@@ -14,6 +18,10 @@
 { // adm
 	"version": 1,
 	"type": "adm",
+	"meta": {
+		"created": 1756617060,
+		"last_updated": 1756619953
+	},
 	"keks": {
 		"<base64>": { // KID (AAD)
 			"label": "example-label", // (AAD)
@@ -25,6 +33,21 @@
 				"nonce": "<base64>"
 			}
 		}
+	}
+}
+
+{ // p
+	"version": 1, // (AAD)
+	"type": "p", // (AAD)
+	"meta": {
+		"created": 1756617060, // (AAD)
+		"last_updated": 1756619953 // (AAD)
+	},
+	"enc": {
+		"salt": "<base64>"
+		"ct": "<base64>",   // KEKs部分の暗号文
+		"tag": "<base64>",
+		"nonce": "<base64>"
 	}
 }
 

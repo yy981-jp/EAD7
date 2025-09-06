@@ -1,11 +1,8 @@
 #include <windows.h>
 #include <wincred.h>
 #include <tchar.h>
-#include <iostream>
 
-#include "def.h"
 #include "master.h"
-#include "base.h"
 
 
 void saveToken(const BIN& token) {
