@@ -26,7 +26,8 @@
 		"<base64>": { // KID (AAD)
 			"label": "example-label", // (AAD)
 			"status": "active", // (AAD)
-			"created": 1756617060 // (AAD)
+			"created": 1756617060, // (AAD)
+			"salt": "<base64>"
 			"enc": {
 				"ct": "<base64>",
 				"tag": "<base64>",
@@ -44,10 +45,10 @@
 		"last_updated": 1756619953 // (AAD)
 	},
 	"enc": {
-		"salt": "<base64>"
 		"ct": "<base64>",   // KEKs部分の暗号文
 		"tag": "<base64>",
 		"nonce": "<base64>"
+		"salt": "<base64>"
 	}
 }
 
@@ -59,21 +60,14 @@
 		"last_updated": 1756619953   // (AAD)
 	},
 	"kdf": {
-		"opslimit": "<opslimitの数値>",
-		"memlimit": "<memlimitの数値>",
-		"salt": "<base64>"
+		"opslimit": "<opslimitの数値>",	// (AAD)
+		"memlimit": "<memlimitの数値>",	// (AAD)
+		"salt": "<base64>" // 16b	(AAD)
 	},
-	"keks": {
-		"<base64>": { // KID (AAD)
-			"label": "example-label", // (AAD)
-			"status": "active", // (AAD)
-			"created": 1756617060 // (AAD)
-			"enc": {
-				"ct": "<base64>",
-				"tag": "<base64>",
-				"nonce": "<base64>"
-			}
-		}
+	"enc": {
+		"ct": "<base64>",
+		"tag": "<base64>",
+		"nonce": "<base64>"
 	}
 }
 

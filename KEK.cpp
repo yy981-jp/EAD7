@@ -300,100 +300,81 @@ json decPKEK(const json& p_json) {
 
 
 
+// p形式: keks丸ごと暗号化 dst作成
 json createDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit, size_t memlimit) {
 	if (!raw_json.is_object()) throw std::runtime_error("raw_json must be an object");
 
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 
-	// generate file-level salt
+	// ファイルレベルのsalt生成
 	BIN file_salt = randomBIN(crypto_pwhash_SALTBYTES); // 16B
 
-	// derive fileKey from password + file_salt
+	// password + file_salt から fileKeyを導出
 	const size_t KEY_LEN = 32;
 	BIN fileKey = derivekey_password(password, file_salt, opslimit, memlimit, KEY_LEN);
 
-	// build dst json
+	// keksを丸ごと暗号化
+	std::string keks_str = raw_json.at("keks").dump();
+	BIN keks_bin(reinterpret_cast<const byte*>(keks_str.data()), keks_str.size());
+
+	// nonce生成（ファイル単位）
+	BIN nonce = randomBIN(12);
+
+	// AAD構築 (version/type/meta/kdf)
+	ordered_json aad_obj;
+	aad_obj["version"] = raw_json.at("version");
+	aad_obj["type"] = "dst";
+	aad_obj["meta"] = {
+		{"created", raw_json.at("meta").at("created")},
+		{"last_updated", unix_now}
+	};
+	aad_obj["kdf"] = {
+		{"opslimit", (unsigned long long)opslimit},
+		{"memlimit", (unsigned long long)memlimit},
+		{"salt", base::enc64(file_salt)}
+	};
+	std::string aad_str = aad_obj.dump();
+	BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
+
+	// 暗号化
+	CryptoGCM cg = encAES256GCM(fileKey, nonce, keks_bin, aad_bin);
+
+	// dst JSON構築
 	json dst;
 	dst["version"] = raw_json.at("version");
-	dst["type"] = std::string("dst");
+	dst["type"] = "dst";
+	dst["meta"] = {
+		{"created", raw_json.at("meta").at("created")},
+		{"last_updated", unix_now}
+	};
 	dst["kdf"] = {
 		{"opslimit", (unsigned long long)opslimit},
 		{"memlimit", (unsigned long long)memlimit},
 		{"salt", base::enc64(file_salt)}
 	};
-	dst["meta"] = {
-		{"created", raw_json.at("meta").at("created")},
-		{"last_updated", unix_now}
+	dst["enc"] = {
+		{"ct", base::enc64(cg.cipher)},
+		{"tag", base::enc64(cg.tag)},
+		{"nonce", base::enc64(nonce)}
 	};
-	dst["keks"] = json::object();
 
-	// iterate entries in raw_json
-	if (!raw_json.contains("keks") || !raw_json["keks"].is_object()) {
-		throw std::runtime_error("raw_json missing 'keks' object");
-	}
-
-	for (auto & [kid_b64, entry] : raw_json["keks"].items()) {
-		std::string label  = entry.at("label");
-		std::string status = entry.at("status");
-		int64_t created    = entry.at("created");
-
-		if (!entry.contains("kek")) throw std::runtime_error("raw entry missing kek for kid: " + kid_b64);
-		BIN kek_plain = base::dec64(entry["kek"].get<std::string>());
-
-		// AAD: ordered json of kid,label,status,created and also kdf params (for tamper protection)
-		ordered_json aad_obj;
-		aad_obj["kid"] = kid_b64;
-		aad_obj["label"] = label;
-		aad_obj["status"] = status;
-		aad_obj["created"] = created;
-		// include KDF info in AAD so tampering with kdf params / salt is detectable
-		aad_obj["kdf"] = {
-			{"opslimit", (unsigned long long)opslimit},
-			{"memlimit", (unsigned long long)memlimit},
-			{"salt", base::enc64(file_salt)}
-		};
-		std::string aad_str = aad_obj.dump();
-		BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
-
-		// nonce per-entry
-		BIN nonce = randomBIN(12);
-
-		// encrypt with fileKey
-		CryptoGCM cg = encAES256GCM(fileKey, nonce, kek_plain, aad_bin);
-
-		// build dst entry
-		json dst_entry;
-		dst_entry["label"] = label;
-		dst_entry["status"] = status;
-		dst_entry["created"] = created;
-		dst_entry["enc"] = {
-			{"ct", base::enc64(cg.cipher)},
-			{"tag", base::enc64(cg.tag)},
-			{"nonce", base::enc64(nonce)}
-		};
-
-		dst["keks"][kid_b64] = dst_entry;
-
-		// zero
-		delm(kek_plain);
-		delm(nonce);
-		delm(aad_bin);
-		// note: keep fileKey until all entries done
-	}
-
-	// zero fileKey
+	// ゼロ化
 	delm(fileKey);
+	delm(keks_bin);
+	delm(nonce);
+	delm(aad_bin);
 
 	return dst;
 }
 
+// p形式: keks丸ごと復号
 json decDstKEK(const std::string &password, const json &dst_json) {
 	if (sodium_init() < 0) throw std::runtime_error("sodium_init failed");
 	if (!dst_json.is_object()) throw std::runtime_error("dst_json must be an object");
 
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 
-	// kdf 情報の読み出し (name omitted per design)
+	// kdf 情報
 	if (!dst_json.contains("kdf") || !dst_json["kdf"].is_object()) {
 		throw std::runtime_error("dst_json missing kdf object");
 	}
@@ -403,99 +384,66 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	std::string salt_b64 = kdf.at("salt");
 	if (salt_b64.empty()) throw std::runtime_error("kdf.salt missing");
 
-	// decode salt and derive fileKey
 	BIN file_salt = base::dec64(salt_b64);
 	const size_t KEY_LEN = 32;
 	BIN fileKey = derivekey_password(password, file_salt, KEY_LEN, opslimit, memlimit);
 
-	// 構造の検査
-	if (!dst_json.contains("keks") || !dst_json["keks"].is_object()) {
+	// 構造検査
+	if (!dst_json.contains("enc") || !dst_json["enc"].is_object()) {
 		delm(fileKey);
-		throw std::runtime_error("dst_json missing 'keks' object");
+		throw std::runtime_error("dst_json missing 'enc' object");
 	}
+	json enc = dst_json["enc"];
+	std::string ct_b64 = enc.at("ct");
+	std::string tag_b64 = enc.at("tag");
+	std::string nonce_b64 = enc.at("nonce");
 
-	// 出力 raw skeleton
-	json raw;
-	raw["version"] = dst_json.at("version");
-	raw["type"] = std::string("raw");
-	raw["meta"] = {
-		{"created", dst_json.at("meta").at("created")},
-		{"last_updated", unix_now}
-	};
-	raw["keks"] = json::object();
+	BIN cipher = base::dec64(ct_b64);
+	BIN tag    = base::dec64(tag_b64);
+	BIN nonce  = base::dec64(nonce_b64);
 
-	// 走査して各エントリを復号
-	for (auto & [kid_b64, dst_entry] : dst_json["keks"].items()) {
-		std::string label  = dst_entry.at("label");
-		std::string status = dst_entry.at("status");
-		int64_t created    = dst_entry.at("created");
+	// AAD構築（dst作成時と同様）
+	ordered_json aad_obj;
+	aad_obj["version"] = dst_json.at("version");
+	aad_obj["type"] = "dst";
+	aad_obj["meta"] = dst_json.at("meta");
+	aad_obj["kdf"] = dst_json.at("kdf");
+	std::string aad_str = aad_obj.dump();
+	BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
 
-		if (!dst_entry.contains("enc")) {
-			delm(fileKey);
-			throw std::runtime_error("dst entry missing enc for kid: " + kid_b64);
-		}
-
-		json enc = dst_entry["enc"];
-		std::string ct_b64    = enc.at("ct");
-		std::string tag_b64   = enc.at("tag");
-		std::string nonce_b64 = enc.at("nonce");
-		if (ct_b64.empty() || tag_b64.empty() || nonce_b64.empty()) {
-			delm(fileKey);
-			throw std::runtime_error("enc object missing fields for kid: " + kid_b64);
-		}
-
-		// base64 -> BIN
-		BIN cipher = base::dec64(ct_b64);
-		BIN tag    = base::dec64(tag_b64);
-		BIN nonce  = base::dec64(nonce_b64);
-
-		// AAD を再構築（ordered_json.dump() で決定的に）
-		ordered_json aad_obj;
-		aad_obj["kid"] = kid_b64;
-		aad_obj["label"] = label;
-		aad_obj["status"] = status;
-		aad_obj["created"] = created;
-		// kdf 情報 (salt/opslimit/memlimit) を AAD に含めて改ざん検知
-		aad_obj["kdf"] = {
-			{"opslimit", (unsigned long long)opslimit},
-			{"memlimit", (unsigned long long)memlimit},
-			{"salt", base::enc64(file_salt)}
-		};
-		std::string aad_str = aad_obj.dump();
-		BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
-
-		// 復号
-		BIN kek_plain;
-		try {
-			kek_plain = decAES256GCM(fileKey, nonce, cipher, aad_bin, tag);
-		} catch (const std::exception &e) {
-			// 敏感データを消してから投げ直す
-			delm(fileKey);
-			delm(cipher);
-			delm(tag);
-			delm(nonce);
-			throw std::runtime_error(std::string("dst decryption failed for kid: ") + kid_b64 + " - " + e.what());
-		}
-
-		// raw 形式のエントリを組み立て（kek を base64 化）
-		std::string kek_b64 = base::enc64(kek_plain);
-		json raw_entry;
-		raw_entry["label"] = label;
-		raw_entry["status"] = status;
-		raw_entry["created"] = created;
-		raw_entry["kek"] = kek_b64;
-		raw["keks"][kid_b64] = raw_entry;
-
-		// 敏感データをゼロ化
-		delm(kek_plain);
+	// 復号
+	BIN keks_bin;
+	try {
+		keks_bin = decAES256GCM(fileKey, nonce, cipher, aad_bin, tag);
+	} catch (const std::exception &e) {
+		delm(fileKey);
 		delm(cipher);
 		delm(tag);
 		delm(nonce);
 		delm(aad_bin);
+		throw std::runtime_error(std::string("dst decryption failed: ") + e.what());
 	}
 
-	// fileKey をゼロ化して返す
+	// JSONに戻す
+	std::string keks_str(reinterpret_cast<const char*>(keks_bin.data()), keks_bin.size());
+	json raw_keks = json::parse(keks_str);
+
+	json raw;
+	raw["version"] = dst_json.at("version");
+	raw["type"] = "raw";
+	raw["meta"] = {
+		{"created", dst_json.at("meta").at("created")},
+		{"last_updated", unix_now}
+	};
+	raw["keks"] = raw_keks;
+
+	// ゼロ化
 	delm(fileKey);
+	delm(keks_bin);
+	delm(cipher);
+	delm(tag);
+	delm(nonce);
+	delm(aad_bin);
+
 	return raw;
 }
-

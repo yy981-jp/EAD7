@@ -12,7 +12,7 @@ MK.e7		upass	xchacha		管理者	エントリ	マスターキーリスト 1ファ
 .kek.e7
 	管理者 adm.kek.e7 -> dst.kek.e7
 	ユーザー dst.kek.e7 -> kek.e7
-		(内部でdevice_key使って再暗号化->プログラムのファイル群(localappdata/ead7)に保存)
+		(内部でtoken使って再暗号化->プログラムのファイル群(localappdata/ead7)に保存)
 	配布用パスワードは使い捨て
 
 kek系に対するエントリの追記は、一旦raw.kekに戻してから追記して元の形式に戻す
