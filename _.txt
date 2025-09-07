@@ -29,8 +29,8 @@ kidPath			MK=1 の KID.label=test の場合、 01test
 	1.kek.e7
 
 
-
-
+==================================================
+CUI + CLIArg 完結型
 
 
 
