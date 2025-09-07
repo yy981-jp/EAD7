@@ -41,6 +41,10 @@ struct CryptoGCM {
 	BIN cipher, tag;
 };
 
+struct CryptoGCM_nonce {
+	BIN cipher, tag, nonce;
+};
+
 extern BIN deriveKey(const BIN& ikm, const std::string &info, size_t keyLen, const BIN& salt = BIN());
 extern BIN randomBIN(size_t size);
 extern CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD);
@@ -67,6 +71,10 @@ extern json createPKEK(const json& raw_json);
 extern json decPKEK(const json& p_json);
 extern json createDstKEK(const std::string &password, unsigned long long opslimit, size_t memlimit);
 extern json decDstKEK(const std::string &password, const json &dst_json);
+
+
+extern CryptoGCM_nonce encCore(const BIN& kek, const BIN& plaintext, const BIN& aad);
+extern BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad, const BIN& tag);
 
 
 extern void saveToken(const BIN& token);

@@ -27,6 +27,7 @@ set(SOURCES
 	MK_io.cpp
 	KID.cpp
 	KEK.cpp
+	DEK.cpp
 	token.cpp
 	AES256GCM.cpp
 )
