@@ -8,7 +8,6 @@
 #include <cryptopp/cryptlib.h>
 #include <sodium.h>
 
-
 #include <yy981/string.h>
 #include <yy981/return.h>
 
@@ -16,11 +15,9 @@
 #include "base.h"
 #include "master.h"
 #include "interface.h"
+#include "ui.h"
 
-#include "ui.cpp"
-
-bool GUI = false;
-
+std::vector<std::string> ca;
 
 inline void init() {
 	SetConsoleOutputCP(CP_UTF8);
@@ -33,6 +30,7 @@ inline void init() {
 }
 
 int main(int argc, char* argv[]) {
+	ca = st::charV(argc,argv);
 	init();
-	return UI(st::charV(argc,argv));
+	UI();
 }

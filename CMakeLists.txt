@@ -30,6 +30,7 @@ set(SOURCES
 	DEK.cpp
 	token.cpp
 	AES256GCM.cpp
+	ui.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

@@ -1,35 +1,56 @@
+#include <iostream>
+#include <map>
+#include <functional>
+#include <stdexcept>
+
+#include <yy981/string.h>
+
+#include "ui.h"
 #include "text.h"
 
 
 bool interactive = false;
 bool UISwitch_failed = false;
 
-int UI(std::vector<std::string> ca) {
-	switch (ca.size()) {
-		case 1: interactive = true; break;
+namespace ui {
+	void list() {
 		
-		case 2:
-			if (is_or(ca[1],"manage","master")) {
-				mmain();
-				return 981;
-			} else if (is_or(ca[1],"list","l","L")) {
-				
-			} else if (is_or(ca[1]),"help","h","H") {
-				std::cout << t::banner;
-			} else UISwitch_failed = true;
-		
-		
-		
-		break; case 3:
-			if (is_or(ca[1],"enc","en","e","E")) {}
-			else if (is_or(ca[1],"dec","de","d","D")) {}
-			else UISwitch_failed = true;
-		
-		
-		
-		break; default: UISwitch_failed = true; break;
 	}
 	
-	if (UISwitch_failed) return_e("CLI引数エラー \"EAD7 h\"を参照してください");
-	return 0;
+	void help() {
+		std::cout << t::banner << t::help;
+	}
+	
+	
+	
+	void encrypt() {
+	}
+
+	void decrypt() {
+		
+	}
+}
+
+std::map<std::vector<std::string>, std::function<void()>> commands = {
+	{{"list","l","L"}, ui::list},
+	{{"help","h","H"}, ui::help},
+	{{"encrypt","enc","en","e"}, ui::encrypt},
+	{{"decrypt","dec","de","d"}, ui::decrypt}
+};
+
+void UI() {
+	switch (ca.size()) {
+		case 1: interactive = true; break;
+		case 2: case 3: {
+			for (auto [aliases,handler]: commands) {
+				if (is_or(ca[1],aliases)) {
+					handler();
+					return;
+				}
+			}
+			UISwitch_failed = true;
+		} break;
+		default: UISwitch_failed = true; break;
+	}
+	if (UISwitch_failed) throw std::runtime_error("CLI引数エラー \"EAD7 h\"を参照してください");
 }
