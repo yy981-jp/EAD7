@@ -108,8 +108,7 @@ BIN loadMKCore(const std::string& pass, const MKEntryB64& res) {
 	return mk;
 }
 
-MKEntryB64 createMKCore(const std::string& pass) {
-	BIN mk = randomBIN(32);
+MKEntryB64 createMKCore(const std::string& pass, BIN mk) {
 /*
 	std::cout << "Generated MK (raw hex): ";
 	for (auto b : mk) printf("%02X", b);

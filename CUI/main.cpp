@@ -7,10 +7,30 @@
 
 #include "ui.h"
 #include "text.h"
+#include "../master.h"
 
 
 bool interactive = false;
 bool UISwitch_failed = false;
+
+enum class KEKIndexType {
+	label, kid
+};
+
+using KEKIndex = std::map<std::string,std::string>;
+
+KEKIndex createKEKIndex(const json& j, KEKIndexType t) {
+	KEKIndex result;
+	for (auto& [key,value]: j["keks"].items()) {
+		switch (t) {
+			case KEKIndexType::label: result[value["label"]] = result["kek"]; break;
+			case KEKIndexType::kid: result[key] = value["kek"]; break;
+		}
+	}
+	return result;
+}
+
+
 
 namespace ui {
 	void list() {
@@ -24,6 +44,8 @@ namespace ui {
 	
 	
 	void encrypt() {
+		KEKIndex index = createKEKIndex(decPKEK(readJson(SD+"kek.e7")),KEKIndexType::label);
+		
 	}
 
 	void decrypt() {

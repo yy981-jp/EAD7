@@ -1,3 +1,36 @@
+{ // MK
+	"1":{
+		"ct":"TJu0PKSSRRS_ksfoWn-Jee37VKdKN1cCFc40-v7ePehXNgEqZ2dzjqd5qFcdKR38",
+		"nonce":"T2EDADD8psQ4CXXOI2wR6_Q_FPJR0G-n",
+		"salt":"yPPAlDDdEwfOqdHooVMK4Q"
+	}
+}
+
+{ // KID
+	"body": {
+		"version": 1,
+		"kids": {
+			"gxggbtqJyCPyci3o_LeXQQ": {
+				"label": "testKey",
+				"created": 1756617060,
+				"status": "active",
+				"note": "試験用"
+			},
+			"TlnpN5d31oqaDAVGWE3jFA": {
+				"label": "testKey2",
+				"created": 1756619953,
+				"status": "active",
+				"note": "試験用かも"
+			}
+		}
+	},
+	"hmac": "VrVJgq2P3AZsDpYETouLmXlVIza93c3JfLsnR44O340"
+}
+
+
+
+
+
 { // raw
 	"version": 1,
 	"type": "raw",
@@ -78,7 +111,7 @@
 		"<kid_base64>": {
 			"note": "これは自分用メモ",
 			"alias": "仕事用アカウント",
-			"icon": "<base64>"
+			// "icon": "<base64>" 保留
 		}
 	}
 }

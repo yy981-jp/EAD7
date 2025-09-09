@@ -15,7 +15,7 @@
 #include "base.h"
 #include "master.h"
 #include "interface.h"
-#include "ui.h"
+#include "CUI/ui.h"
 
 std::vector<std::string> ca;
 
@@ -33,4 +33,5 @@ int main(int argc, char* argv[]) {
 	ca = st::charV(argc,argv);
 	init();
 	UI();
+	// writeJson("test.json",{"test",{"text","あああ"}});
 }

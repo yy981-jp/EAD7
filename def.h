@@ -12,3 +12,7 @@ using ordered_json = nlohmann::ordered_json;
 extern const std::string SD;
 extern const std::string SDM;
 extern bool AESNI;
+
+namespace path {
+	extern const std::string MK,p_kek,cus_kek;
+}

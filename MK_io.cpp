@@ -11,11 +11,10 @@
 
 
 BIN loadMK(int index, const std::string& pass) {
-	const std::string path = SDM+"MK.E7";
 	std::string sindex = std::to_string(index);
 	json jsondat;
-	if (fs::exists(path)) {
-		std::ifstream ifile(path);
+	if (fs::exists(path::MK)) {
+		std::ifstream ifile(path::MK);
 		if (!ifile) throw std::runtime_error("loadMK()::ifstream");
 		ifile >> jsondat;
 	}
@@ -30,15 +29,14 @@ BIN loadMK(int index, const std::string& pass) {
 	return loadMKCore(pass,entry);
 }
 
-void createMK(int index, const std::string& pass) {
-	const std::string path = SDM+"MK.E7";
+void createMK(int index, const std::string& pass, BIN mk) {
 	std::string sindex = std::to_string(index);
-	if (!fs::exists(path)) {
-		std::ofstream ofile(path);
+	if (!fs::exists(path::MK)) {
+		std::ofstream ofile(path::MK);
 		if (!ofile) throw std::runtime_error("createMK()::ini::ofstream");
 		ofile << "{}";
 	}
-	std::ifstream ifile(path);
+	std::ifstream ifile(path::MK);
 	if (!ifile) throw std::runtime_error("createMK()::ifstream");
 	json jsondat;
 	ifile >> jsondat;
@@ -52,7 +50,7 @@ void createMK(int index, const std::string& pass) {
 		{"ct",entry.ct}
 	};
 	
-	std::ofstream ofile(path);
+	std::ofstream ofile(path::MK);
 	if (!ofile) throw std::runtime_error("createMK()::ofstream");
 	ofile << jsondat;
 }

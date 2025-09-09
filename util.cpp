@@ -3,13 +3,27 @@
 #include <cryptopp/sha.h>
 #include <cryptopp/hkdf.h>
 #include <sodium.h>
-
+#include <fstream>
 #include <string>
 
 #include "AES256GCM.h"
 
 bool AESNI = true;
 
+
+json readJson(const std::string& path) {
+	std::ifstream ifs(path);
+	if (!ifs) throw std::runtime_error("readJson()::ファイルを開けませんでした");
+	json j;
+	ifs >> j;
+	return j;
+}
+
+void writeJson(const std::string& path, const json& j) {
+	std::ofstream ofs(path);
+	if (!ofs) throw std::runtime_error("writeJson()::ファイルを開けませんでした");
+	ofs << j;
+}
 
 CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD) {
 	if (AESNI) return encAES256GCM_sodium(key, nonce, text, AAD);		// AES-NI在り 高速

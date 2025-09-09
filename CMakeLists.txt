@@ -22,7 +22,6 @@ set(SOURCES
 	base.cpp
 	def.cpp
 	util.cpp
-	master.cpp
 	MK.cpp
 	MK_io.cpp
 	KID.cpp
@@ -30,7 +29,9 @@ set(SOURCES
 	DEK.cpp
 	token.cpp
 	AES256GCM.cpp
-	ui.cpp
+	CUI/main.cpp
+	CUI/master.cpp
+	CUI/util.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
