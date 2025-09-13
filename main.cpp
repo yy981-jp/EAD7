@@ -32,6 +32,7 @@ inline void init() {
 int main(int argc, char* argv[]) {
 	ca = st::charV(argc,argv);
 	init();
-	UI();
-	// writeJson("test.json",{"test",{"text","あああ"}});
+	for (int i = 0; i <= 15; ++i) {
+		std::cout << i;
+	}
 }

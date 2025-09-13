@@ -46,7 +46,7 @@ void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
 
 
 
-ordered_json loadKID(const BIN& mk, const int& mkid) {
+json loadKID(const BIN& mk, const int& mkid) {
 	if (mk.empty()) throw std::runtime_error("loadKID()::MKが破損しています");
 	const std::string path = SDM + std::to_string(mkid) + ".kid.e7";
 	ordered_json j;
@@ -87,7 +87,7 @@ ordered_json loadKID(const BIN& mk, const int& mkid) {
 	return body;
 }
 
-void saveKID(const BIN& mk, const int &mkid, const ordered_json& body) {
+void saveKID(const BIN& mk, const int& mkid, const ordered_json& body) {
 	if (mk.empty()) throw std::runtime_error("saveKID()::MKが破損しています");
 	const std::string path = SDM + std::to_string(mkid) + ".kid.e7";
 	// HMAC計算

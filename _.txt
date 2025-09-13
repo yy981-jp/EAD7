@@ -1,4 +1,4 @@
-[magic(E7だけ):2b][ver:1b][mkid:1b][kid:16b][nonce:12b][本文(ct)][tag:16b]
+[magic(0xE7):1b][ver:1b][mkid:1b][kid:16b][nonce:12b][本文(ct)][tag:16b]
 
 暗号空間(MKの作者固有) > MK空間(MK固有) < ユーザー空間(ユーザー固有)
 暗号空間:	MK作者の管理空間 (SDM)
@@ -28,7 +28,7 @@ kek系に対するエントリの追記は、一旦raw.kekに戻してから追�
 MK + KID -> KEK		管理者
 KEK + nonce -> DEC	利用者(システム内部で処理)
 
-kidPath			MK=1 の KID.label=test の場合、 01test
+// kidPath			MK=1 の KID.label=test の場合、 01test
 
 
 鍵の型
@@ -50,4 +50,3 @@ CUI + CLIArg 完結型
 
 
 鍵の失効を通達する機構がない どうすべきか
-MKの構造にhmac導入すべき?

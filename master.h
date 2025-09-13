@@ -23,12 +23,18 @@ void delm(Bins&... bins) {
 }
 
 
+namespace HEADER {
+	constexpr uint8_t magic(1), ver(1), mkid(1), kid(16), nonce(12), tag(16),
+		magicData(0xE7), verData(1),
+		all(magic+ver+mkid+kid+nonce+tag);
+}
+
 inline std::string getMkid(const std::string& KIDPath) {
 	return std::to_string(std::stoi(KIDPath.substr(0,2)));
 }
 
 
-enum class Status : uint8_t {
+enum class Status {
 	Active,
 	Disabled,
 	Revoked,
@@ -70,8 +76,8 @@ extern void createMK(int index, const std::string& pass, BIN mk = randomBIN(32))
 extern BIN loadMK(int index, const std::string& pass);
 
 // KID
-extern void saveKID(const BIN& mk, const int &mkid, const ordered_json& body);
-extern ordered_json loadKID(const BIN& mk, const int& mkid);
+extern void saveKID(const BIN& mk, const int& mkid, const ordered_json& body);
+extern json loadKID(const BIN& mk, const int& mkid);
 extern void addNewKid(ordered_json& body, const KIDEntry& kid_e);
 
 // KEK
@@ -86,6 +92,8 @@ extern json decDstKEK(const std::string &password, const json &dst_json);
 // Core (DEK.cpp)
 extern CryptoGCM_nonce encCore(const BIN& kek, const BIN& plaintext, const BIN& aad);
 extern BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad, const BIN& tag);
+extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const BIN& mkid, const BIN& kid);
+extern bool dec(const BIN& kek, const BIN& blob, const BIN& aad, BIN& out_plain);
 
 // token
 extern void saveToken(const BIN& token);
