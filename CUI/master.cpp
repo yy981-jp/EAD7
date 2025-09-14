@@ -8,14 +8,15 @@
 #include "../master.h"
 #include "../base.h"
 #include "ui.h"
+#include "../GUI/ui.h"
 
 
 json loadKIDEntry() { //mkid 1つずつのみ対応 増やしたかったらその時作る?
 	int mkid = std::stoi(inp("対象KIDリストのMKID: "));
-	if (!(mkid>=0 || mkid<=15)) {std::cerr << "MKIDは0~15である必要があります"; return {};}
+	if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return {};}
 	std::string pass = inp("MKIDのMKのパスワード: ");
 	BIN mk = loadMK(mkid,pass);
-	loadKID(mk,mkid);
+	json kid = loadKID(mk,mkid);
 	
 }
 
@@ -34,14 +35,14 @@ namespace uim {
 			case 'E': return;
 			case 'C': {
 				int mkid = std::stoi(inp("新しいMKのインデックス: "));
-				if (!(mkid>=0 || mkid<=15)) {std::cerr << "MKIDは0~15である必要があります"; return;}
+				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
 				std::string pass = inp("新しいMKのパスワード: ");
 				::createMK(mkid,pass);
 				delm(pass);
 			}
 			case 'I': {
 				int mkid = std::stoi(inp("追加するMKのインデックス: "));
-				if (!(mkid>=0 || mkid<=15)) {std::cerr << "MKIDは0~15である必要があります"; return;}
+				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
 				std::string pass = inp("追加するMKのパスワード: ");
 				std::string mk_b64 = inp("追加するMK(base64): ");
 				BIN mk = base::dec64(mk_b64);

@@ -28,8 +28,8 @@ BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad,
 	return plain;
 }
 
-BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const BIN& mkid, const BIN& kid) {
-	if (mkid.size() != 1) throw std::runtime_error("mkid must be 1 byte");
+BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid_i, const BIN& kid) {
+	BIN mkid(&mkid_i,1);
 	if (kid.size() != 16) throw std::runtime_error("kid must be 16 bytes");
 
 	CryptoGCM_nonce r = encCore(kek, plaintext, aad); // r.nonce:12, r.cipher:var, r.tag:16

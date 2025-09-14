@@ -34,6 +34,14 @@ inline std::string getMkid(const std::string& KIDPath) {
 }
 
 
+struct MK {
+	BIN bin;
+	uint8_t id;
+	~MK() {
+		delm(bin);
+	}
+};
+
 enum class Status {
 	Active,
 	Disabled,
@@ -81,7 +89,7 @@ extern json loadKID(const BIN& mk, const int& mkid);
 extern void addNewKid(ordered_json& body, const KIDEntry& kid_e);
 
 // KEK
-extern json createRawKEK(const BIN& mk, json kek_json, const json& kid_json);
+extern json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const int& mkid);
 extern json createAdmKEK(const BIN& mk, const json& raw_json);
 extern json decAdmKEK(const BIN& mk, const json& adm_json);
 extern json createPKEK(const json& raw_json);
@@ -92,7 +100,7 @@ extern json decDstKEK(const std::string &password, const json &dst_json);
 // Core (DEK.cpp)
 extern CryptoGCM_nonce encCore(const BIN& kek, const BIN& plaintext, const BIN& aad);
 extern BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad, const BIN& tag);
-extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const BIN& mkid, const BIN& kid);
+extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const int& mkid, const BIN& kid);
 extern bool dec(const BIN& kek, const BIN& blob, const BIN& aad, BIN& out_plain);
 
 // token

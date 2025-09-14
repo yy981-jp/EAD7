@@ -29,9 +29,10 @@ set(SOURCES
 	DEK.cpp
 	token.cpp
 	AES256GCM.cpp
-	CUI/main.cpp
-	CUI/master.cpp
-	CUI/util.cpp
+	# CUI/main.cpp
+	# CUI/master.cpp
+	# CUI/util.cpp
+	GUI/main.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
@@ -41,8 +42,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE "C:/msys64/mingw64/include/qt
 target_link_libraries(${PROJECT_NAME}
 	cryptopp
 	sodium
-	# Qt6Core
-	# Qt6Gui
-	# Qt6Widgets
+	Qt6Core
+	Qt6Gui
+	Qt6Widgets
 	# Qt6OpenGLWidgets
 )

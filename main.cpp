@@ -8,13 +8,15 @@
 #include <cryptopp/cryptlib.h>
 #include <sodium.h>
 
+#include <QtWidgets/QApplication>
+
 #include <yy981/string.h>
 #include <yy981/return.h>
 
 #include "def.h"
 #include "base.h"
 #include "master.h"
-#include "interface.h"
+// #include "interface.h"
 #include "CUI/ui.h"
 
 std::vector<std::string> ca;
@@ -31,8 +33,7 @@ inline void init() {
 
 int main(int argc, char* argv[]) {
 	ca = st::charV(argc,argv);
+	QApplication app(argc, argv);
 	init();
-	for (int i = 0; i <= 15; ++i) {
-		std::cout << i;
-	}
+	gmain();
 }

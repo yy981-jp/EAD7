@@ -6,7 +6,7 @@
 	}
 }
 
-{ // KID
+{ // KID ({mkid}.kid.e7)
 	"body": {
 		"version": 1,
 		"kids": {
@@ -43,6 +43,7 @@
 			"label": "example-label",
 			"status": "active",
 			"created": 1756617060
+			"mkid": 1,
 			"kek": "<base64>", // 平文 KEK
 		}
 	}
@@ -60,6 +61,7 @@
 			"label": "example-label", // (AAD)
 			"status": "active", // (AAD)
 			"created": 1756617060, // (AAD)
+			"mkid": 1 //(AAD)
 			"salt": "<base64>"
 			"enc": {
 				"ct": "<base64>",
@@ -104,7 +106,7 @@
 	}
 }
 
-{ //cus
+{ //cus (mkidの記録の必要はない)
 	"version": 1,
 	"type": "cus",
 	"custom": {

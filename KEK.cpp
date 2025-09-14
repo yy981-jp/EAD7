@@ -23,7 +23,7 @@ BIN derivekey_password(const std::string& password, const BIN& salt,
 }
 
 
-json convert_kid_kek(const BIN& mk, const json& kid_json) {
+json convert_kid_kek(const BIN& mk, const json& kid_json, const int& mkid) {
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 	json keks = json::object();
 
@@ -40,13 +40,14 @@ json convert_kid_kek(const BIN& mk, const json& kid_json) {
 		keks[kid_b64]["status"] = status;
 		keks[kid_b64]["note"] = note;
 		keks[kid_b64]["created"] = created;
+		keks[kid_b64]["mkid"] = mkid;
 		keks[kid_b64]["kek"] = kek_b64;
 	}
 
 	return keks;
 }
 
-json createRawKEK(const BIN& mk, json kek_json, const json& kid_json) { // kek_json:全体 kid_json:bodyのみ
+json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const int& mkid) { // kek_json:全体 kid_json:bodyのみ
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 	if (!kek_json.contains("version")) {
 		kek_json["meta"]["created"] = unix_now;
@@ -63,7 +64,7 @@ json createRawKEK(const BIN& mk, json kek_json, const json& kid_json) { // kek_j
 		},
 		{"keks",kek_json["keks"]}
 	};
-	raw["keks"].update(convert_kid_kek(mk,kid_json));
+	raw["keks"].update(convert_kid_kek(mk,kid_json,mkid));
 	return raw;
 }
 
@@ -87,6 +88,7 @@ json createAdmKEK(const BIN& mk, const json& raw_json) {
 		std::string label  = entry.at("label");
 		std::string status = entry.at("status");
 		int64_t created    = entry.at("created");
+		int mkid = entry.at("mkid");
 		// kek plain is in raw -> "kek"
 		if (!entry.contains("kek")) throw std::runtime_error("raw entry missing kek for kid: " + kid_b64);
 		std::string kek_b64 = entry["kek"].get<std::string>();
@@ -105,6 +107,7 @@ json createAdmKEK(const BIN& mk, const json& raw_json) {
 		aad_obj["label"] = label;
 		aad_obj["status"] = status;
 		aad_obj["created"] = created;
+		aad_obj["mkid"] = mkid;
 		std::string aad_str = aad_obj.dump(); // deterministic ordered dump
 		BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
 
@@ -119,6 +122,7 @@ json createAdmKEK(const BIN& mk, const json& raw_json) {
 		adm_entry["label"] = label;
 		adm_entry["status"] = status;
 		adm_entry["created"] = created;
+		adm_entry["mkid"] = mkid;
 		adm_entry["salt"] = base::enc64(salt);
 		adm_entry["enc"] = {
 			{"ct", base::enc64(cg.cipher)},
@@ -155,6 +159,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		std::string label  = adm_entry.at("label");
 		std::string status = adm_entry.at("status");
 		int64_t created    = adm_entry.at("created");
+		int mkid = adm_entry.at("mkid");
 
 		BIN salt = base::dec64(adm_entry["salt"].get<std::string>());
 
@@ -168,6 +173,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		aad_obj["label"] = label;
 		aad_obj["status"] = status;
 		aad_obj["created"] = created;
+		aad_obj["mkid"] = mkid;
 		std::string aad_str = aad_obj.dump();
 		BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
 
@@ -188,6 +194,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		raw_entry["label"] = label;
 		raw_entry["status"] = status;
 		raw_entry["created"] = created;
+		raw_entry["mkid"] = mkid;
 		raw_entry["kek"] = kek_b64;
 
 		raw["keks"][kid_b64] = raw_entry;
@@ -416,11 +423,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	try {
 		keks_bin = decAES256GCM(fileKey, nonce, cipher, aad_bin, tag);
 	} catch (const std::exception &e) {
-		delm(fileKey);
-		delm(cipher);
-		delm(tag);
-		delm(nonce);
-		delm(aad_bin);
+		delm(fileKey,cipher,tag,nonce,aad_bin);
 		throw std::runtime_error(std::string("dst decryption failed: ") + e.what());
 	}
 
