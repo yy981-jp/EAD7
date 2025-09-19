@@ -54,14 +54,14 @@
 	"type": "adm",
 	"meta": {
 		"created": 1756617060,
-		"last_updated": 1756619953
+		"last_updated": 1756619953,
+		"mkid": 1
 	},
 	"keks": {
 		"<base64>": { // KID (AAD)
 			"label": "example-label", // (AAD)
 			"status": "active", // (AAD)
 			"created": 1756617060, // (AAD)
-			"mkid": 1 //(AAD)
 			"salt": "<base64>"
 			"enc": {
 				"ct": "<base64>",
@@ -106,7 +106,7 @@
 	}
 }
 
-{ //cus (mkidの記録の必要はない)
+{ //cus (mkidの記録の必要はない(構造的に独立したkek.e7))
 	"version": 1,
 	"type": "cus",
 	"custom": {

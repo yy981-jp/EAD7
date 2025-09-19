@@ -23,11 +23,11 @@ BIN derivekey_password(const std::string& password, const BIN& salt,
 }
 
 
-json convert_kid_kek(const BIN& mk, const json& kid_json, const int& mkid) {
+json convert_kid_kek(const BIN& mk, const json& kid_json, const uint8_t& mkid) {
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 	json keks = json::object();
 
-	for (auto& [kid_b64, entry] : kid_json["kids"].items()) {
+	for (auto& [kid_b64, entry] : kid_json.items()) {
 		std::string label  = entry.value("label", "");
 		std::string status = entry.value("status", "active");
 		std::string note   = entry.value("note", "");
@@ -47,7 +47,7 @@ json convert_kid_kek(const BIN& mk, const json& kid_json, const int& mkid) {
 	return keks;
 }
 
-json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const int& mkid) { // kek_json:全体 kid_json:bodyのみ
+json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const uint8_t& mkid) { // kek_json:全体 kid_json:kidsのみ
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 	if (!kek_json.contains("version")) {
 		kek_json["meta"]["created"] = unix_now;
@@ -70,7 +70,7 @@ json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const int&
 
 
 
-json createAdmKEK(const BIN& mk, const json& raw_json) {
+json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid_adm) {
 	if (!raw_json.is_object()) throw std::runtime_error("adm_json must be an object");
 
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
@@ -80,7 +80,8 @@ json createAdmKEK(const BIN& mk, const json& raw_json) {
 	adm["type"] = std::string("adm");
 	adm["meta"] = {
 		{"created", raw_json.at("created")},
-		{"last_updated", unix_now}
+		{"last_updated", unix_now},
+		{"mkid", mkid_adm}
 	};
 	adm["keks"] = json::object();
 	
@@ -88,7 +89,7 @@ json createAdmKEK(const BIN& mk, const json& raw_json) {
 		std::string label  = entry.at("label");
 		std::string status = entry.at("status");
 		int64_t created    = entry.at("created");
-		int mkid = entry.at("mkid");
+		uint8_t mkid = entry.at("mkid");
 		// kek plain is in raw -> "kek"
 		if (!entry.contains("kek")) throw std::runtime_error("raw entry missing kek for kid: " + kid_b64);
 		std::string kek_b64 = entry["kek"].get<std::string>();
@@ -159,7 +160,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		std::string label  = adm_entry.at("label");
 		std::string status = adm_entry.at("status");
 		int64_t created    = adm_entry.at("created");
-		int mkid = adm_entry.at("mkid");
+		uint8_t mkid = adm_entry.at("mkid");
 
 		BIN salt = base::dec64(adm_entry["salt"].get<std::string>());
 
@@ -200,12 +201,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		raw["keks"][kid_b64] = raw_entry;
 
 		// zero sensitive memory
-		delm(kek_plain);
-		delm(entry_key);
-		delm(salt);
-		delm(cipher);
-		delm(tag);
-		delm(nonce);
+		delm(kek_plain,entry_key,salt,cipher,tag,nonce);
 	}
 
 	return raw;
@@ -213,7 +209,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 
 
 
-json createPKEK(const json& raw_json) {
+json encPKEK(const json& raw_json) {
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 
 	// --- 1) AAD作成 ---
@@ -308,7 +304,7 @@ json decPKEK(const json& p_json) {
 
 
 // p形式: keks丸ごと暗号化 dst作成
-json createDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit, size_t memlimit) {
+json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit, size_t memlimit) {
 	if (!raw_json.is_object()) throw std::runtime_error("raw_json must be an object");
 
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));

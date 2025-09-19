@@ -29,9 +29,10 @@ set(SOURCES
 	DEK.cpp
 	token.cpp
 	AES256GCM.cpp
-	# CUI/main.cpp
-	# CUI/master.cpp
-	# CUI/util.cpp
+	del.cpp
+	CUI/main.cpp
+	CUI/master.cpp
+	CUI/util.cpp
 	GUI/main.cpp
 )
 

@@ -10,7 +10,12 @@
 
 bool AESNI = true;
 
-
+/*
+FSType getFileType(const std::string& file) {
+	if (file.extention() != ".e7") return FSType::fe_e7;
+	if (file.stem()=="MK")
+}
+*/
 json readJson(const std::string& path) {
 	std::ifstream ifs(path);
 	if (!ifs) throw std::runtime_error("readJson()::ファイルを開けませんでした");

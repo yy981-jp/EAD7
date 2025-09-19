@@ -9,8 +9,7 @@ namespace fs = std::filesystem;
 using json = nlohmann::json;
 using ordered_json = nlohmann::ordered_json;
 
-extern const std::string SD;
-extern const std::string SDM;
+extern const std::string SD, SDM, SDMK;
 extern bool AESNI;
 
 namespace path {

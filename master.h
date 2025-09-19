@@ -4,23 +4,7 @@
 #include <sodium.h>
 
 #include "def.h"
-
-
-template <typename T>
-concept HasDataAndSize = requires(T t) {
-	{ t.data() } -> std::convertible_to<void*>;
-	{ t.size() } -> std::convertible_to<std::size_t>;
-};
-
-template <HasDataAndSize Bin>
-void delm(Bin& bin) {
-	sodium_memzero(bin.data(), bin.size());
-}
-
-template <HasDataAndSize... Bins>
-void delm(Bins&... bins) {
-	(delm(bins), ...);
-}
+#include "del.h"
 
 
 namespace HEADER {
@@ -32,16 +16,12 @@ namespace HEADER {
 inline std::string getMkid(const std::string& KIDPath) {
 	return std::to_string(std::stoi(KIDPath.substr(0,2)));
 }
-
-
-struct MK {
-	BIN bin;
-	uint8_t id;
-	~MK() {
-		delm(bin);
-	}
-};
-
+/*
+enum class FSType {
+	MK, kid, p_kek, raw_kek, cus_kek, adm_kek, dst_kek,
+	fe_e7
+}
+*/
 enum class Status {
 	Active,
 	Disabled,
@@ -84,23 +64,23 @@ extern void createMK(int index, const std::string& pass, BIN mk = randomBIN(32))
 extern BIN loadMK(int index, const std::string& pass);
 
 // KID
-extern void saveKID(const BIN& mk, const int& mkid, const ordered_json& body);
-extern json loadKID(const BIN& mk, const int& mkid);
+extern void saveKID(const BIN& mk, const uint8_t& mkid, const ordered_json& body);
+extern json loadKID(const BIN& mk, const uint8_t& mkid);
 extern void addNewKid(ordered_json& body, const KIDEntry& kid_e);
 
 // KEK
-extern json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const int& mkid);
-extern json createAdmKEK(const BIN& mk, const json& raw_json);
+extern json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const uint8_t& mkid);
+extern json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid);
 extern json decAdmKEK(const BIN& mk, const json& adm_json);
-extern json createPKEK(const json& raw_json);
+extern json encPKEK(const json& raw_json);
 extern json decPKEK(const json& p_json);
-extern json createDstKEK(const std::string &password, unsigned long long opslimit, size_t memlimit);
+extern json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit = crypto_pwhash_OPSLIMIT_INTERACTIVE, size_t memlimit = crypto_pwhash_MEMLIMIT_INTERACTIVE);
 extern json decDstKEK(const std::string &password, const json &dst_json);
 
 // Core (DEK.cpp)
 extern CryptoGCM_nonce encCore(const BIN& kek, const BIN& plaintext, const BIN& aad);
 extern BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad, const BIN& tag);
-extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const int& mkid, const BIN& kid);
+extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid, const BIN& kid);
 extern bool dec(const BIN& kek, const BIN& blob, const BIN& aad, BIN& out_plain);
 
 // token

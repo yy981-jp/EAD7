@@ -60,7 +60,7 @@ std::map<std::vector<std::string>, std::function<void()>> commands = {
 	{{"decrypt","dec","de","d"}, ui::decrypt}
 };
 
-void UI() {
+void UI() { // UIの実質main関数
 	switch (ca.size()) {
 		case 1: interactive = true; break;
 		case 2: case 3: {
