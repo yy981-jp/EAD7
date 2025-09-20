@@ -55,7 +55,7 @@
 	"meta": {
 		"created": 1756617060,
 		"last_updated": 1756619953,
-		"mkid": 1
+		"mkid": 1 // admファイル自身の鍵
 	},
 	"keks": {
 		"<base64>": { // KID (AAD)
@@ -63,6 +63,7 @@
 			"status": "active", // (AAD)
 			"created": 1756617060, // (AAD)
 			"salt": "<base64>"
+			"mkid": 1 // KEKの導出に使うMK (AAD)
 			"enc": {
 				"ct": "<base64>",
 				"tag": "<base64>",

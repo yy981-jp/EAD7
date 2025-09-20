@@ -11,13 +11,13 @@ set(CMAKE_CXX_STANDARD 23)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets)
 
 # MOC
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+# set(CMAKE_AUTOMOC ON)
+# set(CMAKE_AUTORCC ON)
+# set(CMAKE_AUTOUIC ON)
 
 set(SOURCES
 	# test.cpp
-	main.ui
+	# main.ui
 	main.cpp
 	base.cpp
 	def.cpp

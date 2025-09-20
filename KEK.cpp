@@ -144,14 +144,12 @@ json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid_adm) {
 json decAdmKEK(const BIN& mk, const json& adm_json) {
 	if (!adm_json.is_object()) throw std::runtime_error("adm_json must be an object");
 
-	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
-
 	json raw;
 	raw["version"] = adm_json.at("version");
 	raw["type"] = std::string("raw");
 	raw["meta"] = {
 		{"created", adm_json.at("created")},
-		{"last_updated", unix_now}
+		{"last_updated", adm_json.at("last_updated")}
 	};
 	raw["keks"] = json::object();
 

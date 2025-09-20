@@ -16,18 +16,14 @@ namespace HEADER {
 inline std::string getMkid(const std::string& KIDPath) {
 	return std::to_string(std::stoi(KIDPath.substr(0,2)));
 }
+
 /*
-enum class FSType {
-	MK, kid, p_kek, raw_kek, cus_kek, adm_kek, dst_kek,
-	fe_e7
-}
-*/
 enum class Status {
 	Active,
 	Disabled,
 	Revoked,
 };
-
+*/
 struct KIDEntry {
 	std::string label, status, note, b64;
 	int64_t created;

@@ -8,6 +8,7 @@
 #include "ui.h"
 #include "text.h"
 #include "../master.h"
+#include "../base.h"
 
 
 bool interactive = false;
@@ -50,6 +51,74 @@ namespace ui {
 
 	void decrypt() {
 		
+	}
+	
+	void f_info() {
+		const std::string dat = inp("対象のファイルパス,base64,json: ");
+		FDat f = getFileType(dat);
+		switch (f.type) {
+			case FSType::MK: {
+				std::cout << "[MK]:マスターキーリスト\n存在するMKID: ";
+				for (auto [key,value]: f.json.items()) {
+					std::cout << key << ",";
+				}
+				std::cout << "\nより詳細な情報は管理者モードで起動して操作してください\n";
+			} break;
+			case FSType::kid: {
+				json j = loadKid(f.json);
+				std::cout << "[kid]:KIDリスト\n"
+				for (auto [key,v]: j["keks"]) {
+					std::cout << v["label"] << " {"
+							  << "\n\tID: " << key
+							  << "\n\t作成日時: " << convUnixTime(v["created"].get<int64_t>())
+							  << "\n\t状態: " << v["status"]
+							  << "\n}";
+				}
+			} break;
+			case FSType::raw_kek: {
+				std::cout << "[raw.kek]:生KEK"
+						  << "\n作成日時: " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
+						  << "\n最終更新日時: " << convUnixTime(f.json["meta"]["last_updated"].get<int64_t>())
+				for (auto [key,v]: f.json["keks"].items()) {
+					std::cout << "\n\t" << v["label"] << " {"
+							  << "\n\t\tID: " << key
+							  << "\n\t\t状態: " << v["status"]
+							  << "\n\t\t作成日時: " << v["created"]
+							  << "\n\t}";
+				}
+				delm(f.json);
+			} break;
+			case FSType::p_kek: {
+				json j = decPKEK(f.json);
+				std::cout << "[p.kek]:通常KEK"
+						  << "\n作成日時: " << convUnixTime(j["meta"]["created"].get<int64_t>())
+						  << "\n最終更新日時: " << convUnixTime(j["meta"]["last_updated"].get<int64_t>())
+				for (auto [key,v]: j["keks"].items()) {
+					std::cout << "\n\t" << v["label"] << " {"
+							  << "\n\t\tID: " << key
+							  << "\n\t\t状態: " << v["status"]
+							  << "\n\t\t作成日時: " << v["created"]
+							  << "\n\t}";
+				}
+				delm(j);
+			} break;
+			case FSType::cus_kek: {
+				// 後で実装するはず 未来の自分よろ
+				exit(1000);
+			} break;
+			case FSType::adm_kek: {
+				std::cout << "[p.kek]:通常KEK"
+						  << "\n作成日時: " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
+						  << "\n最終更新日時: " << convUnixTime(f.json["meta"]["last_updated"].get<int64_t>())
+				for (auto [key,v]: f.json["keks"].items()) {
+					std::cout << "\n\t" << v["label"] << " {"
+							  << "\n\t\tID: " << key
+							  << "\n\t\t状態: " << v["status"]
+							  << "\n\t\t作成日時: " << v["created"]
+							  << "\n\t}";
+				}
+			}
+		}
 	}
 }
 
