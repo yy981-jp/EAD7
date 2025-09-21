@@ -49,20 +49,20 @@ namespace uim {
 			case 'C': {
 				uint8_t mkid = std::stoi(inp("新しいMKのインデックス: "));
 				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
-				std::string pass = inp("新しいMKのパスワード: ");
+				std::string pass = inp_s("新しいMKのパスワード: ");
 				::createMK(mkid,pass);
 				delm(pass);
 			} break; case 'I': {
 				uint8_t mkid = std::stoi(inp("追加するMKのインデックス: "));
 				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
-				std::string pass = inp("追加するMKのパスワード: ");
-				std::string mk_b64 = inp("追加するMK(base64): ");
+				std::string pass = inp_s("追加するMKのパスワード: ");
+				std::string mk_b64 = inp_s("追加するMK(base64): ");
 				BIN mk = base::dec64(mk_b64);
 				::createMK(mkid,pass,mk);
 				delm(mk,mk_b64);
 			} break; case 'R': {
 				uint8_t mkid = choice("対象MKID(候補="+index+"): ",index) - '0';
-				std::string pass = inp("対象MKのパスワード: ");
+				std::string pass = inp_s("対象MKのパスワード: ");
 				BIN mk = loadMK(mkid,pass);
 				std::string mk_b64 = base::enc64(mk);
 				std::cout << "生MK(Base64): " << mk_b64 << "\n";
@@ -75,7 +75,7 @@ namespace uim {
 	void KEK_C() { // kekを生成し、ADM.kekで保存
 		uint8_t mkid = std::stoi(inp("対象KIDリストのMKID: "));
 		if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
-		std::string pass = inp("MKIDのMKのパスワード: ");
+		std::string pass = inp_s("MKIDのMKのパスワード: ");
 		BIN mk = loadMK(mkid,pass);
 		json kid = loadKID(mk,mkid);
 		json raw_kek = createRawKEK(mk,{},kid,mkid);
@@ -94,9 +94,9 @@ namespace uim {
 	void DST() {
 		json adm_kek = getAdmKEK();
 		uint8_t mkid = adm_kek["meta"]["mkid"].get<uint8_t>();
-		std::string pass = inp("対象のADMに使用されたMKID("+std::to_string(mkid)+")のMKのパスワード: ");
+		std::string pass = inp_s("対象のADMに使用されたMKID("+std::to_string(mkid)+")のMKのパスワード: ");
 		BIN mk = loadMK(mkid,pass);
-		std::string dst_pass = inp("DST.KEKファイルのパスワード: ");
+		std::string dst_pass = inp_s("DST.KEKファイルのパスワード: ");
 		json dst_kek = encDstKEK(dst_pass,decAdmKEK(mk,adm_kek));
 		std::string oname = inp("配布KEKリストファイル(***.dst.kek.e7)の名前(拡張子無し): ");
 		fs::path opath = fs::current_path()/oname/".dst.kek.e7";

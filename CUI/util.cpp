@@ -6,12 +6,43 @@
 #include "../master.h"
 
 
+void clearPreviousConsoleLine() {
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hOut == INVALID_HANDLE_VALUE) return;
+
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (!GetConsoleScreenBufferInfo(hOut, &csbi)) return;
+
+	SHORT targetY = csbi.dwCursorPosition.Y - 1;
+	if (targetY < 0) return;
+
+	COORD startCoord;
+	startCoord.X = 0;
+	startCoord.Y = targetY;
+
+	DWORD consoleWidth = csbi.dwSize.X;
+	DWORD written = 0;
+
+	FillConsoleOutputCharacterA(hOut, ' ', consoleWidth, startCoord, &written);
+	FillConsoleOutputAttribute(hOut, csbi.wAttributes, consoleWidth, startCoord, &written);
+	SetConsoleCursorPosition(hOut, startCoord);
+}
+
 std::string inp(const std::string& out) {
 	std::cout << out;
 	std::string in;
 	std::cin >> in;
 	return in;
 }
+
+std::string inp_s(const std::string& out) {
+	const std::string r = inp(out);
+	clearPreviousConsoleLine();
+	std::cout << out + "*****\n";
+	return r;
+}
+
+
 
 char choice(const std::string& message, const std::string& validChars) {
 	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);

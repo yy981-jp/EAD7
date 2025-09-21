@@ -234,8 +234,13 @@ json encPKEK(const json& raw_json) {
 	BIN file_key = deriveKey(loadToken(), info, 32, salt);
 
 	// --- 5) AES256-GCM で暗号化
-	CryptoGCM cg = encAES256GCM(file_key, nonce, keks_bin, aad_bin);
-
+	CryptoGCM cg;
+	try {
+		cg = encAES256GCM(file_key, nonce, keks_bin, aad_bin);
+	} catch (const std::runtime_error& err) {
+		std::cerr << "tokenかp.kekが破損している可能性が高いです 移植は正規の手順に則って行ってください";
+		throw err;
+	}
 	// --- 6) JSON 出力
 	json p;
 	p["version"] = aad_obj["version"];
@@ -279,7 +284,13 @@ json decPKEK(const json& p_json) {
 	BIN file_key = deriveKey(loadToken(), info, 32, salt);
 
 	// --- 4) 復号 ---
-	BIN plain = decAES256GCM(file_key, nonce, ct, aad_bin, tag);
+	BIN plain;
+	try {
+		plain = decAES256GCM(file_key, nonce, ct, aad_bin, tag);
+	} catch (const std::runtime_error& err) {
+		std::cerr << "tokenかp.kekが破損している可能性が高いです 移植は正規の手順に則って行ってください";
+		throw err;
+	}
 
 	// --- 5) 平文を JSON として復元 ---
 	std::string plain_str(reinterpret_cast<const char*>(plain.data()), plain.size());

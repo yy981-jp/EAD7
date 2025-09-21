@@ -39,5 +39,5 @@ int main(int argc, char* argv[]) {
 	ca = st::charV(argc,argv);
 	QApplication app(argc, argv);
 	init();
-	// gmain();
+	UI();
 }
