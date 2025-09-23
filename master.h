@@ -10,6 +10,7 @@
 namespace HEADER {
 	constexpr uint8_t magic(1), ver(1), mkid(1), kid(16), nonce(12), tag(16),
 		magicData(0xE7), verData(1),
+		aad_all(magic+ver+mkid+kid+nonce),
 		all(magic+ver+mkid+kid+nonce+tag);
 }
 
@@ -43,7 +44,6 @@ struct MKEntryB64 {
 };
 
 struct CryptoGCM {BIN cipher, tag;};
-struct CryptoGCM_nonce {BIN cipher, tag, nonce;};
 
 // util
 extern BIN deriveKey(const BIN& ikm, const std::string &info, size_t keyLen, const BIN& salt = BIN());
@@ -74,10 +74,10 @@ extern json encDstKEK(const std::string &password, const json &raw_json, unsigne
 extern json decDstKEK(const std::string &password, const json &dst_json);
 
 // Core (DEK.cpp)
-extern CryptoGCM_nonce encCore(const BIN& kek, const BIN& plaintext, const BIN& aad);
-extern BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad, const BIN& tag);
-extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid, const BIN& kid);
-extern bool dec(const BIN& kek, const BIN& blob, const BIN& aad, BIN& out_plain);
+namespace EAD7 {
+	extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid, const BIN& kid);
+	extern bool dec(const BIN& kek, const BIN& blob, BIN& out_plain);
+}
 
 // token
 extern void saveToken(const BIN& token);

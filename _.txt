@@ -13,6 +13,19 @@ cus.kek.e7	平文		無			ユーザー	ユーザ		無		KEKリスト拡張 暗号�
 .adm.kek.e7	MK		AES256GCM	管理者	暗号 ユーザ数	エントリ	基本構造は.kek.e7と同じ 管理者がKEKリストを保管するときに使う
 .dst.kek.e7	upass	AES256GCM	両方		---			ファイル	基本構造は.kek.e7と同じ 管理者が配布用一時パスワードを設定し配布する際に使う dstファイル自体も一時的な存在 ユーザーはこれを受け取り直ちに.kek.e7に変換
 
+SD
+|	kek.e7
+|	cus.e7
+|	master (=SDM)
+	|	MK.e7
+	|	1.kid.e7
+	|	2.kid.e7
+	|	keks (=SDMK)
+		|	一般.adm.kek.e7
+		|	private.adm.kek.e7
+
+
+
 token = ユーザーの環境ごとにOSシークレットストアに保存されたランダム32b
 
 .kek.e7

@@ -6,18 +6,13 @@ BIN deriveDEC(const BIN& kek, const BIN& nonce) {
 	return deriveKey(kek, info, 32, nonce);
 }
 
-CryptoGCM_nonce encCore(const BIN& kek, const BIN& plaintext, const BIN& aad) {
-	BIN nonce = randomBIN(12);
+CryptoGCM encCore(const BIN& kek, const BIN& plaintext, const BIN& aad, const BIN& nonce) {
 	BIN decKey = deriveDEC(kek, nonce);
 
-	CryptoGCM_nonce result;
 	CryptoGCM out = encAES256GCM(decKey, nonce, plaintext, aad);
 
-	result.cipher = out.cipher;
-	result.tag = out.tag;
-	result.nonce = nonce;
 	delm(decKey);
-	return result;
+	return out;
 }
 
 BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad, const BIN& tag) {
@@ -28,87 +23,85 @@ BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad,
 	return plain;
 }
 
-BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid_i, const BIN& kid) {
-	BIN mkid(&mkid_i,1);
-	if (kid.size() != 16) throw std::runtime_error("kid must be 16 bytes");
-
-	CryptoGCM_nonce r = encCore(kek, plaintext, aad); // r.nonce:12, r.cipher:var, r.tag:16
-
-	size_t total_size = 1 + 1 + mkid.size() + kid.size() + r.nonce.size() + r.cipher.size() + r.tag.size();
-
-	BIN result(total_size);
-	size_t pos = 0;
-
-	result[pos++] = HEADER::magicData;
-	result[pos++] = HEADER::verData;
-
-	// mkid
-	memcpy(result.data() + pos, mkid.data(), mkid.size());
-	pos += mkid.size();
-
-	// kid
-	memcpy(result.data() + pos, kid.data(), kid.size());
-	pos += kid.size();
-
-	// nonce
-	memcpy(result.data() + pos, r.nonce.data(), r.nonce.size());
-	pos += r.nonce.size();
-
-	// ct
-	if (r.cipher.size()) {
-		memcpy(result.data() + pos, r.cipher.data(), r.cipher.size());
-		pos += r.cipher.size();
-	}
-
-	// tag
-	memcpy(result.data() + pos, r.tag.data(), r.tag.size());
-	pos += r.tag.size();
-
-	if (pos != total_size) throw std::runtime_error("size mismatch in enc");
-
-	return result;
+static BIN buildAAD(byte magic, byte ver, uint8_t mkid_i, const BIN& kid, const BIN& nonce) {
+	size_t len = 1 + 1 + 1 + kid.size() + nonce.size(); // magic+ver+mkid+kid+nonce
+	BIN aad(len);
+	size_t p = 0;
+	aad[p++] = magic;
+	aad[p++] = ver;
+	aad[p++] = mkid_i;
+	if (kid.size()) memcpy(aad.data() + p, kid.data(), kid.size());
+	p += kid.size();
+	if (nonce.size()) memcpy(aad.data() + p, nonce.data(), nonce.size());
+	// p += nonce.size();
+	return aad;
 }
 
-bool dec(const BIN& kek, const BIN& blob, const BIN& aad, BIN& out_plain) {
-	if (blob.size() < HEADER::all) return false;
+namespace EAD7 {
+	BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid_i, const BIN& kid) {
+		BIN nonce = randomBIN(12);
+		BIN mkid(&mkid_i,1);
+		if (kid.size() != HEADER::kid) throw std::runtime_error("kid must be 16 bytes");
 
-	size_t pos = 0;
+		size_t total_size = 1 + 1 + 1 + HEADER::kid + HEADER::nonce + plaintext.size()/*=r.cipher.size()*/ + HEADER::tag;
 
-	if (blob[pos++] != HEADER::magicData) return false; // 明らかに違うデータ
-	byte ver = blob[pos++];
-	if (ver != HEADER::verData) return false; // 未対応バージョン
+		BIN result(total_size);
+		size_t pos = 0;
 
-	// mkid
-	// BIN mkid(&blob[pos], HEADER::mkid);
-	pos += HEADER::mkid;
+		result[pos++] = HEADER::magicData;
+		result[pos++] = HEADER::verData;
+		memcpy(result.data() + pos, mkid.data(), mkid.size());
+		pos += mkid.size();
+		memcpy(result.data() + pos, kid.data(), kid.size());
+		pos += kid.size();
+		memcpy(result.data() + pos, nonce.data(), nonce.size());
+		pos += nonce.size();
+		
+		CryptoGCM r = encCore(kek, plaintext, result/*この地点ではaad(header)部分のみ*/, nonce);
+		
+		// ct
+		if (r.cipher.size()) {
+			memcpy(result.data() + pos, r.cipher.data(), r.cipher.size());
+			pos += r.cipher.size();
+		} else std::runtime_error("::enc()::r.cipehr.size==0");
 
-	// kid (16b)
-	// BIN kid(blob.data() + pos, HEADER:kid);
-	pos += HEADER::kid;
+		// tag
+		memcpy(result.data() + pos, r.tag.data(), r.tag.size());
+		pos += r.tag.size();
 
-	// nonce (12b)
-	BIN nonce(blob.data() + pos, HEADER::nonce);
-	pos += HEADER::nonce;
+		if (pos != total_size) throw std::runtime_error("size mismatch in enc");
 
-	// ct 長さ = 全体 - pos - HEADER::tag
-	if (blob.size() < pos + HEADER::tag) return false; // 不正長
-	size_t ct_len = blob.size() - pos - HEADER::tag;
-
-	BIN ct;
-	if (ct_len) {
-		ct = BIN(blob.data() + pos, ct_len);
-		pos += ct_len;
+		return result;
 	}
 
-	// tag
-	BIN tag(blob.data() + pos, HEADER::tag);
-	pos += HEADER::tag;
+	bool dec(const BIN& kek, const BIN& blob, BIN& out_plain) {
+		if (blob.size() < HEADER::all) return false;
 
-	try {
-		out_plain = decCore(kek, ct, aad, nonce, tag); // decCore が例外か失敗を返す想定
-	} catch (...) {
-		return false; // 認証失敗や復号失敗
+		// 切り出し
+		size_t pos = 0;
+		byte magic = blob[pos++];
+		byte ver = blob[pos++];
+		byte mkid = blob[pos++];
+		BIN kid(blob.data() + pos, 16);  pos += 16;
+		BIN nonce(blob.data() + pos, 12); pos += 12;
+		BIN aad(blob.data(), pos); // 先頭〜nonceまで
+		size_t cipher_size = blob.size() - pos - 16;
+		BIN cipher(blob.data() + pos, cipher_size);
+		pos += cipher_size;
+		BIN tag(blob.data() + pos, 16);
+
+		if (magic != HEADER::magicData) return false; // 明らかに違うデータ
+		if (ver != HEADER::verData) return false; // 未対応バージョン
+
+		// ct 長さ = 全体 - pos - HEADER::tag
+		if (blob.size() < pos + HEADER::tag) return false; // 不正長
+
+		try {
+			out_plain = decCore(kek, cipher, aad, nonce, tag); // decCore が例外か失敗を返す想定
+		} catch (...) {
+			return false; // 認証失敗や復号失敗
+		}
+
+		return true;
 	}
-
-	return true;
 }

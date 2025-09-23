@@ -26,6 +26,7 @@ struct FDat {
 };
 
 extern FDat getFileType(const std::string& file);
+extern FDat getFileType(const fs::path& file);
 
 inline std::string convUnixTime(const int64_t& t) {
 	std::ostringstream oss;

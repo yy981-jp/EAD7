@@ -6,6 +6,10 @@
 #include "../master.h"
 
 
+inline void D(const int& s) {
+	std::cout << s << "\n";
+}
+
 void clearPreviousConsoleLine() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hOut == INVALID_HANDLE_VALUE) return;
@@ -97,16 +101,17 @@ bool isBase64UrlSafe(const std::string& input) {
 
 bool isJson(const std::string& input) {
 	try {
-		auto j = nlohmann::json::parse(input);
+		json j = json::parse(input);
 	}
-	catch (const nlohmann::json::parse_error&) {
+	catch (const json::parse_error&) {
 		return false;
 	}
 	return true;
 }
 
 FDat getJsonType(const std::string& file) {
-	json j = readJson(file);
+	json j = json::parse(file);
+	if (j.contains("hmac")) return FDat(FSType::kid,j);
 	std::string kek_type = j.at("type");
 	if (kek_type=="p")   return FDat(FSType::p_kek,j);
 	if (kek_type=="raw") return FDat(FSType::raw_kek,j);
@@ -125,11 +130,12 @@ FDat getFileType(const fs::path& file) {
 }
 
 FDat getFileType(const std::string& file) {
-	if (fs::exists(file)) return getFileType(fs::path(file));
+	if (fs::exists(file)) {std::cout << "[F]"; return getFileType(fs::path(file));}
+	if (isJson(file)) {std::cout << "[J]"; return getJsonType(file);}
 	if (isBase64UrlSafe(file)) {
+		std::cout << "[B]";
 		if (base::dec64(file)[0]==HEADER::magicData) return FDat(FSType::encBin,{});
 		else return FDat(FSType::unknown_bin,{});
 	}
-	if (isJson(file)) return getJsonType(file);
 	return FDat(FSType::unknown,{});
 }

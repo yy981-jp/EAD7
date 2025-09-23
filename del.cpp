@@ -33,7 +33,7 @@ void secure_clear_json(json& j, bool clear_structure) {
 		return;
 	}
 
-	// binary（nlohmann::json::binary_t == std::vector<uint8_t>）
+	// binary（json::binary_t == std::vector<uint8_t>）
 	if (j.is_binary()) {
 		try {
 			auto& b = j.get_ref<json::binary_t&>();

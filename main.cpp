@@ -26,10 +26,10 @@ inline void init() {
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 
-	// if (!fs::exists(SD)) {
+	if (!fs::exists(SD)) {
 		fs::create_directories(SD);
 		std::cout << t::banner << t::setup;
-	// }
+	}
 
 	if (sodium_init() < 0) return_e("libsodium init failed\n");
 	AESNI = sodium_runtime_has_aesni();
