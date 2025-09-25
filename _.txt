@@ -24,7 +24,7 @@ SD
 		|	一般.adm.kek.e7
 		|	private.adm.kek.e7
 
-
+EAD7.exe enc label plaintext
 
 token = ユーザーの環境ごとにOSシークレットストアに保存されたランダム32b
 

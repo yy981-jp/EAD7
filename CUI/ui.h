@@ -9,6 +9,7 @@ extern std::vector<std::string> ca;
 extern void UI();
 extern std::string inp(const std::string& out);
 extern std::string inp_s(const std::string& out);
+extern void out_s(const std::string& out);
 extern char choice(const std::string& message, const std::string& validChars);
 
 enum class FSType {

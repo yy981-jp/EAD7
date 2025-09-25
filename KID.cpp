@@ -39,6 +39,7 @@ std::pair<std::string,ordered_json> makeKidEntry(const KIDEntry& kid_e) {
 }
 
 void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
+	body["version"] = 1;
 	for (auto& [key, val] : body["kids"].items()) if (val["label"] == kid_e.label) return_e("すでに同じラベルのKIDが存在します");
 	std::pair<std::string,ordered_json> entry = makeKidEntry(kid_e);
 	body["kids"][entry.first] = entry.second;
@@ -55,7 +56,7 @@ json loadKID(const BIN& mk, const uint8_t& mkid) {
 			{"hmac",""},
 			{"body",{
 				{"version",1},
-					{"kids",ordered_json::object()}
+				{"kids",ordered_json::object()}
 				}
 			}
 		};

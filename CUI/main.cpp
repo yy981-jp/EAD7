@@ -11,21 +11,20 @@
 #include "../base.h"
 
 
-bool interactive = false;
 bool UISwitch_failed = false;
 
-enum class KEKIndexType {
-	label, kid
+enum class KIDIndexType {
+	label
 };
 
-using KEKIndex = std::map<std::string,std::string>;
+using KIDIndex = std::map<std::string,std::string>;
 
-KEKIndex createKEKIndex(const json& j, KEKIndexType t) {
-	KEKIndex result;
+KIDIndex createKIDIndex(const json& j, KIDIndexType t = KIDIndexType::label) { // raw.kek必須
+	KIDIndex result;
 	for (auto& [key,value]: j["keks"].items()) {
 		switch (t) {
-			case KEKIndexType::label: result[value["label"]] = result["kek"]; break;
-			case KEKIndexType::kid: result[key] = value["kek"]; break;
+			case KIDIndexType::label: result[value["label"]] = key; break;
+			// case KEKIndexType::kid: result[key] = key; break;
 		}
 	}
 	return result;
@@ -131,11 +130,17 @@ namespace ui {
 	
 	void encrypt() {
 		std::string label = ca[2];
-		KEKIndex index = createKEKIndex(decPKEK(readJson(SD+"kek.e7")),KEKIndexType::label);
+		json raw_kek = decPKEK(readJson(SD+"kek.e7"));
+		KIDIndex index = createKIDIndex(raw_kek);
 		if (!index.contains(label)) throw std::runtime_error("ラベル("+label+")がこのPCのKEKリストに存在しません");
-		BIN kek = base::dec64(index[label]);
-		// EAD7::enc();
-		delm(kek);
+		std::string kid = index[label];
+		json entry = raw_kek["keks"][kid];
+		if (raw_kek["status"] != "active") throw std::runtime_error("このKEKは現在有効ではありません");
+		uint8_t mkid = entry["mkid"].get<uint8_t>();
+		BIN kek = base::dec64(entry["kek"]);
+		BIN plaintext = conv::STRtoBIN(ca[3]);
+		EAD7::enc(kek,plaintext,mkid,base::dec64(kid));
+		delm(raw_kek,kek);
 	}
 
 	void decrypt() {
@@ -155,14 +160,16 @@ namespace ui {
 }
 
 static std::map<std::vector<std::string>, std::function<void()>> commands2 = {
+	{{"master","m","admin"}, adminUI},
 	{{"list","l","L"}, ui::list},
 	{{"help","h","H"}, ui::help},
 	{{"ver","v","V"}, ui::ver},
 	{{"info","i","I"}, ui::f_info2}
 }, commands3 = {
+	{{"info","i","I"}, ui::f_info3}
+}, commands4 = {
 	{{"encrypt","enc","en","e"}, ui::encrypt},
 	{{"decrypt","dec","de","d"}, ui::decrypt},
-	{{"info","i","I"}, ui::f_info3}
 };
 
 void UI() { // UIの実質main関数
@@ -176,7 +183,7 @@ void UI() { // UIの実質main関数
 						return;
 					}
 				}
-				UISwitch_failed = true;
+				throw std::runtime_error("CLI引数エラー argc2");
 			} break;
 			case 3: {
 				for (auto [aliases,handler]: commands3) {
@@ -185,12 +192,20 @@ void UI() { // UIの実質main関数
 						return;
 					}
 				}
-				UISwitch_failed = true;
+				throw std::runtime_error("CLI引数エラー argc3");
 			} break;
-			default: UISwitch_failed = true; break;
+			case 4: {
+				for (auto [aliases,handler]: commands4) {
+					if (is_or(ca[1],aliases)) {
+						handler();
+						return;
+					}
+				}
+				throw std::runtime_error("CLI引数エラー argc4");
+			} break;
+			default: throw std::runtime_error("CLI引数エラー 0層"); break;
 		}
-		if (UISwitch_failed) throw std::runtime_error("CLI引数エラー \"EAD7 h\"を参照してください");
 	} catch (const std::runtime_error& err) {
-		std::cout << "R_ERR: " << err.what() << "\n";
+		std::cout << "R_ERR:\t" << err.what() << "\n\n\n\n";
 	}
 }

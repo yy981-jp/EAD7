@@ -38,7 +38,7 @@ static BIN buildAAD(byte magic, byte ver, uint8_t mkid_i, const BIN& kid, const 
 }
 
 namespace EAD7 {
-	BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid_i, const BIN& kid) {
+	BIN enc(const BIN& kek, const BIN& plaintext, const uint8_t& mkid_i, const BIN& kid) {
 		BIN nonce = randomBIN(12);
 		BIN mkid(&mkid_i,1);
 		if (kid.size() != HEADER::kid) throw std::runtime_error("kid must be 16 bytes");

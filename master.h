@@ -18,20 +18,28 @@ inline std::string getMkid(const std::string& KIDPath) {
 	return std::to_string(std::stoi(KIDPath.substr(0,2)));
 }
 
-/*
-enum class Status {
-	Active,
-	Disabled,
-	Revoked,
-};
-*/
-struct KIDEntry {
-	std::string label, status, note, b64;
-	int64_t created;
 
-	KIDEntry(std::string label, std::string note, std::string status = "active"): label(label), note(note), status(status) {}
+enum class KStat {
+	active,
+	disabled,
+	revoked
+};
+
+struct KIDEntry {
+	std::string label, note, b64;
+	int64_t created;
+	KStat status;
+
+	// KIDEntry(std::string label, std::string note, KStat status = KStat::active): label(label), note(note), status(status) {}
 	operator bool() {
-		return (status == "active");
+		return (status == KStat::active);
+	}
+	
+	static std::string statusSTR(const KStat& stat) {
+		switch (stat) {
+			case KStat::active: return "active";
+			default: std::runtime_error("KIDEntry::statusSTR()::switch");
+		}
 	}
 };
 
@@ -75,7 +83,7 @@ extern json decDstKEK(const std::string &password, const json &dst_json);
 
 // Core (DEK.cpp)
 namespace EAD7 {
-	extern BIN enc(const BIN& kek, const BIN& plaintext, const BIN& aad, const uint8_t& mkid, const BIN& kid);
+	extern BIN enc(const BIN& kek, const BIN& plaintext, const uint8_t& mkid, const BIN& kid);
 	extern bool dec(const BIN& kek, const BIN& blob, BIN& out_plain);
 }
 
@@ -83,5 +91,5 @@ namespace EAD7 {
 extern void saveToken(const BIN& token);
 extern BIN loadToken();
 
-// master view
-extern void mmain();
+// admin view
+extern void adminUI();

@@ -53,7 +53,7 @@ namespace uim {
 				::createMK(mkid,pass);
 				delm(pass);
 			} break; case 'I': {
-				uint8_t mkid = std::stoi(inp("追加するMKのインデックス: "));
+				uint8_t mkid = std::stoi(inp("追加するMKのインデックス(MKID): "));
 				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
 				std::string pass = inp_s("追加するMKのパスワード: ");
 				std::string mk_b64 = inp_s("追加するMK(base64): ");
@@ -65,9 +65,24 @@ namespace uim {
 				std::string pass = inp_s("対象MKのパスワード: ");
 				BIN mk = loadMK(mkid,pass);
 				std::string mk_b64 = base::enc64(mk);
-				std::cout << "生MK(Base64): " << mk_b64 << "\n";
+				out_s("生MK(Base64): " + mk_b64 + "\n");
 				delm(mk,mk_b64);
 			} break; case 'O': proc::start(path::MK); break;
+		}
+	}
+	
+	void KID() {
+		switch (choice("操作内容 (終了:E,作成:C,追加:I,HMAC再計算:S,ファイルを開く:O)","ECISO")) {
+			case 'E': return;
+			case 'C': {
+				uint8_t mkid = std::stoi(inp("対象のKIDのMKID: "));
+				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
+				KIDEntry kidEntry;
+				kidEntry.label = inp("追加するKIDのラベル名: ");
+				kidEntry.note = inp("追加するKIDの備考: ");
+				kidEntry.status = KStat::active;
+				
+			}
 		}
 	}
 	
@@ -105,19 +120,23 @@ namespace uim {
 	}
 }
 
-void mmain() {
+void adminUI() {
 	fs::create_directories(SDM+"keks/");
 	while (true) {
 		try {
-			char i = choice("[EAD7管理画面]\n1. MK管理\n2. KEK生成\n3. KEK管理\n4. DST.KEK生成", "");
-			switch (i-'0') {
-				case 1: uim::MK(); break;
-				case 2: uim::KEK_C(); break;
-				case 4: uim::DST(); break;
+			char i = choice("[EAD7管理画面]\nE. 終了\n1. MK管理\n2. KIDリスト管理\n3. KEK生成\n4. KEK管理\n5. DST.KEK生成\n", "E12345");
+			switch (i) {
+				case 'E': return;
+				case '1': uim::MK(); break;
+				case '2': uim::KID(); break;
+				case '3': uim::KEK_C(); break;
+				case '5': uim::DST(); break;
+				
+				default: throw std::runtime_error("adminUI()::switch");
 			}
 			std::cout << "\n\n\n";
 		} catch (std::runtime_error& err) {
-			std::cout << "R_ERR: " << err.what() << "\n";
+			std::cout << "R_ERR:\t" << err.what() << "\n\n\n\n";
 		}
 	}
 }

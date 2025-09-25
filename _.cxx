@@ -66,7 +66,7 @@ std::string calcHMAC(const std::string &data, const BIN &key) {
 	return mac;
 }
 
-std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey) {
+std::vector<KIDList> parseKIDList(const std::string& fn, const BIN &hmacKey) { // 旧式kidlist
 	std::ifstream f(fn);
 	if (!f) throw std::runtime_error("File open failed");
 
@@ -136,3 +136,17 @@ CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const std::string& text
 	return AES256GCM(key,nonce,text_bin,aad_bin);
 }
 
+
+inline void createKID(const BIN& mk, uint8_t& mkid mkid, const KIDEntry& kid_e) {
+	ordered_json body = loadKID(mk,mkid);
+	addNewKid(body,kid_e);
+	saveKID(mk,mkid,body);
+}
+/*
+inline KIDEntry getKID(const uint8_t& mkid mkid, const std::string& KIDlabel) {
+	for (const ordered_json& e: body.items()) {
+		if (e["label"] == KIDlabel) return 
+	}
+	return_e("");
+}
+*/

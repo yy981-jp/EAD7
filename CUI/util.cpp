@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <cryptopp/base64.h>
 #include <cryptopp/filters.h>
+#include <conio.h>
 #include "ui.h"
 #include "../master.h"
 
@@ -10,14 +11,16 @@ inline void D(const int& s) {
 	std::cout << s << "\n";
 }
 
-void clearPreviousConsoleLine() {
+void clearPreviousConsoleLine(const bool currentLine = false) {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hOut == INVALID_HANDLE_VALUE) return;
 
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	if (!GetConsoleScreenBufferInfo(hOut, &csbi)) return;
 
-	SHORT targetY = csbi.dwCursorPosition.Y - 1;
+	SHORT targetY;
+	if (!currentLine) targetY = csbi.dwCursorPosition.Y - 1;
+		else targetY = csbi.dwCursorPosition.Y;
 	if (targetY < 0) return;
 
 	COORD startCoord;
@@ -44,6 +47,18 @@ std::string inp_s(const std::string& out) {
 	clearPreviousConsoleLine();
 	std::cout << out + "*****\n";
 	return r;
+}
+
+void out_s(const std::string& out) {
+	std::cout << "spaceかenterを押して続行): "<< out;
+	while (true) {
+		int key = _getch(); // 1文字取得（表示しない）
+		if (key == ' ' || key == '\r') { // ' ' はスペース, '\r' はEnter
+			break;
+		}
+	}
+	clearPreviousConsoleLine(true);
+	std::cout << "***************\n";
 }
 
 

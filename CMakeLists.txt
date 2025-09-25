@@ -31,7 +31,7 @@ set(SOURCES
 	AES256GCM.cpp
 	del.cpp
 	CUI/main.cpp
-	CUI/master.cpp
+	CUI/admin.cpp
 	CUI/util.cpp
 	GUI/main.cpp
 )
