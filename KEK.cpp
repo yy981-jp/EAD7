@@ -7,16 +7,16 @@
 
 
 BIN derivekey_password(const std::string& password, const BIN& salt,
-                       size_t keyLen = 32,
-                       unsigned long long opslimit = crypto_pwhash_OPSLIMIT_MODERATE,
-                       size_t memlimit = crypto_pwhash_MEMLIMIT_MODERATE) {
+					   size_t keyLen = 32,
+					   unsigned long long opslimit = crypto_pwhash_OPSLIMIT_MODERATE,
+					   size_t memlimit = crypto_pwhash_MEMLIMIT_MODERATE) {
 	BIN key(keyLen);
 
 	if (crypto_pwhash(key.data(), key.size(),
-	                  password.c_str(), password.size(),
-	                  salt.data(),
-	                  opslimit, memlimit,
-	                  crypto_pwhash_ALG_ARGON2ID13) != 0) {
+					  password.c_str(), password.size(),
+					  salt.data(),
+					  opslimit, memlimit,
+					  crypto_pwhash_ALG_ARGON2ID13) != 0) {
 		throw std::runtime_error("Password hashing failed (maybe out of memory)");
 	}
 	return key;
@@ -79,7 +79,7 @@ json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid_adm) {
 	adm["version"] = raw_json.at("version");
 	adm["type"] = std::string("adm");
 	adm["meta"] = {
-		{"created", raw_json.at("created")},
+		{"created", raw_json.at("meta").at("created")},
 		{"last_updated", unix_now},
 		{"mkid", mkid_adm}
 	};
@@ -88,7 +88,7 @@ json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid_adm) {
 	for (auto& [kid_b64, entry] : raw_json["keks"].items()) {
 		std::string label  = entry.at("label");
 		std::string status = entry.at("status");
-		int64_t created    = entry.at("created");
+		int64_t created	= entry.at("created");
 		uint8_t mkid = entry.at("mkid");
 		// kek plain is in raw -> "kek"
 		if (!entry.contains("kek")) throw std::runtime_error("raw entry missing kek for kid: " + kid_b64);
@@ -148,8 +148,8 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 	raw["version"] = adm_json.at("version");
 	raw["type"] = std::string("raw");
 	raw["meta"] = {
-		{"created", adm_json.at("created")},
-		{"last_updated", adm_json.at("last_updated")}
+		{"created", adm_json.at("meta").at("created")},
+		{"last_updated", adm_json.at("meta").at("last_updated")}
 	};
 	raw["keks"] = json::object();
 
@@ -157,7 +157,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		// read fields
 		std::string label  = adm_entry.at("label");
 		std::string status = adm_entry.at("status");
-		int64_t created    = adm_entry.at("created");
+		int64_t created	= adm_entry.at("created");
 		uint8_t mkid = adm_entry.at("mkid");
 
 		BIN salt = base::dec64(adm_entry["salt"].get<std::string>());
@@ -179,7 +179,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		// extract enc fields
 		json enc = adm_entry["enc"];
 		BIN cipher = base::dec64(enc.at("ct"));
-		BIN tag    = base::dec64(enc.at("tag"));
+		BIN tag	= base::dec64(enc.at("tag"));
 		BIN nonce  = base::dec64(enc.at("nonce"));
 
 		// decrypt
@@ -215,7 +215,7 @@ json encPKEK(const json& raw_json) {
 	aad_obj["version"] = raw_json.at("version");
 	aad_obj["type"] = "p";
 	aad_obj["meta"] = {
-		{"created", raw_json["meta"].at("created")},
+		{"created", raw_json.at("meta").at("created")},
 		{"last_updated", unix_now}
 	};
 	std::string aad_str = aad_obj.dump();
@@ -275,7 +275,7 @@ json decPKEK(const json& p_json) {
 	}
 	auto enc = p_json["enc"];
 	BIN salt  = base::dec64(enc.at("salt").get<std::string>());
-	BIN ct    = base::dec64(enc.at("ct").get<std::string>());
+	BIN ct	= base::dec64(enc.at("ct").get<std::string>());
 	BIN tag   = base::dec64(enc.at("tag").get<std::string>());
 	BIN nonce = base::dec64(enc.at("nonce").get<std::string>());
 
@@ -411,7 +411,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	std::string nonce_b64 = enc.at("nonce");
 
 	BIN cipher = base::dec64(ct_b64);
-	BIN tag    = base::dec64(tag_b64);
+	BIN tag	= base::dec64(tag_b64);
 	BIN nonce  = base::dec64(nonce_b64);
 
 	// AAD構築（dst作成時と同様）

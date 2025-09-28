@@ -1,5 +1,6 @@
 #include "def.h"
 #include <fstream>
+#include <map>
 #include <sodium.h>
 
 #include <cryptopp/hmac.h>
@@ -9,6 +10,11 @@
 
 #include "base.h"
 #include "master.h"
+
+
+std::map<KStat,std::string> KStatMap = {
+	{KStat::active,"active"}
+};
 
 
 // HMAC-SHA256(key: 32B) → 32B
@@ -26,20 +32,20 @@ inline BIN deriveKidlistHmacKey(const BIN& MK) {
 }
 
 
-
-// KIDエントリJSON（label/created/status/note）
 std::pair<std::string,ordered_json> makeKidEntry(const KIDEntry& kid_e) {
 	ordered_json j;
-	std::string b64 = base::enc64(randomBIN(16));
+	std::string b64;
+	if (kid_e.b64.empty()) b64 = base::enc64(randomBIN(16));
+		else b64 = kid_e.b64;
 	j["label"] = kid_e.label;
 	j["created"] = static_cast<int64_t>(std::time(nullptr));
-	j["status"] = kid_e.status; // "active" | "disabled" | "revoked"
+	j["status"] = KStatMap[kid_e.status];
 	j["note"] = kid_e.note;
 	return {b64,j};
 }
 
 void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
-	body["version"] = 1;
+	// body["version"] = 1;
 	for (auto& [key, val] : body["kids"].items()) if (val["label"] == kid_e.label) return_e("すでに同じラベルのKIDが存在します");
 	std::pair<std::string,ordered_json> entry = makeKidEntry(kid_e);
 	body["kids"][entry.first] = entry.second;

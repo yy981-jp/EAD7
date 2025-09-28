@@ -1,4 +1,5 @@
 set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Releases)
 
 
 
@@ -14,6 +15,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets)
 # set(CMAKE_AUTOMOC ON)
 # set(CMAKE_AUTORCC ON)
 # set(CMAKE_AUTOUIC ON)
+
+
 
 set(SOURCES
 	# test.cpp
@@ -40,7 +43,7 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PRIVATE "C:/msys64/mingw64/include/qt6")
 
 # ライブラリ
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PRIVATE
 	cryptopp
 	sodium
 	Qt6Core

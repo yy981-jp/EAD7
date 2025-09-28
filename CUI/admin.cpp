@@ -47,27 +47,28 @@ namespace uim {
 		switch (choice("操作内容 (終了:E,作成:C,追加:I,解読:R,ファイルを開く:O)","ECIRO")) {
 			case 'E': return;
 			case 'C': {
-				uint8_t mkid = std::stoi(inp("新しいMKのインデックス: "));
-				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
+				uint8_t mkid = cmkid(inp("新しいMKのインデックス: "));
 				std::string pass = inp_s("新しいMKのパスワード: ");
 				::createMK(mkid,pass);
 				delm(pass);
-			} break; case 'I': {
-				uint8_t mkid = std::stoi(inp("追加するMKのインデックス(MKID): "));
-				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
+			} break;
+			case 'I': {
+				uint8_t mkid = cmkid(inp("追加するMKのインデックス(MKID): "));
 				std::string pass = inp_s("追加するMKのパスワード: ");
 				std::string mk_b64 = inp_s("追加するMK(base64): ");
 				BIN mk = base::dec64(mk_b64);
 				::createMK(mkid,pass,mk);
 				delm(mk,mk_b64);
-			} break; case 'R': {
+			} break;
+			case 'R': {
 				uint8_t mkid = choice("対象MKID(候補="+index+"): ",index) - '0';
 				std::string pass = inp_s("対象MKのパスワード: ");
 				BIN mk = loadMK(mkid,pass);
 				std::string mk_b64 = base::enc64(mk);
 				out_s("生MK(Base64): " + mk_b64 + "\n");
 				delm(mk,mk_b64);
-			} break; case 'O': proc::start(path::MK); break;
+			} break;
+			case 'O': openFile(path::MK); break;
 		}
 	}
 	
@@ -75,25 +76,53 @@ namespace uim {
 		switch (choice("操作内容 (終了:E,作成:C,追加:I,HMAC再計算:S,ファイルを開く:O)","ECISO")) {
 			case 'E': return;
 			case 'C': {
-				uint8_t mkid = std::stoi(inp("対象のKIDのMKID: "));
-				if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
+				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
+				std::string mkpass = inp_s("mkのパスワード: ");
+				BIN mk = loadMK(mkid,mkpass);
+				ordered_json j = loadKID(mk,mkid);
 				KIDEntry kidEntry;
 				kidEntry.label = inp("追加するKIDのラベル名: ");
 				kidEntry.note = inp("追加するKIDの備考: ");
 				kidEntry.status = KStat::active;
-				
-			}
+				addNewKid(j,kidEntry);
+				saveKID(mk,mkid,j);
+				delm(mk,mkpass);
+			} break;
+			case 'I': {
+				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
+				std::string mkpass = inp_s("mkのパスワード: ");
+				BIN mk = loadMK(mkid,mkpass);
+				ordered_json j = loadKID(mk,mkid);
+				KIDEntry kidEntry;
+				kidEntry.label = inp("追加するKIDのラベル名: ");
+				kidEntry.note = inp("追加するKIDの備考: ");
+				kidEntry.b64 = inp("追加するKIDのbase64UrlSafe文字列: ");
+				kidEntry.status = KStat::active;
+				addNewKid(j,kidEntry);
+				saveKID(mk,mkid,j);
+				delm(mk,mkpass);
+			} break;
+			case 'S': {
+				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
+				ordered_json j = readJson(SDM+std::to_string(mkid)+".kid.e7")["body"];
+				const std::string pass = inp_s("対象MKIDのパスワード: ");
+				BIN mk = loadMK(mkid,pass);
+				saveKID(mk,mkid,j);
+			} break;
+			case 'O': {
+				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
+				openFile(SDM+std::to_string(mkid)+".kid.e7");
+			} break;
 		}
 	}
 	
 	
 	void KEK_C() { // kekを生成し、ADM.kekで保存
-		uint8_t mkid = std::stoi(inp("対象KIDリストのMKID: "));
-		if (!(mkid>=0 || mkid<=255)) {std::cerr << "MKIDは0~255である必要があります"; return;}
+		uint8_t mkid = cmkid(inp("対象KIDリストのMKID: "));
 		std::string pass = inp_s("MKIDのMKのパスワード: ");
 		BIN mk = loadMK(mkid,pass);
 		json kid = loadKID(mk,mkid);
-		json raw_kek = createRawKEK(mk,{},kid,mkid);
+		json raw_kek = createRawKEK(mk,{},kid["kids"],mkid);
 		json adm_kek = encAdmKEK(mk,raw_kek,mkid);
 		delm(mk,raw_kek);
 		std::string oname = inp("保存KEKリストファイル(***.adm.kek.e7)の名前(拡張子無し): ");

@@ -11,7 +11,7 @@
 #include <QtWidgets/QApplication>
 
 #include <yy981/string.h>
-#include <yy981/return.h>
+#include <yy981/proc.h>
 
 #include "def.h"
 #include "base.h"
@@ -31,7 +31,7 @@ inline void init() {
 		std::cout << t::banner << t::setup;
 	}
 
-	if (sodium_init() < 0) return_e("libsodium init failed\n");
+	if (sodium_init() < 0) throw std::runtime_error("libsodium init failed\n");
 	AESNI = sodium_runtime_has_aesni();
 }
 

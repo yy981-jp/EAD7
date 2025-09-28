@@ -4,8 +4,8 @@
 
 
 struct Entry {
-    std::string label; // 表示用
-    std::string id;    // 内部用
+	std::string label; // 表示用
+	std::string id;	// 内部用
 };
 
 

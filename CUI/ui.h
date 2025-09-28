@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <windows.h>
 #include "../GUI/ui.h"
 #include "../def.h"
 #include "../base.h"
@@ -33,4 +34,14 @@ inline std::string convUnixTime(const int64_t& t) {
 	std::ostringstream oss;
 	oss << std::put_time(std::localtime(&t), "%Y/%m/%d-%H:%M:%S");
 	return oss.str();
+}
+
+inline void openFile(const std::string& path) {
+	ShellExecuteA(NULL, "open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+inline uint8_t cmkid(const std::string& mkid_s) {
+	uint8_t mkid = std::stoi(mkid_s);
+	if (!(mkid>=0 || mkid<=255)) {throw std::runtime_error("MKIDは0~255である必要があります");}
+	return mkid;
 }
