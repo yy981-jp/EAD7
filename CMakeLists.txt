@@ -3,13 +3,14 @@ set(CMAKE_BUILD_TYPE Debug)
 
 
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20...4.1)
 project(EAD7) # Encryption and decryption ver7
 add_compile_options(-fdiagnostics-color=always)
 
 set(CMAKE_CXX_STANDARD 23)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets OpenGLWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Boost REQUIRED COMPONENTS locale)
 
 # MOC
 # set(CMAKE_AUTOMOC ON)
@@ -46,6 +47,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE "C:/msys64/mingw64/include/qt
 target_link_libraries(${PROJECT_NAME} PRIVATE
 	cryptopp
 	sodium
+	Boost::locale
 	Qt6Core
 	Qt6Gui
 	Qt6Widgets

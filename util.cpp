@@ -5,14 +5,19 @@
 #include <sodium.h>
 #include <fstream>
 #include <string>
+#include <boost/locale.hpp>
 
 #include "AES256GCM.h"
 
 bool AESNI = true;
 
 
+std::wstring to_wstring(const std::string& u8) {
+	return boost::locale::conv::to_utf<wchar_t>(u8, "UTF-8");
+}
+
 json readJson(const std::string& path) {
-	std::ifstream ifs(path);
+	std::ifstream ifs(fs::path(to_wstring(path)));
 	if (!ifs) throw std::runtime_error("readJson()::ファイルを開けませんでした");
 	json j;
 	ifs >> j;
@@ -20,7 +25,7 @@ json readJson(const std::string& path) {
 }
 
 void writeJson(const std::string& path, const json& j) {
-	std::ofstream ofs(path);
+	std::ofstream ofs(fs::path(to_wstring(path)));
 	if (!ofs) throw std::runtime_error("writeJson()::ファイルを開けませんでした");
 	ofs << j;
 }

@@ -171,8 +171,12 @@ static std::map<std::vector<std::string>, std::function<void()>> commands2 = {
 	{{"encrypt","enc","en","e"}, ui::encrypt},
 	{{"decrypt","dec","de","d"}, ui::decrypt},
 };
-
-void UI() { // UIの実質main関数
+/*
+void CUI_ini() {
+}
+*/
+void UI() { // CUIの実質main関数
+	// CUI_ini();
 	try {
 		switch (ca.size()) {
 			case 1: std::cout << "DEV::UI()::argc1"; break;

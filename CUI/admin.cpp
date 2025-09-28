@@ -17,7 +17,7 @@ json getAdmKEK() {
 		if (x.path().string().ends_with(".adm.kek.e7")) std::cout << x.path().string() << "\n";
 	}
 	std::string iname = inp("対象ADM.KEKファイルの名前(拡張子無し): ");
-	return readJson(SDM+iname+"adm.kek.e7");
+	return readJson(getAdmKEKPath(iname));
 }
 
 json loadKIDEntry(const json& kid) { //mkid 1つずつのみ対応 増やしたかったらその時作る?
@@ -126,7 +126,7 @@ namespace uim {
 		json adm_kek = encAdmKEK(mk,raw_kek,mkid);
 		delm(mk,raw_kek);
 		std::string oname = inp("保存KEKリストファイル(***.adm.kek.e7)の名前(拡張子無し): ");
-		writeJson(SDM+oname+"adm.kek.e7",adm_kek);
+		writeJson(getAdmKEKPath(oname),adm_kek);
 		delm(pass);
 	}
 	
@@ -165,7 +165,7 @@ void adminUI() {
 			}
 			std::cout << "\n\n\n";
 		} catch (std::runtime_error& err) {
-			std::cout << "R_ERR:\t" << err.what() << "\n\n\n\n";
+			std::cout << "R_ERR:\t" << err.what() << "\n\n";
 		}
 	}
 }

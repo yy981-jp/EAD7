@@ -13,6 +13,10 @@ extern std::string inp_s(const std::string& out);
 extern void out_s(const std::string& out);
 extern char choice(const std::string& message, const std::string& validChars);
 
+namespace env {
+	extern UINT cp;
+}
+
 enum class FSType {
 	MK, kid, p_kek, raw_kek, cus_kek, adm_kek, dst_kek,
 	base64, encBin, json,
@@ -29,6 +33,10 @@ struct FDat {
 
 extern FDat getFileType(const std::string& file);
 extern FDat getFileType(const fs::path& file);
+
+inline std::string getAdmKEKPath(const std::string& name) {
+	return SDM + name + ".adm.kek.e7";
+}
 
 inline std::string convUnixTime(const int64_t& t) {
 	std::ostringstream oss;

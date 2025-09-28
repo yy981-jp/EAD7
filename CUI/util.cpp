@@ -7,8 +7,8 @@
 #include "../master.h"
 
 
-inline void D(const int& s) {
-	std::cout << s << "\n";
+namespace env {
+	UINT cp;
 }
 
 void clearPreviousConsoleLine(const bool currentLine = false) {
