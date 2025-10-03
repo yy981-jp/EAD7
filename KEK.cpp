@@ -11,7 +11,7 @@ BIN derivekey_password(const std::string& password, const BIN& salt,
 					   unsigned long long opslimit = crypto_pwhash_OPSLIMIT_MODERATE,
 					   size_t memlimit = crypto_pwhash_MEMLIMIT_MODERATE) {
 	BIN key(keyLen);
-
+	
 	if (crypto_pwhash(key.data(), key.size(),
 					  password.c_str(), password.size(),
 					  salt.data(),
@@ -319,11 +319,11 @@ json encDstKEK(const std::string &password, const json &raw_json, unsigned long 
 	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
 
 	// ファイルレベルのsalt生成
-	BIN file_salt = randomBIN(crypto_pwhash_SALTBYTES); // 16B
+	BIN file_salt = randomBIN(16);
 
 	// password + file_salt から fileKeyを導出
 	const size_t KEY_LEN = 32;
-	BIN fileKey = derivekey_password(password, file_salt, opslimit, memlimit, KEY_LEN);
+	BIN fileKey = derivekey_password(password, file_salt, KEY_LEN, opslimit, memlimit);
 
 	// keksを丸ごと暗号化
 	std::string keks_str = raw_json.at("keks").dump();

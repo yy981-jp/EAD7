@@ -51,5 +51,4 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	Qt6Core
 	Qt6Gui
 	Qt6Widgets
-	# Qt6OpenGLWidgets
 )

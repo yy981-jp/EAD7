@@ -157,6 +157,26 @@ namespace ui {
 		FDat f = getFileType(dat);
 		f_infoCore(f);
 	}
+	
+	void dst() {
+		if (ca[1].ends_with(".e7")) {
+			fs::path p = ca[1];
+			if (fs::exists(p)) {
+				FDat f = getFileType(p);
+				switch (f.type) {
+					case FSType::dst_kek: {
+						std::string pass = inp_s("DST.KEKファイルのパスワード: ");
+						json raw_kek = decDstKEK(pass,f.json);
+						json p_kek = encPKEK(raw_kek);
+						writeJson(path::p_kek,p_kek);
+						std::cout << "P.KEK更新完了\n";
+						delm(pass,raw_kek);
+					} break;
+					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
+				}
+			}
+		}
+	}
 }
 
 static std::map<std::vector<std::string>, std::function<void()>> commands2 = {
@@ -179,8 +199,9 @@ void UI() { // CUIの実質main関数
 	// CUI_ini();
 	try {
 		switch (ca.size()) {
-			case 1: std::cout << "DEV::UI()::argc1"; break;
+			case 1: std::cout << "GUI未実装"; break;
 			case 2: {
+				ui::dst();
 				for (auto [aliases,handler]: commands2) {
 					if (is_or(ca[1],aliases)) {
 						handler();

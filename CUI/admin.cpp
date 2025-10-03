@@ -13,14 +13,14 @@
 
 json getAdmKEK() {
 	std::cout << "[存在するADM.KEK]\n";
-	for (const fs::directory_entry& x : fs::directory_iterator(SDM)) {
-		if (x.path().string().ends_with(".adm.kek.e7")) std::cout << x.path().string() << "\n";
+	for (const fs::directory_entry& x : fs::directory_iterator(SDMK)) {
+		if (x.path().string().ends_with(".adm.kek.e7")) std::cout << "\t" << x.path().stem().stem().stem().string() << "\n";
 	}
 	std::string iname = inp("対象ADM.KEKファイルの名前(拡張子無し): ");
 	return readJson(getAdmKEKPath(iname));
 }
 
-json loadKIDEntry(const json& kid) { //mkid 1つずつのみ対応 増やしたかったらその時作る?
+json loadKIDEntry(const json& kid) { //mkid 1つずつのみ対応 増やしたかったらその時作る?     kid全体を受け取り、選択されたエントリだけで構築されたkidのkids部分のみ返す
 	std::vector<Entry> list_i;
 	for (const auto& [key,value]: kid["kids"].items()) {
 		list_i.emplace_back(Entry(value.at("label"),key));
@@ -28,7 +28,7 @@ json loadKIDEntry(const json& kid) { //mkid 1つずつのみ対応 増やした�
 	const std::vector<std::string> r = selectItem(list_i);
 	json result; // kids部分に相当
 	for (const std::string& e: r) {
-		result.update(kid["keks"].at(e));
+		result[e] = kid["kids"].at(e);
 	}
 	return result;
 }
@@ -116,23 +116,30 @@ namespace uim {
 		}
 	}
 	
-	
-	void KEK_C() { // kekを生成し、ADM.kekで保存
-		uint8_t mkid = cmkid(inp("対象KIDリストのMKID: "));
-		std::string pass = inp_s("MKIDのMKのパスワード: ");
-		BIN mk = loadMK(mkid,pass);
-		json kid = loadKID(mk,mkid);
-		json raw_kek = createRawKEK(mk,{},kid["kids"],mkid);
-		json adm_kek = encAdmKEK(mk,raw_kek,mkid);
-		delm(mk,raw_kek);
-		std::string oname = inp("保存KEKリストファイル(***.adm.kek.e7)の名前(拡張子無し): ");
-		writeJson(getAdmKEKPath(oname),adm_kek);
-		delm(pass);
-	}
-	
-	
-	void KEK_M() {
-		
+	void KEK() {
+		switch (choice("操作内容 (終了:E,新規作成:C,全体一覧:F,エントリ削除:D,エントリ追加:A)","ECFDA")) {
+			case 'E': return;
+			case 'C': {
+				uint8_t mkid = cmkid(inp("対象KIDリストのMKID: "));
+				std::string pass = inp_s("MKIDのMKのパスワード: ");
+				BIN mk = loadMK(mkid,pass);
+				json kid = loadKID(mk,mkid);
+				json selectedKid = loadKIDEntry(kid);
+				json raw_kek = createRawKEK(mk,{},selectedKid,mkid);
+				json adm_kek = encAdmKEK(mk,raw_kek,mkid);
+				delm(mk,raw_kek);
+				std::string oname = inp("保存KEKリストファイル(***.adm.kek.e7)の名前(拡張子無し): ");
+				writeJson(getAdmKEKPath(oname),adm_kek);
+				delm(pass);
+			} break;
+			case 'F': {
+				for (const fs::directory_entry& x : fs::directory_iterator(SDMK)) {
+					if (x.path().string().ends_with(".adm.kek.e7")) std::cout << x.path().stem().stem().stem().string() << "\n";
+				}
+			} break;
+			case 'D': {//中断
+			}
+		}
 	}
 	
 	void DST() {
@@ -143,8 +150,8 @@ namespace uim {
 		std::string dst_pass = inp_s("DST.KEKファイルのパスワード: ");
 		json dst_kek = encDstKEK(dst_pass,decAdmKEK(mk,adm_kek));
 		std::string oname = inp("配布KEKリストファイル(***.dst.kek.e7)の名前(拡張子無し): ");
-		fs::path opath = fs::current_path()/oname/".dst.kek.e7";
-		writeJson(opath.string(),dst_kek);
+		fs::path opath = fs::current_path()/oname;
+		writeJson(opath.string()+".dst.kek.e7",dst_kek);
 		delm(mk,dst_pass);
 	}
 }
@@ -153,17 +160,17 @@ void adminUI() {
 	fs::create_directories(SDM+"keks/");
 	while (true) {
 		try {
-			char i = choice("[EAD7管理画面]\nE. 終了\n1. MK管理\n2. KIDリスト管理\n3. KEK生成\n4. KEK管理\n5. DST.KEK生成\n", "E12345");
+			char i = choice("[EAD7管理画面]\nE. 終了\n1. MK管理\n2. KIDリスト管理\n3. KEK管理\n4. DST.KEK生成\n", "E12345");
 			switch (i) {
 				case 'E': return;
 				case '1': uim::MK(); break;
 				case '2': uim::KID(); break;
-				case '3': uim::KEK_C(); break;
-				case '5': uim::DST(); break;
+				case '3': uim::KEK(); break;
+				case '4': uim::DST(); break;
 				
 				default: throw std::runtime_error("adminUI()::switch");
 			}
-			std::cout << "\n\n\n";
+			std::cout << "\n";
 		} catch (std::runtime_error& err) {
 			std::cout << "R_ERR:\t" << err.what() << "\n\n";
 		}

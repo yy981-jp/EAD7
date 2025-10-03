@@ -35,7 +35,7 @@ extern FDat getFileType(const std::string& file);
 extern FDat getFileType(const fs::path& file);
 
 inline std::string getAdmKEKPath(const std::string& name) {
-	return SDM + name + ".adm.kek.e7";
+	return SDMK + name + ".adm.kek.e7";
 }
 
 inline std::string convUnixTime(const int64_t& t) {

@@ -78,7 +78,7 @@ extern json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid);
 extern json decAdmKEK(const BIN& mk, const json& adm_json);
 extern json encPKEK(const json& raw_json);
 extern json decPKEK(const json& p_json);
-extern json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit = crypto_pwhash_OPSLIMIT_INTERACTIVE, size_t memlimit = crypto_pwhash_MEMLIMIT_INTERACTIVE);
+extern json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit = crypto_pwhash_OPSLIMIT_MODERATE, size_t memlimit = crypto_pwhash_MEMLIMIT_MODERATE);
 extern json decDstKEK(const std::string &password, const json &dst_json);
 
 // Core (DEK.cpp)

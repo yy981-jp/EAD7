@@ -145,12 +145,22 @@ FDat getFileType(const fs::path& file) {
 }
 
 FDat getFileType(const std::string& file) {
-	if (fs::exists(file)) {std::cout << "[F]"; return getFileType(fs::path(file));}
-	if (isJson(file)) {std::cout << "[J]"; return getJsonType(file);}
+	if (fs::exists(file)) return getFileType(fs::path(file));
+	if (isJson(file)) return getJsonType(file);
 	if (isBase64UrlSafe(file)) {
-		std::cout << "[B]";
 		if (base::dec64(file)[0]==HEADER::magicData) return FDat(FSType::encBin,{});
 		else return FDat(FSType::unknown_bin,{});
 	}
 	return FDat(FSType::unknown,{});
 }
+/*
+void loadSubcommand(const std::map<std::vector<std::string>, std::function<void()>> commandList) {
+	for (auto [aliases,handler]: commandList) {
+		if (is_or(ca[1],aliases)) {
+			handler();
+			return;
+		}
+	}
+	throw std::runtime_error("CLI引数エラー argc2");
+}
+*/
