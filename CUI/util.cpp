@@ -103,6 +103,19 @@ char choice(const std::string& message, const std::string& validChars) {
 	return result;
 }
 
+std::string toUTF8(const std::string& s) {
+	// CP932 → UTF-16
+	int wlen = MultiByteToWideChar(env::cp, 0, s.c_str(), (int)s.size(), nullptr, 0);
+	std::wstring wbuf(wlen, 0);
+	MultiByteToWideChar(env::cp, 0, s.c_str(), (int)s.size(), &wbuf[0], wlen);
+
+	// UTF-16 → UTF-8
+	int len = WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), (int)wbuf.size(), nullptr, 0, nullptr, nullptr);
+	std::string out(len, 0);
+	WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), (int)wbuf.size(), &out[0], len, nullptr, nullptr);
+
+	return out;
+}
 
 bool isBase64UrlSafe(const std::string& input) {
 	try {
@@ -115,17 +128,17 @@ bool isBase64UrlSafe(const std::string& input) {
 }
 
 bool isJson(const std::string& input) {
+	// if (input.starts_with("{")) return false;
 	try {
 		json j = json::parse(input);
 	}
-	catch (const json::parse_error&) {
+	catch (...) {
 		return false;
 	}
 	return true;
 }
 
-FDat getJsonType(const std::string& file) {
-	json j = json::parse(file);
+FDat getJsonType(const json& j) {
 	if (j.contains("hmac")) return FDat(FSType::kid,j);
 	std::string kek_type = j.at("type");
 	if (kek_type=="p")   return FDat(FSType::p_kek,j);
@@ -140,13 +153,14 @@ FDat getFileType(const fs::path& file) {
 	if (file.extension() != ".e7") return FDat(FSType::fe_e7,{});
 	if (file.stem()=="MK") return FDat(FSType::MK,readJson(file.string()));
 	if (file.stem().extension()==".kid") return FDat(FSType::kid,readJson(file.string()));
-	if (file.stem().extension()==".kek") return getJsonType(file.string());
+	if (file.stem().extension()==".kek") return getJsonType(readJson(file.string()));
 	return FDat(FSType::unknown_file,{});
 }
 
-FDat getFileType(const std::string& file) {
-	if (fs::exists(file)) return getFileType(fs::path(file));
-	if (isJson(file)) return getJsonType(file);
+FDat getFileType(std::string& file) {
+	while (file.starts_with(" ")) {file.erase(0,1);}
+	if (fs::exists(to_wstring(file))) return getFileType(fs::path(file));
+	if (isJson(file)) return getJsonType(readJson(file));
 	if (isBase64UrlSafe(file)) {
 		if (base::dec64(file)[0]==HEADER::magicData) return FDat(FSType::encBin,{});
 		else return FDat(FSType::unknown_bin,{});

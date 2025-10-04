@@ -151,23 +151,3 @@ inline KIDEntry getKID(const uint8_t& mkid mkid, const std::string& KIDlabel) {
 }
 */
 
-std::wstring to_wstring(const std::string& u8) {
-	int size_needed = MultiByteToWideChar(CP_UTF8, 0, u8.c_str(), -1, nullptr, 0);
-	std::wstring wbuf(size_needed, 0);
-	MultiByteToWideChar(CP_UTF8, 0, u8.c_str(), -1, &wbuf[0], size_needed);
-	return wbuf;
-}
-
-std::string toUTF8(const std::string& s) {
-	// CP932 → UTF-16
-	int wlen = MultiByteToWideChar(env::cp, 0, s.c_str(), (int)s.size(), nullptr, 0);
-	std::wstring wbuf(wlen, 0);
-	MultiByteToWideChar(env::cp, 0, s.c_str(), (int)s.size(), &wbuf[0], wlen);
-
-	// UTF-16 → UTF-8
-	int len = WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), (int)wbuf.size(), nullptr, 0, nullptr, nullptr);
-	std::string out(len, 0);
-	WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), (int)wbuf.size(), &out[0], len, nullptr, nullptr);
-
-	return out;
-}

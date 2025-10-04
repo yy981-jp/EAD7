@@ -13,13 +13,7 @@
 
 bool UISwitch_failed = false;
 
-enum class KIDIndexType {
-	label
-};
-
-using KIDIndex = std::map<std::string,std::string>;
-
-KIDIndex createKIDIndex(const json& j, KIDIndexType t = KIDIndexType::label) { // raw.kek必須
+KIDIndex createKIDIndex(const json& j, KIDIndexType t) { // raw.kek必須
 	KIDIndex result;
 	for (auto& [key,value]: j["keks"].items()) {
 		switch (t) {
@@ -44,13 +38,13 @@ static void f_infoCore(FDat& f) {
 		} break;
 		case FSType::raw_kek: {
 			std::cout << "[raw.kek]:生KEK"
-					  << "\n作成日時: " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
+					  << "\n作成日時:     " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
 					  << "\n最終更新日時: " << convUnixTime(f.json["meta"]["last_updated"].get<int64_t>());
 			for (auto [key,v]: f.json["keks"].items()) {
 				std::cout << "\n\t" << v["label"] << " {"
 						  << "\n\t\tID: " << key
 						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << v["created"]
+						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
 						  << "\n\t}";
 			}
 			delm(f.json);
@@ -58,13 +52,13 @@ static void f_infoCore(FDat& f) {
 		case FSType::p_kek: {
 			json j = decPKEK(f.json);
 			std::cout << "[p.kek]:通常KEK"
-					  << "\n作成日時: " << convUnixTime(j["meta"]["created"].get<int64_t>())
+					  << "\n作成日時:     " << convUnixTime(j["meta"]["created"].get<int64_t>())
 					  << "\n最終更新日時: " << convUnixTime(j["meta"]["last_updated"].get<int64_t>());
 			for (auto [key,v]: j["keks"].items()) {
 				std::cout << "\n\t" << v["label"] << " {"
 						  << "\n\t\tID: " << key
 						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << v["created"]
+						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
 						  << "\n\t}";
 			}
 			delm(j);
@@ -75,13 +69,13 @@ static void f_infoCore(FDat& f) {
 		} break;
 		case FSType::adm_kek: {
 			std::cout << "[p.kek]:管理者KEK"
-					  << "\n作成日時: " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
+					  << "\n作成日時:     " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
 					  << "\n最終更新日時: " << convUnixTime(f.json["meta"]["last_updated"].get<int64_t>());
 			for (auto [key,v]: f.json["keks"].items()) {
 				std::cout << "\n\t" << v["label"] << " {"
 						  << "\n\t\tID: " << key
 						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << v["created"]
+						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
 						  << "\n\t}";
 			}
 		} break;
@@ -89,13 +83,13 @@ static void f_infoCore(FDat& f) {
 			std::cout << "[dst.kek]:配布KEK\n";
 			std::string pass = inp_s("パスワード: ");
 			json j = decDstKEK(pass,f.json);
-			std::cout << "\n作成日時: " << convUnixTime(j["meta"]["created"].get<int64_t>())
+			std::cout << "\n作成日時:     " << convUnixTime(j["meta"]["created"].get<int64_t>())
 					  << "\n最終更新日時: " << convUnixTime(j["meta"]["last_updated"].get<int64_t>());
-			for (auto [key,v]: f.json["keks"].items()) {
+			for (auto [key,v]: j["keks"].items()) {
 				std::cout << "\n\t" << v["label"] << " {"
 						  << "\n\t\tID: " << key
 						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << v["created"]
+						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
 						  << "\n\t}";
 			}
 		} break;
@@ -168,7 +162,7 @@ namespace ui {
 						std::string pass = inp_s("DST.KEKファイルのパスワード: ");
 						json raw_kek = decDstKEK(pass,f.json);
 						json p_kek = encPKEK(raw_kek);
-						writeJson(path::p_kek,p_kek);
+						writeJson(p_kek,path::p_kek);
 						std::cout << "P.KEK更新完了\n";
 						delm(pass,raw_kek);
 					} break;

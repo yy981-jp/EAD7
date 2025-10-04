@@ -18,6 +18,10 @@ inline std::string getMkid(const std::string& KIDPath) {
 	return std::to_string(std::stoi(KIDPath.substr(0,2)));
 }
 
+inline int64_t getUnixTime() {
+	return static_cast<int64_t>(std::time(nullptr));
+}
+
 
 enum class KStat {
 	active,
@@ -59,7 +63,9 @@ extern BIN randomBIN(size_t size);
 extern CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD);
 extern BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD, const BIN& tag);
 extern json readJson(const std::string& path);
-extern void writeJson(const std::string& path, const json& j);
+extern void writeJson(const json& j, const std::string& path);
+extern std::wstring to_wstring(const std::string& u8);
+
 
 // MK
 extern MKEntryB64 createMKCore(const std::string& pass, BIN mk = randomBIN(32));

@@ -24,7 +24,7 @@ BIN derivekey_password(const std::string& password, const BIN& salt,
 
 
 json convert_kid_kek(const BIN& mk, const json& kid_json, const uint8_t& mkid) {
-	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
+	int64_t unix_now = getUnixTime();
 	json keks = json::object();
 
 	for (auto& [kid_b64, entry] : kid_json.items()) {
@@ -48,7 +48,7 @@ json convert_kid_kek(const BIN& mk, const json& kid_json, const uint8_t& mkid) {
 }
 
 json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const uint8_t& mkid) { // kek_json:全体 kid_json:kidsのみ
-	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
+	int64_t unix_now = getUnixTime();
 	if (!kek_json.contains("version")) {
 		kek_json["meta"]["created"] = unix_now;
 		kek_json["keks"] = json::object();
@@ -73,7 +73,7 @@ json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const uint
 json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid_adm) {
 	if (!raw_json.is_object()) throw std::runtime_error("adm_json must be an object");
 
-	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
+	int64_t unix_now = getUnixTime();
 
 	json adm;
 	adm["version"] = raw_json.at("version");
@@ -208,7 +208,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 
 
 json encPKEK(const json& raw_json) {
-	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
+	int64_t unix_now = getUnixTime();
 
 	// --- 1) AAD作成 ---
 	ordered_json aad_obj;
@@ -316,7 +316,7 @@ json decPKEK(const json& p_json) {
 json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit, size_t memlimit) {
 	if (!raw_json.is_object()) throw std::runtime_error("raw_json must be an object");
 
-	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
+	int64_t unix_now = getUnixTime();
 
 	// ファイルレベルのsalt生成
 	BIN file_salt = randomBIN(16);
@@ -384,7 +384,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	if (sodium_init() < 0) throw std::runtime_error("sodium_init failed");
 	if (!dst_json.is_object()) throw std::runtime_error("dst_json must be an object");
 
-	int64_t unix_now = static_cast<int64_t>(std::time(nullptr));
+	int64_t unix_now = getUnixTime();
 
 	// kdf 情報
 	if (!dst_json.contains("kdf") || !dst_json["kdf"].is_object()) {
@@ -417,9 +417,16 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	// AAD構築（dst作成時と同様）
 	ordered_json aad_obj;
 	aad_obj["version"] = dst_json.at("version");
-	aad_obj["type"] = "dst";
-	aad_obj["meta"] = dst_json.at("meta");
-	aad_obj["kdf"] = dst_json.at("kdf");
+	aad_obj["type"] = dst_json.at("type");
+	aad_obj["meta"] = {
+		{"created", dst_json.at("meta").at("created")},
+		{"last_updated", dst_json.at("meta").at("last_updated")}
+	};
+	aad_obj["kdf"] = {
+		{"opslimit", dst_json.at("kdf").at("opslimit")},
+		{"memlimit", dst_json.at("kdf").at("memlimit")},
+		{"salt", dst_json.at("kdf").at("salt")}
+	};
 	std::string aad_str = aad_obj.dump();
 	BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
 

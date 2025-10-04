@@ -11,13 +11,17 @@
 #include "../GUI/ui.h"
 
 
-json getAdmKEK() {
+json getAdmKEK(const bool embed = false) {
 	std::cout << "[存在するADM.KEK]\n";
 	for (const fs::directory_entry& x : fs::directory_iterator(SDMK)) {
 		if (x.path().string().ends_with(".adm.kek.e7")) std::cout << "\t" << x.path().stem().stem().stem().string() << "\n";
 	}
 	std::string iname = inp("対象ADM.KEKファイルの名前(拡張子無し): ");
-	return readJson(getAdmKEKPath(iname));
+	std::string path = getAdmKEKPath(iname);
+	json j = readJson(path);
+	if (!embed) return j;
+	j["embedded_AdmKEKPath"] = path;
+	return j;
 }
 
 json loadKIDEntry(const json& kid) { //mkid 1つずつのみ対応 増やしたかったらその時作る?     kid全体を受け取り、選択されたエントリだけで構築されたkidのkids部分のみ返す
@@ -129,7 +133,7 @@ namespace uim {
 				json adm_kek = encAdmKEK(mk,raw_kek,mkid);
 				delm(mk,raw_kek);
 				std::string oname = inp("保存KEKリストファイル(***.adm.kek.e7)の名前(拡張子無し): ");
-				writeJson(getAdmKEKPath(oname),adm_kek);
+				writeJson(adm_kek,getAdmKEKPath(oname));
 				delm(pass);
 			} break;
 			case 'F': {
@@ -137,7 +141,22 @@ namespace uim {
 					if (x.path().string().ends_with(".adm.kek.e7")) std::cout << x.path().stem().stem().stem().string() << "\n";
 				}
 			} break;
-			case 'D': {//中断
+			case 'D': {
+				json adm_kek = getAdmKEK(true);
+				KIDIndex index = createKIDIndex(adm_kek);
+				std::cout << "[存在するエントリ]\n";
+				for (const auto& [label,kid]: index) {
+					std::cout << "\t" << label << "\n";
+				}
+				std::string in_label = inp("対象エントリ: ");
+				adm_kek["meta"]["last_updated"] = getUnixTime();
+				adm_kek["keks"].erase(index[in_label]);
+				std::string path = adm_kek["embedded_AdmKEKPath"];
+				adm_kek.erase("embedded_AdmKEKPath");
+				writeJson(adm_kek,path);
+			} break;
+			case 'A': {
+				// 中断
 			}
 		}
 	}
@@ -151,7 +170,7 @@ namespace uim {
 		json dst_kek = encDstKEK(dst_pass,decAdmKEK(mk,adm_kek));
 		std::string oname = inp("配布KEKリストファイル(***.dst.kek.e7)の名前(拡張子無し): ");
 		fs::path opath = fs::current_path()/oname;
-		writeJson(opath.string()+".dst.kek.e7",dst_kek);
+		writeJson(dst_kek,opath.string()+".dst.kek.e7");
 		delm(mk,dst_pass);
 	}
 }

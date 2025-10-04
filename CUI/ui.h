@@ -31,8 +31,16 @@ struct FDat {
 	json json;
 };
 
-extern FDat getFileType(const std::string& file);
+extern FDat getFileType(std::string& file);
 extern FDat getFileType(const fs::path& file);
+
+using KIDIndex = std::map<std::string,std::string>;
+enum class KIDIndexType {
+	label
+};
+
+extern KIDIndex createKIDIndex(const json& j, KIDIndexType t = KIDIndexType::label);
+
 
 inline std::string getAdmKEKPath(const std::string& name) {
 	return SDMK + name + ".adm.kek.e7";

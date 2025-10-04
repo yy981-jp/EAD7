@@ -24,7 +24,7 @@ json readJson(const std::string& path) {
 	return j;
 }
 
-void writeJson(const std::string& path, const json& j) {
+void writeJson(const json& j, const std::string& path) {
 	std::ofstream ofs(fs::path(to_wstring(path)));
 	if (!ofs) throw std::runtime_error("writeJson()::ファイルを開けませんでした");
 	ofs << j;
