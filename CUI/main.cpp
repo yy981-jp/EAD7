@@ -129,16 +129,27 @@ namespace ui {
 		if (!index.contains(label)) throw std::runtime_error("ラベル("+label+")がこのPCのKEKリストに存在しません");
 		std::string kid = index[label];
 		json entry = raw_kek["keks"][kid];
-		if (raw_kek["status"] != "active") throw std::runtime_error("このKEKは現在有効ではありません");
+		if (entry["status"] != "active") throw std::runtime_error("このKEKは現在有効ではありません");
 		uint8_t mkid = entry["mkid"].get<uint8_t>();
 		BIN kek = base::dec64(entry["kek"]);
 		BIN plaintext = conv::STRtoBIN(ca[3]);
-		EAD7::enc(kek,plaintext,mkid,base::dec64(kid));
+		BIN cipher = EAD7::enc(kek,plaintext,mkid,base::dec64(kid));
+		std::cout << "暗号: " << base::enc64(cipher) << "\n";
 		delm(raw_kek,kek);
 	}
 
 	void decrypt() {
-		
+		BIN cipher = base::dec64(ca[2]);
+		json raw_kek = decPKEK(readJson(path::p_kek));
+		EAD7ST es(cipher);
+		json entry = raw_kek["keks"][base::enc64(es.kid)];
+		if (entry.empty()) {
+			std::cerr << "あなたはこのルームの鍵を持っていないため、解読できません\n";
+			return;
+		}
+		BIN kek = base::dec64(entry["kek"]);
+		BIN plaintext = EAD7::dec(kek,cipher);
+		std::cout << "原文: " << conv::BINtoSTR(plaintext) << "\n";
 	}
 	
 	void f_info3() {
@@ -152,7 +163,7 @@ namespace ui {
 		f_infoCore(f);
 	}
 	
-	void dst() {
+	bool dst() {
 		if (ca[1].ends_with(".e7")) {
 			fs::path p = ca[1];
 			if (fs::exists(p)) {
@@ -168,8 +179,10 @@ namespace ui {
 					} break;
 					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
 				}
+				return true;
 			}
 		}
+		return false;
 	}
 }
 
@@ -180,10 +193,10 @@ static std::map<std::vector<std::string>, std::function<void()>> commands2 = {
 	{{"ver","v","V"}, ui::ver},
 	{{"info","i","I"}, ui::f_info2}
 }, commands3 = {
-	{{"info","i","I"}, ui::f_info3}
+	{{"info","i","I"}, ui::f_info3},
+	{{"decrypt","dec","de","d"}, ui::decrypt}
 }, commands4 = {
 	{{"encrypt","enc","en","e"}, ui::encrypt},
-	{{"decrypt","dec","de","d"}, ui::decrypt},
 };
 /*
 void CUI_ini() {
@@ -195,7 +208,7 @@ void UI() { // CUIの実質main関数
 		switch (ca.size()) {
 			case 1: std::cout << "GUI未実装"; break;
 			case 2: {
-				ui::dst();
+				if (ui::dst()) return;
 				for (auto [aliases,handler]: commands2) {
 					if (is_or(ca[1],aliases)) {
 						handler();
@@ -225,6 +238,6 @@ void UI() { // CUIの実質main関数
 			default: throw std::runtime_error("CLI引数エラー 0層"); break;
 		}
 	} catch (const std::runtime_error& err) {
-		std::cout << "R_ERR:\t" << err.what() << "\n\n\n\n";
+		std::cout << "R_ERR:\t" << err.what() << "\n";
 	}
 }

@@ -12,7 +12,7 @@ namespace base {
 
 namespace conv {
 	inline std::string BINtoSTR(const BIN& block) {
-		return std::string(reinterpret_cast<const char*>(block.BytePtr()), block.size());
+		return std::string(reinterpret_cast<const char*>(block.data()), block.size());
 	}
 
 	inline BIN STRtoBIN(const std::string& str) {

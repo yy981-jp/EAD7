@@ -90,7 +90,7 @@ extern json decDstKEK(const std::string &password, const json &dst_json);
 // Core (DEK.cpp)
 namespace EAD7 {
 	extern BIN enc(const BIN& kek, const BIN& plaintext, const uint8_t& mkid, const BIN& kid);
-	extern bool dec(const BIN& kek, const BIN& blob, BIN& out_plain);
+	extern BIN dec(const BIN& kek, const BIN& blob);
 }
 
 // token

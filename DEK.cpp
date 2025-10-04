@@ -15,7 +15,7 @@ CryptoGCM encCore(const BIN& kek, const BIN& plaintext, const BIN& aad, const BI
 	return out;
 }
 
-BIN decCore(const BIN& kek, const BIN& nonce, const BIN& cipher, const BIN& aad, const BIN& tag) {
+BIN decCore(const BIN& kek, const BIN& cipher, const BIN& aad, const BIN& nonce, const BIN& tag) {
 	BIN decKey = deriveDEC(kek, nonce);
 	BIN plain = decAES256GCM(decKey, nonce, cipher, aad, tag);
 
@@ -36,7 +36,6 @@ static BIN buildAAD(byte magic, byte ver, uint8_t mkid_i, const BIN& kid, const 
 	// p += nonce.size();
 	return aad;
 }
-
 namespace EAD7 {
 	BIN enc(const BIN& kek, const BIN& plaintext, const uint8_t& mkid_i, const BIN& kid) {
 		BIN nonce = randomBIN(12);
@@ -50,14 +49,12 @@ namespace EAD7 {
 
 		result[pos++] = HEADER::magicData;
 		result[pos++] = HEADER::verData;
-		memcpy(result.data() + pos, mkid.data(), mkid.size());
-		pos += mkid.size();
-		memcpy(result.data() + pos, kid.data(), kid.size());
-		pos += kid.size();
-		memcpy(result.data() + pos, nonce.data(), nonce.size());
-		pos += nonce.size();
+		memcpy(result.data() + pos, mkid.data(), mkid.size()); pos += mkid.size();
+		memcpy(result.data() + pos, kid.data(), kid.size()); pos += kid.size();
+		memcpy(result.data() + pos, nonce.data(), nonce.size()); pos += nonce.size();
+		BIN aad(result.data(), pos);
 		
-		CryptoGCM r = encCore(kek, plaintext, result/*この地点ではaad(header)部分のみ*/, nonce);
+		CryptoGCM r = encCore(kek, plaintext, aad, nonce);
 		
 		// ct
 		if (r.cipher.size()) {
@@ -74,8 +71,8 @@ namespace EAD7 {
 		return result;
 	}
 
-	bool dec(const BIN& kek, const BIN& blob, BIN& out_plain) {
-		if (blob.size() < HEADER::all) return false;
+	BIN dec(const BIN& kek, const BIN& blob) {
+		if (blob.size() < HEADER::all) throw std::runtime_error("ESD7::dec()");;
 
 		// 切り出し
 		size_t pos = 0;
@@ -90,18 +87,11 @@ namespace EAD7 {
 		pos += cipher_size;
 		BIN tag(blob.data() + pos, 16);
 
-		if (magic != HEADER::magicData) return false; // 明らかに違うデータ
-		if (ver != HEADER::verData) return false; // 未対応バージョン
+		if (magic != HEADER::magicData // 明らかに違うデータ
+		|| ver != HEADER::verData // 未対応バージョン
+		|| blob.size() < pos + HEADER::tag) // 不正長
+			throw std::runtime_error("ESD7::dec()");
 
-		// ct 長さ = 全体 - pos - HEADER::tag
-		if (blob.size() < pos + HEADER::tag) return false; // 不正長
-
-		try {
-			out_plain = decCore(kek, cipher, aad, nonce, tag); // decCore が例外か失敗を返す想定
-		} catch (...) {
-			return false; // 認証失敗や復号失敗
-		}
-
-		return true;
+		return decCore(kek, cipher, aad, nonce, tag);
 	}
 }

@@ -31,6 +31,26 @@ struct FDat {
 	json json;
 };
 
+struct EAD7ST {
+	EAD7ST(const BIN& blob) {
+		size_t pos = 0;
+		magic = blob[pos++];
+		ver = blob[pos++];
+		mkid = blob[pos++];
+		kid = BIN(blob.data() + pos, 16);  pos += 16;
+		nonce = BIN(blob.data() + pos, 12); pos += 12;
+		size_t cipher_size = blob.size() - pos - 16;
+		cipher = BIN(blob.data() + pos, cipher_size);
+		pos += cipher_size;
+		tag = BIN(blob.data() + pos, 16);
+		size = pos + 16;
+	}
+	byte magic, ver, mkid;
+	BIN kid, nonce, cipher, tag;
+	size_t size;
+};
+
+
 extern FDat getFileType(std::string& file);
 extern FDat getFileType(const fs::path& file);
 
@@ -40,7 +60,6 @@ enum class KIDIndexType {
 };
 
 extern KIDIndex createKIDIndex(const json& j, KIDIndexType t = KIDIndexType::label);
-
 
 inline std::string getAdmKEKPath(const std::string& name) {
 	return SDMK + name + ".adm.kek.e7";

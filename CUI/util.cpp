@@ -151,7 +151,8 @@ FDat getJsonType(const json& j) {
 
 FDat getFileType(const fs::path& file) {
 	if (file.extension() != ".e7") return FDat(FSType::fe_e7,{});
-	if (file.stem()=="MK") return FDat(FSType::MK,readJson(file.string()));
+	if (file.stem()=="mk") return FDat(FSType::MK,readJson(file.string()));
+	if (!file.stem().has_extension() && file.stem()=="kek") return FDat(FSType::p_kek,readJson(file.string()));
 	if (file.stem().extension()==".kid") return FDat(FSType::kid,readJson(file.string()));
 	if (file.stem().extension()==".kek") return getJsonType(readJson(file.string()));
 	return FDat(FSType::unknown_file,{});
