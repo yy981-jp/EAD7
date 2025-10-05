@@ -21,6 +21,7 @@
 #include "CUI/ui.h"
 #include "CUI/text.h"
 
+QApplication* app;
 std::vector<std::string> ca;
 UINT oldOutCP, oldInCP;
 
@@ -45,9 +46,10 @@ inline void end() {
 }
 
 int main(int argc, char* argv[]) {
+	app = new QApplication(argc, argv);
 	ca = st::charV(argc,argv);
-	QApplication app(argc, argv);
 	init();
-	UI();
+	int result = UI();
 	end();
+	return result;
 }

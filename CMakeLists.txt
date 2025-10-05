@@ -13,15 +13,13 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(Boost REQUIRED COMPONENTS locale)
 
 # MOC
-# set(CMAKE_AUTOMOC ON)
-# set(CMAKE_AUTORCC ON)
-# set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 
 
 set(SOURCES
-	# test.cpp
-	# main.ui
 	main.cpp
 	base.cpp
 	def.cpp
@@ -38,10 +36,16 @@ set(SOURCES
 	CUI/admin.cpp
 	CUI/util.cpp
 	GUI/main.cpp
+	GUI/util.cpp
+	GUI/main.ui
+	GUI/widgets/fileButton.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-target_include_directories(${PROJECT_NAME} PRIVATE "C:/msys64/mingw64/include/qt6")
+add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
+target_include_directories(${PROJECT_NAME} PRIVATE 
+	"C:/msys64/mingw64/include/qt6"
+	"${CMAKE_SOURCE_DIR}/GUI/widgets"
+)
 
 # ライブラリ
 target_link_libraries(${PROJECT_NAME} PRIVATE

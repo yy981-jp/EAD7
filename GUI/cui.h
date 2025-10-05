@@ -2,6 +2,10 @@
 #include <string>
 #include <vector>
 
+#include <QtWidgets/QApplication>
+
+
+extern QApplication* app;
 
 struct Entry {
 	std::string label; // 表示用
@@ -12,4 +16,4 @@ struct Entry {
 
 
 extern std::vector<std::string> selectItem(const std::vector<Entry>& entries);
-extern void gmain();
+extern int GUI();

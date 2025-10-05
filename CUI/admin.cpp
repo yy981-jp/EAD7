@@ -8,7 +8,7 @@
 #include "../master.h"
 #include "../base.h"
 #include "ui.h"
-#include "../GUI/ui.h"
+#include "../GUI/cui.h"
 
 
 json getAdmKEK(const bool embed = false) {

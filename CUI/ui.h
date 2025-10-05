@@ -2,12 +2,12 @@
 #include <vector>
 #include <string>
 #include <windows.h>
-#include "../GUI/ui.h"
+#include "../GUI/cui.h"
 #include "../def.h"
 #include "../base.h"
 
 extern std::vector<std::string> ca;
-extern void UI();
+extern int UI();
 extern std::string inp(const std::string& out);
 extern std::string inp_s(const std::string& out);
 extern void out_s(const std::string& out);
