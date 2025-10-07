@@ -25,7 +25,7 @@ namespace u {
 		ui->log->appendPlainText(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str));
 	}
 	void stat(const std::string& str) {
-		ui->statusbar->showMessage(QString::fromStdString(str));
+		ui->statusbar->showMessage(QString::fromStdString(str),60*1000); // 1分
 	}
 }
 
@@ -73,16 +73,20 @@ enum class INP_FROM {
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
 	void run() {
-		
+		std::string text;
+		switch (inp_from) {
+			case INP_FROM::line: text = ui->inp_line->text().toStdString(); break;
+			case INP_FROM::multi: text = ui->inp_multi->plainText().toStdString(); break;
+			case INP_FROM::file: {
+				// std::ifstream(inp_file_path.text().toStdString()); EAD7::encFile 実装待ち
+			} break;
+		}
 	}
+	
 }
 
 int GUI() {
 	windowSave::settingFile = SD+"GUI_setting.json";
-	w = new QMainWindow;
-	ui = new Ui::MainWindow;
-	ui->setupUi(w);
-	u::log("EAD GUI 起動");
 
 	ui->log->setVisible(false);
 	w->show();
@@ -108,7 +112,19 @@ int GUI() {
 
 	u::log("ui setup完了");
 	
-	int result = app->exec();
-	delete w; // QThreadStorageエラー対策
-	return result;
+}
+
+int GUI_interface() {
+	try {
+		w = new QMainWindow;
+		ui = new Ui::MainWindow;
+		ui->setupUi(w);
+		u::log("EAD GUI 起動");
+		return GUI(); // Core
+		int result = app->exec();
+		delete w; // QThreadStorageエラー対策
+		return result;
+	} catch (const std::runtime_error& e) {
+		u::stat("RuntimeError: " + e.what())
+	}
 }

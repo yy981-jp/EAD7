@@ -205,7 +205,7 @@ int UI() { // CUIの実質main関数
 	// CUI_ini();
 	try {
 		switch (ca.size()) {
-			case 1: return GUI();
+			case 1: return GUI_interface();
 			case 2: {
 				if (ui::dst()) return 0;
 				for (auto [aliases,handler]: commands2) {

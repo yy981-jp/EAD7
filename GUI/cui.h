@@ -16,4 +16,4 @@ struct Entry {
 
 
 extern std::vector<std::string> selectItem(const std::vector<Entry>& entries);
-extern int GUI();
+extern int GUI_interface();

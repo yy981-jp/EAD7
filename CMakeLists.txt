@@ -32,6 +32,7 @@ set(SOURCES
 	token.cpp
 	AES256GCM.cpp
 	del.cpp
+	file.cpp
 	CUI/main.cpp
 	CUI/admin.cpp
 	CUI/util.cpp
