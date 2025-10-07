@@ -8,7 +8,6 @@ BIN deriveDEC(const BIN& kek, const BIN& nonce) {
 
 CryptoGCM encCore(const BIN& kek, const BIN& plaintext, const BIN& aad, const BIN& nonce) {
 	BIN decKey = deriveDEC(kek, nonce);
-
 	CryptoGCM out = encAES256GCM(decKey, nonce, plaintext, aad);
 
 	delm(decKey);
@@ -17,7 +16,7 @@ CryptoGCM encCore(const BIN& kek, const BIN& plaintext, const BIN& aad, const BI
 
 BIN decCore(const BIN& kek, const BIN& cipher, const BIN& aad, const BIN& nonce, const BIN& tag) {
 	BIN decKey = deriveDEC(kek, nonce);
-	BIN plain = decAES256GCM(decKey, nonce, cipher, aad, tag);
+	BIN plain = decAES256GCM(decKey, nonce, cipher, tag, aad);
 
 	delm(decKey);
 	return plain;

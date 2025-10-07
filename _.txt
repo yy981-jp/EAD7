@@ -1,4 +1,9 @@
-[magic(0xE7):1b][ver:1b][mkid:1b][kid:16b][nonce:12b][本文(ct)][tag:16b]
+Text:	[magic(0xE7):1b][ver:1b][mkid:1b][kid:16b][nonce:12b][本文(ct)][tag:16b]
+
+File:	fixedHeader{ [magic(0xE7):1b][ver:1b] }
+		header{ [mkid:1b][kid:16b][chunkSize:8b] }
+		body{ [nonce:12b][tag:16b][本文(ct)]... }
+		footer{ [hmac:32b] }
 
 暗号空間(MKの作者固有) > MK空間(MK固有) < ユーザー空間(ユーザー固有)
 暗号空間:	MK作者の管理空間 (SDM)

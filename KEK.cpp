@@ -183,7 +183,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		BIN nonce  = base::dec64(enc.at("nonce"));
 
 		// decrypt
-		BIN kek_plain = decAES256GCM(entry_key, nonce, cipher, aad_bin, tag);
+		BIN kek_plain = decAES256GCM(entry_key, nonce, cipher, tag, aad_bin);
 
 		// encode kek_plain back to base64 for raw format
 		std::string kek_b64 = base::enc64(kek_plain);
@@ -286,7 +286,7 @@ json decPKEK(const json& p_json) {
 	// --- 4) 復号 ---
 	BIN plain;
 	try {
-		plain = decAES256GCM(file_key, nonce, ct, aad_bin, tag);
+		plain = decAES256GCM(file_key, nonce, ct, tag, aad_bin);
 	} catch (const std::runtime_error& err) {
 		std::cerr << "tokenかp.kekが破損している可能性が高いです 移植は正規の手順に則って行ってください";
 		throw err;
@@ -433,7 +433,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	// 復号
 	BIN keks_bin;
 	try {
-		keks_bin = decAES256GCM(fileKey, nonce, cipher, aad_bin, tag);
+		keks_bin = decAES256GCM(fileKey, nonce, cipher, tag, aad_bin);
 	} catch (const std::exception &e) {
 		delm(fileKey,cipher,tag,nonce,aad_bin);
 		throw std::runtime_error(std::string("dst decryption failed: ") + e.what());

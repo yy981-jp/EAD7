@@ -9,6 +9,7 @@
 
 #include "../master.h"
 #include "cui.h"
+#include "gui.h"
 #include "ui_main.h"
 #include "../CUI/ui.h"
 #include "../CUI/text.h"
@@ -21,18 +22,6 @@ QMainWindow* w = nullptr;
 
 
 struct VERSION {};
-
-namespace u {
-	void setPrg(const int& v) {
-		ui->progressBar->setValue(v);
-	}
-	void log(const std::string& str) {
-		ui->log->appendPlainText(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str));
-	}
-	void stat(const std::string& str) {
-		ui->statusbar->showMessage(QString::fromStdString(str),60*1000); // 1分
-	}
-}
 
 void showMessage(const std::string& msg) {
 	QWidget* w = new QWidget;
@@ -93,7 +82,6 @@ enum class INP_FROM {
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
 	void run() {
-		throw std::runtime_error("test RE");
 		std::string text;
 		switch (inp_from) {
 			case INP_FROM::line: text = ui->inp_line->text().toStdString(); break;
