@@ -5,10 +5,13 @@
 #include <QtWidgets/QMainWindow>
 #include <QtGui/QShortcut>
 
+#include <yy981/env.h>
+
 #include "../master.h"
 #include "cui.h"
 #include "ui_main.h"
 #include "../CUI/ui.h"
+#include "../CUI/text.h"
 
 #include "widgets/fileButton.h"
 
@@ -16,6 +19,8 @@ namespace fs = std::filesystem;
 Ui::MainWindow* ui = nullptr;
 QMainWindow* w = nullptr;
 
+
+struct VERSION {};
 
 namespace u {
 	void setPrg(const int& v) {
@@ -27,6 +32,21 @@ namespace u {
 	void stat(const std::string& str) {
 		ui->statusbar->showMessage(QString::fromStdString(str),60*1000); // 1分
 	}
+}
+
+void showMessage(const std::string& msg) {
+	QWidget* w = new QWidget;
+	w->setWindowTitle("通知");
+
+	QVBoxLayout* layout = new QVBoxLayout(w);
+	QLabel* label = new QLabel(QString::fromStdString(msg));
+	layout->addWidget(label);
+
+	QPushButton* button = new QPushButton("OK");
+	layout->addWidget(button);
+	QObject::connect(button, &QPushButton::clicked, w, &QWidget::close);
+	w->setLayout(layout);
+	w->show();
 }
 
 namespace windowSave {
@@ -73,10 +93,11 @@ enum class INP_FROM {
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
 	void run() {
+		throw std::runtime_error("test RE");
 		std::string text;
 		switch (inp_from) {
 			case INP_FROM::line: text = ui->inp_line->text().toStdString(); break;
-			case INP_FROM::multi: text = ui->inp_multi->plainText().toStdString(); break;
+			case INP_FROM::multi: text = ui->inp_multi->toPlainText().toStdString(); break;
 			case INP_FROM::file: {
 				// std::ifstream(inp_file_path.text().toStdString()); EAD7::encFile 実装待ち
 			} break;
@@ -85,7 +106,7 @@ namespace mw {
 	
 }
 
-int GUI() {
+void GUI() {
 	windowSave::settingFile = SD+"GUI_setting.json";
 
 	ui->log->setVisible(false);
@@ -98,6 +119,7 @@ int GUI() {
 	
 	QObject::connect(app, &QCoreApplication::aboutToQuit, windowSave::save);
 	QShortcut shortcut_inp_multi(QKeySequence("Alt+Return"), ui->inp_multi);
+	QObject::connect(ui->run, &QPushButton::clicked, mw::run);
 	QObject::connect(&shortcut_inp_multi, &QShortcut::activated, ui->run, &QPushButton::animateClick);
 	QObject::connect(ui->inp_line, &QLineEdit::returnPressed, []{mw::inp_from=INP_FROM::line; ui->run->animateClick();});
 	QObject::connect(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::inp_from=INP_FROM::file; ui->run->animateClick();});
@@ -115,16 +137,34 @@ int GUI() {
 }
 
 int GUI_interface() {
-	try {
-		w = new QMainWindow;
-		ui = new Ui::MainWindow;
-		ui->setupUi(w);
-		u::log("EAD GUI 起動");
-		return GUI(); // Core
-		int result = app->exec();
-		delete w; // QThreadStorageエラー対策
-		return result;
-	} catch (const std::runtime_error& e) {
-		u::stat("RuntimeError: " + e.what())
+	bool crashed = false;
+	std::string err;
+	while (true) {
+		try {
+			w = new QMainWindow;
+			ui = new Ui::MainWindow;
+			ui->setupUi(w);
+			if (!crashed) u::log("EAD GUI 起動"); else {
+				crashed = false;
+				u::stat("RuntimeError: " + err);
+				u::log("RuntimeError: " + err);
+				u::log("EAD GUI 再起動");
+			}
+			GUI(); // Core
+			int result = app->exec();
+			delete w; // QThreadStorageエラー対策
+			return result;
+		} catch (const std::runtime_error& e) {
+			crashed = true;
+			err = e.what();
+			w->close();
+			continue;
+		} catch (...) {
+			std::string crash_log_path = getEnv("tmp")+"/EAD7_crash.log";
+			std::ofstream(crash_log_path) << t::banner << "\n\n\n\n\n" << convUnixTime(getUnixTime()) << ":   不明な例外が発生したため、プログラムを終了しました\n";
+			openFile(crash_log_path);
+			return 1;
+		}
+		return 111;
 	}
 }

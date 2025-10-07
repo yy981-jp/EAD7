@@ -55,6 +55,11 @@ struct MKEntryB64 {
 	operator bool() {return status;}
 };
 
+namespace ca_ori {
+	extern int argc;
+	extern char** argv;
+}
+
 struct CryptoGCM {BIN cipher, tag;};
 
 // util
