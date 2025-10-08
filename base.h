@@ -18,4 +18,18 @@ namespace conv {
 	inline BIN STRtoBIN(const std::string& str) {
 		return BIN(reinterpret_cast<const byte*>(str.data()), str.size());
 	}
+	
+	template <size_t N>
+	inline BIN ARRtoBIN(const std::array<uint8_t, N>& arr) {
+		BIN bin(N);
+		memcpy(bin.data(), arr.data(), N);
+		return bin;
+	}
+
+	template <size_t N>
+	inline std::array<uint8_t, N> BINtoARR(const BIN& bin) {
+		std::array<uint8_t, N> arr{};
+		memcpy(arr.data(), bin.data(), std::min(N, bin.size()));
+		return arr;
+	}
 }

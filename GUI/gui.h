@@ -10,13 +10,16 @@ extern QMainWindow* w;
 
 
 namespace u {
-	void setPrg(const int& v) {
+	inline void setPrg(const int& v) {
 		ui->progressBar->setValue(v);
 	}
-	void log(const std::string& str) {
+	inline void setPrgMax(const int& v) {
+		ui->progressBar->setMaximum(v);
+	}
+	inline void log(const std::string& str) {
 		ui->log->appendPlainText(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str));
 	}
-	void stat(const std::string& str) {
+	inline void stat(const std::string& str) {
 		ui->statusbar->showMessage(QString::fromStdString(str),60*1000); // 1分
 	}
 }

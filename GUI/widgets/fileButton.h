@@ -20,6 +20,7 @@ protected:
 
 	void dropEvent(QDropEvent *event) override {
 		if (event->mimeData()->hasUrls()) {
+			mw::inp_from=INP_FROM::file;
 			QString filePath = event->mimeData()->urls().first().toLocalFile();
 			emit fileSelected(filePath);
 		}

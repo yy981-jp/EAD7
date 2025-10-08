@@ -75,7 +75,7 @@ inline BIN deriveE7FileHmacKey(const BIN& key) {
 	return deriveKey(key, "EAD7|E7File-HMAC", 32);
 }
 
-inline BIN deriveDECFile(const BIN& kek, const BIN& nonce) {
+inline BIN deriveDECFileKey(const BIN& kek, const BIN& nonce) {
 	std::string info = "EAD7|DECFile|v1";
 	return deriveKey(kek, info, 32, nonce);
 }
@@ -96,25 +96,26 @@ namespace EAD7 {
 		
 		binFReader file(path,chunkSize);
 		fixedFHeader fh(HEADER::magicData,1);
-		FHeader h(mkid,kid,chunkSize);
+		FHeader h(mkid,conv::BINtoARR<16>(kid),chunkSize);
 		
+		BIN hmacKey = deriveE7FileHmacKey(kek);
+		HMAC<SHA256> hmac(hmacKey, hmacKey.size());
+
 		hmac.Update(reinterpret_cast<const uint8_t*>(&fh), sizeof(fixedFHeader));
 		hmac.Update(reinterpret_cast<const uint8_t*>(&h), sizeof(FHeader));
 		ofs.write(reinterpret_cast<const char*>(&fh), sizeof(fixedFHeader));
 		ofs.write(reinterpret_cast<const char*>(&h), sizeof(FHeader));
-
-		BIN hmacKey = deriveE7FileHmacKey(randomBIN(32));
-		HMAC<SHA256> hmac(hmacKey, hmacKey.size());
 		
 		// body構成
 		while (file) {
 			if (file.next() != chunkSize) std::runtime_error("encFile()::チャンク読み込み失敗");
 			BIN nonce = randomBIN(12);
-			BIN decKey = deriveDECFile(kek, nonce);
+			BIN decKey = deriveDECFileKey(kek, nonce);
+			
 			CryptoGCM out = encAES256GCM(decKey, nonce, file.data);
 			// Chunk構成
-			BIN chunk(sizeof(chunk_fixed)+out.cipher.size());
-			FChunk chunk_fixed(nonce,out.tag);
+			BIN chunk(sizeof(FChunk)+out.cipher.size());
+			FChunk chunk_fixed(conv::BINtoARR<12>(nonce),conv::BINtoARR<16>(out.tag));
 			memcpy(chunk, &chunk_fixed, sizeof(FChunk));
 			memcpy(chunk + sizeof(FChunk), out.cipher.data(), out.cipher.size());
 			hmac.Update(reinterpret_cast<const uint8_t*>(chunk.data()), chunk.size());

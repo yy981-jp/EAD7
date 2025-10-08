@@ -21,7 +21,17 @@ Ui::MainWindow* ui = nullptr;
 QMainWindow* w = nullptr;
 
 
-struct VERSION {};
+namespace VER {
+	constexpr uint8_t
+		gen  = 7,
+		major = 0,
+		minor = 2,
+		patch = 0;
+	
+	std::string str() {
+		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+patch);
+	}
+};
 
 void showMessage(const std::string& msg) {
 	QWidget* w = new QWidget;
@@ -81,21 +91,38 @@ enum class INP_FROM {
 
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
+	
+	void textProc(const std::string& text) {
+		std::string out;
+		ui->selectKey
+		if (ui->encMode->isChecked()) {
+			out = EAD7::enc(kek,text,mkid,kid);
+		} else {
+			
+		}
+		ui->out->setPlainText(QString::fromStdString(out));
+	}
+	
+	void fileProc(const std::string& text) {
+		
+	}
+	
 	void run() {
 		std::string text;
 		switch (inp_from) {
 			case INP_FROM::line: text = ui->inp_line->text().toStdString(); break;
 			case INP_FROM::multi: text = ui->inp_multi->toPlainText().toStdString(); break;
-			case INP_FROM::file: {
-				// std::ifstream(inp_file_path.text().toStdString()); EAD7::encFile 実装待ち
-			} break;
+			case INP_FROM::file: text = inp_file_path->text().toStdString(); break;
 		}
+		if (inp_from == INP_FROM::file) fileProc(text); else textProc(text);
 	}
 	
 }
 
 void GUI() {
 	windowSave::settingFile = SD+"GUI_setting.json";
+	
+	ui->credit->setText(QString::fromStdString("EAD7 " + VER::str() + " (C) 2025 yy981"));
 
 	ui->log->setVisible(false);
 	w->show();
@@ -127,6 +154,7 @@ void GUI() {
 int GUI_interface() {
 	bool crashed = false;
 	std::string err;
+	QString log;
 	while (true) {
 		try {
 			w = new QMainWindow;
@@ -134,6 +162,7 @@ int GUI_interface() {
 			ui->setupUi(w);
 			if (!crashed) u::log("EAD GUI 起動"); else {
 				crashed = false;
+				ui->log->setPlainText(log);
 				u::stat("RuntimeError: " + err);
 				u::log("RuntimeError: " + err);
 				u::log("EAD GUI 再起動");
@@ -145,6 +174,7 @@ int GUI_interface() {
 		} catch (const std::runtime_error& e) {
 			crashed = true;
 			err = e.what();
+			log = ui->log->toPlainText();
 			w->close();
 			continue;
 		} catch (...) {

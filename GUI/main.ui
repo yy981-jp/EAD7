@@ -123,7 +123,7 @@
      </widget>
     </item>
     <item row="4" column="5">
-     <widget class="QToolButton" name="toolButton">
+     <widget class="QToolButton" name="keyView">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -139,7 +139,7 @@
      </widget>
     </item>
     <item row="4" column="0" colspan="5">
-     <widget class="QComboBox" name="comboBox"/>
+     <widget class="QComboBox" name="selectKey"/>
     </item>
     <item row="7" column="0" colspan="3">
      <widget class="QLabel" name="credit">
