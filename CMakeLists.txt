@@ -33,13 +33,15 @@ set(SOURCES
 	AES256GCM.cpp
 	del.cpp
 	file.cpp
+
 	CUI/main.cpp
 	CUI/admin.cpp
 	CUI/util.cpp
 	GUI/main.cpp
 	GUI/util.cpp
-	GUI/main.ui
+
 	GUI/widgets/fileButton.cpp
+	GUI/main.ui
 )
 
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})

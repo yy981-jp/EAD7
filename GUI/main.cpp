@@ -19,19 +19,26 @@
 namespace fs = std::filesystem;
 Ui::MainWindow* ui = nullptr;
 QMainWindow* w = nullptr;
+json p_kek;
 
 
-namespace VER {
-	constexpr uint8_t
-		gen  = 7,
-		major = 0,
-		minor = 2,
-		patch = 0;
+struct VER {
+	constexpr VER(const uint16_t& major, const uint16_t& minor, const uint16_t& patch = 0): major(major), minor(minor), patch(patch) {}
 	
-	std::string str() {
+	uint16_t gen{7}, major, minor, patch;
+	
+	constexpr std::string str() const {
 		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+patch);
 	}
+	
+	constexpr uint64_t num() const {
+		return (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
+	}
+	constexpr uint64_t numALL() const {
+		return (uint64_t)gen<<(16*3) | (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
+	}
 };
+constexpr VER ver(0,2);
 
 void showMessage(const std::string& msg) {
 	QWidget* w = new QWidget;
@@ -85,18 +92,17 @@ namespace windowSave {
 	}
 }
 
-enum class INP_FROM {
-	null, line, multi, file
-};
-
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
 	
 	void textProc(const std::string& text) {
 		std::string out;
-		ui->selectKey
+		
+		int index = ui->selectKey->currentIndex();
+		std::string kid = ui->selectKey->itemData(index).toString().toStdString();
+		
 		if (ui->encMode->isChecked()) {
-			out = EAD7::enc(kek,text,mkid,kid);
+			// out = EAD7::enc(kek,text,mkid,kid);
 		} else {
 			
 		}
@@ -110,23 +116,43 @@ namespace mw {
 	void run() {
 		std::string text;
 		switch (inp_from) {
+			case INP_FROM::null: u::stat("入力元が特定できません"); return;
 			case INP_FROM::line: text = ui->inp_line->text().toStdString(); break;
 			case INP_FROM::multi: text = ui->inp_multi->toPlainText().toStdString(); break;
-			case INP_FROM::file: text = inp_file_path->text().toStdString(); break;
+			case INP_FROM::file: text = ui->inp_file_path->text().toStdString(); break;
 		}
 		if (inp_from == INP_FROM::file) fileProc(text); else textProc(text);
 	}
 	
 }
 
-void GUI() {
-	windowSave::settingFile = SD+"GUI_setting.json";
+void loadKeyCombobox() {
+	if (!fs::exists(path::p_kek)) {
+		ui->selectKey->addItem(QString::fromStdString("Keyリストを配布KEKファイルから登録してください"));
+		for (QWidget* child : w->findChildren<QWidget*>()) {
+			if (child != ui->dst_kek) child->setEnabled(false);
+		}
+		ui->selectKey->setStyleSheet("background-color: red; color: black; font-weight: bold;");
+		return;
+	}
+	p_kek = readJson(path::p_kek);
 	
-	ui->credit->setText(QString::fromStdString("EAD7 " + VER::str() + " (C) 2025 yy981"));
+	json raw_kek = decPKEK(p_kek);
+	u::log("Keyリスト(P_KEK)読み込み完了   最終更新日時: " + convUnixTime(raw_kek["meta"]["last_updated"].get<uint64_t>()));
+	KIDIndex index = createKIDIndex(raw_kek);
+	for (const auto [label,kid]: index) {
+		ui->selectKey->addItem(QString::fromStdString(label),QString::fromStdString(kid));
+	}
+	delm(raw_kek);
+}
 
+void GUI() {
+	windowSave::settingFile = SD+"GUI_setting.json";	
 	ui->log->setVisible(false);
 	w->show();
-
+	
+	ui->credit->setStyleSheet("color: tomato;");
+	ui->credit->setText(QString::fromStdString("EAD7 " + ver.str() + " (C) 2025 yy981"));
 	if (fs::exists(SDM)) {
 		ui->adminMode->setEnabled(true);
 		ui->adminMode->setChecked(true);
@@ -145,17 +171,26 @@ void GUI() {
 	});
 	QObject::connect(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
 	
+	loadKeyCombobox();
+	
 	if (fs::exists(windowSave::settingFile)) windowSave::load();
 
 	u::log("ui setup完了");
 	
 }
 
+void crashReport(const std::string& text) {
+	std::string crash_log_path = getEnv("tmp")+"/EAD7_crash.log";
+	std::ofstream(crash_log_path) << t::banner << "\n\n\n\n\n" << convUnixTime(getUnixTime())
+								  << ":   " << text << "\n";
+	openFile(crash_log_path);
+}
+
 int GUI_interface() {
 	bool crashed = false;
 	std::string err;
 	QString log;
-	while (true) {
+	for (int i = 1; i <= 100; ++i) {
 		try {
 			w = new QMainWindow;
 			ui = new Ui::MainWindow;
@@ -177,12 +212,14 @@ int GUI_interface() {
 			log = ui->log->toPlainText();
 			w->close();
 			continue;
-		} catch (...) {
-			std::string crash_log_path = getEnv("tmp")+"/EAD7_crash.log";
-			std::ofstream(crash_log_path) << t::banner << "\n\n\n\n\n" << convUnixTime(getUnixTime()) << ":   不明な例外が発生したため、プログラムを終了しました\n";
-			openFile(crash_log_path);
+		} catch (const std::exception& e) {
+			crashReport("深刻な例外が発生したため、プログラムを終了しました\nstd::exception::what(): " + std::string(e.what()));
 			return 1;
+		} catch (...) {
+			crashReport("不明な例外が発生したため、プログラムを終了しました");
+			return 2;
 		}
-		return 111;
 	}
+	crashReport("RuntimeErrorが100回発生したため明らかな異常と判断し、プログラムを終了しました");
+	return 50;
 }
