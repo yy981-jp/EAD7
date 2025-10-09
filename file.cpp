@@ -4,6 +4,7 @@
 #include <cryptopp/sha.h>
 
 #include "master.h"
+#include "base.h"
 #include "GUI/gui.h"
 
 

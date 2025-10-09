@@ -1,4 +1,3 @@
-#include "cui.h"
 #include <iostream>
 
 #include <QtWidgets/QApplication>
@@ -7,6 +6,11 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QInputDialog>
+
+#include "cui.h"
+#include "gui.h"
+#include "../master.h"
 
 
 std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
@@ -51,13 +55,13 @@ std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
 	return result;
 }
 
-/*
-void gmain() {
-	std::vector<Entry> list = {
-		{"abc","aaaa1"},{"def","bbbb2",true},{"ghi","cccc3"}
-	};
-	for (const std::string& e: selectItem(list)) {
-		std::cout << e << "\n";
-	}
+std::string prompt(const std::string& placeholderText) {
+	bool ok = false;
+	QString text = QInputDialog::getText(
+		nullptr,"入力",
+		QString::fromStdString(placeholderText),
+		QLineEdit::Normal,"",&ok
+	);
+	if (ok) return text.toStdString();
+	return "";
 }
-*/

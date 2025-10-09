@@ -6,13 +6,16 @@
 #include <QtCore/QMimeData>
 #include <QtWidgets/QFileDialog>
 
-// #include "../gui.h"
-
+#include "../extern_inp_from.h"
 
 class FileButton : public QPushButton {
 	Q_OBJECT
 public:
 	using QPushButton::QPushButton;
+	
+	FileButton(QWidget *parent = nullptr) : QPushButton(parent) {
+		setAcceptDrops(true);
+	}
 
 protected:
 	void dragEnterEvent(QDragEnterEvent *event) override {
@@ -23,7 +26,7 @@ protected:
 
 	void dropEvent(QDropEvent *event) override {
 		if (event->mimeData()->hasUrls()) {
-			// mw::inp_from=INP_FROM::file;
+			mw::inp_from = INP_FROM::file;
 			QString filePath = event->mimeData()->urls().first().toLocalFile();
 			emit fileSelected(filePath);
 		}
@@ -31,13 +34,11 @@ protected:
 
 	void mousePressEvent(QMouseEvent *event) override {
 		if (event->button() == Qt::LeftButton) {
-			QString filePath = QFileDialog::getOpenFileName(this, "ファイルを選択");
+			QString filePath = QFileDialog::getOpenFileName(this, tr("ファイルを選択"));
 			if (!filePath.isEmpty()) {
 				emit fileSelected(filePath);
 			}
 		}
-		// 通常のQPushButtonの処理も呼ぶ
-		// QPushButton::mousePressEvent(event);
 	}
 
 signals:

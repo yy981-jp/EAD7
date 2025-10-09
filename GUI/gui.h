@@ -1,32 +1,36 @@
 #pragma once
 #include <QtWidgets/QMainWindow>
 
-#include "ui_main.h"
-#include "../CUI/ui.h"
+namespace Ui { class MainWindow; }
 
+struct VER {
+	constexpr VER(const uint16_t& major, const uint16_t& minor, const uint16_t& patch = 0): major(major), minor(minor), patch(patch) {}
+	
+	uint16_t gen{7}, major, minor, patch;
+	
+	constexpr std::string str() const {
+		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+patch);
+	}
+	
+	constexpr uint64_t num() const {
+		return (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
+	}
+	constexpr uint64_t numALL() const {
+		return (uint64_t)gen<<(16*3) | (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
+	}
+};
+constexpr VER ver(0,2);
 
 extern Ui::MainWindow* ui;
 extern QMainWindow* w;
 
-enum class INP_FROM {
-	null, line, multi, file
-};
-
-namespace mw {
-	extern INP_FROM inp_from;
-}
+extern std::string prompt(const std::string& placeholderText);
 
 namespace u {
-	inline void setPrg(const int& v) {
-		ui->progressBar->setValue(v);
-	}
-	inline void setPrgMax(const int& v) {
-		ui->progressBar->setMaximum(v);
-	}
-	inline void log(const std::string& str) {
-		ui->log->appendPlainText(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str));
-	}
-	inline void stat(const std::string& str) {
-		ui->statusbar->showMessage(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str),60*1000); // 1分
-	}
+    void setPrg(const int& v);
+    void setPrgMax(const int& v);
+    void log(const std::string& str);
+    void stat(const std::string& str);
 }
+
+void crashReport(const std::string& text);

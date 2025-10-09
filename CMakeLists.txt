@@ -39,6 +39,9 @@ set(SOURCES
 	CUI/util.cpp
 	GUI/main.cpp
 	GUI/util.cpp
+	GUI/gui.cpp
+	GUI/windowSave.cpp
+	GUI/def.cpp
 
 	GUI/widgets/fileButton.cpp
 	GUI/main.ui

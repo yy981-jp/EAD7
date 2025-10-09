@@ -8,37 +8,15 @@
 #include <yy981/env.h>
 
 #include "../master.h"
+#include "def.h"
 #include "cui.h"
 #include "gui.h"
 #include "ui_main.h"
 #include "../CUI/ui.h"
 #include "../CUI/text.h"
+#include "windowSave.h"
 
 #include "widgets/fileButton.h"
-
-namespace fs = std::filesystem;
-Ui::MainWindow* ui = nullptr;
-QMainWindow* w = nullptr;
-json p_kek;
-
-
-struct VER {
-	constexpr VER(const uint16_t& major, const uint16_t& minor, const uint16_t& patch = 0): major(major), minor(minor), patch(patch) {}
-	
-	uint16_t gen{7}, major, minor, patch;
-	
-	constexpr std::string str() const {
-		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+patch);
-	}
-	
-	constexpr uint64_t num() const {
-		return (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
-	}
-	constexpr uint64_t numALL() const {
-		return (uint64_t)gen<<(16*3) | (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
-	}
-};
-constexpr VER ver(0,2);
 
 void showMessage(const std::string& msg) {
 	QWidget* w = new QWidget;
@@ -55,45 +33,31 @@ void showMessage(const std::string& msg) {
 	w->show();
 }
 
-namespace windowSave {
-	std::string settingFile;
-	
-	json saveWidgetCore(QWidget *parent) {
-		json j;
-		for (auto w : parent->findChildren<QWidget*>()) {
-			std::string name = w->objectName().toStdString();
-			if (name.empty()) continue;
-
-			if (auto cb = qobject_cast<QCheckBox*>(w))			j[name] = cb->isChecked();
-			else if (auto combo = qobject_cast<QComboBox*>(w))	j[name] = combo->currentIndex();
-		}
-		return j;
-	}
-
-	void loadWidgetCore(QWidget *parent, const json& j) {
-		for (auto w : parent->findChildren<QWidget*>()) {
-			std::string name = w->objectName().toStdString();
-			if (name.empty() || !j.contains(name)) continue;
-
-			if (auto cb = qobject_cast<QCheckBox*>(w))			cb->setChecked(j[name]);
-			else if (auto combo = qobject_cast<QComboBox*>(w))	combo->setCurrentIndex(j[name]);
-		}
-	}
-	
-	void save() {
-		json setting;
-		setting["MainWindow"] = saveWidgetCore(w);
-		writeJson(setting,settingFile);
-	}
-
-	void load() {
-		json setting = readJson(settingFile);
-		loadWidgetCore(w,setting["MainWindow"]);
-	}
-}
-
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
+	
+	void import_dst_kek(const QString& qstr) {
+		std::string str = qstr.toStdString();
+		if (str.ends_with(".e7")) {
+			fs::path p = str;
+			if (fs::exists(p)) {
+				FDat f = getFileType(p);
+				switch (f.type) {
+					case FSType::dst_kek: {
+						std::string pass = prompt("DST.KEKファイルのパスワード: ");
+						json raw_kek = decDstKEK(pass,f.json);
+						json p_kek = encPKEK(raw_kek);
+						writeJson(p_kek,path::p_kek);
+						u::stat("P_KEK更新完了\n");
+						delm(pass,raw_kek);
+						throw std::runtime_error("再起動信号(P_KEK再読み込み)");
+					} break;
+					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
+				}
+			}
+		}
+		u::stat("dst_kekとして入力されたファイルはe7ファイルではありません(ファイル拡張子で判断)");
+	}
 	
 	void textProc(const std::string& text) {
 		std::string out;
@@ -128,16 +92,16 @@ namespace mw {
 
 void loadKeyCombobox() {
 	if (!fs::exists(path::p_kek)) {
-		ui->selectKey->addItem(QString::fromStdString("Keyリストを配布KEKファイルから登録してください"));
-		for (QWidget* child : w->findChildren<QWidget*>()) {
-			if (child != ui->dst_kek) child->setEnabled(false);
-		}
-		ui->selectKey->setStyleSheet("background-color: red; color: black; font-weight: bold;");
+		w->close();
+		delete fb;
+		fb = new FileButton;
+		fb->show();
+		QObject::connect(ui->inp_file_button, &FileButton::fileSelected, mw::import_dst_kek);
 		return;
 	}
-	p_kek = readJson(path::p_kek);
+	PKEK = readJson(path::p_kek);
 	
-	json raw_kek = decPKEK(p_kek);
+	json raw_kek = decPKEK(PKEK);
 	u::log("Keyリスト(P_KEK)読み込み完了   最終更新日時: " + convUnixTime(raw_kek["meta"]["last_updated"].get<uint64_t>()));
 	KIDIndex index = createKIDIndex(raw_kek);
 	for (const auto [label,kid]: index) {
@@ -179,25 +143,21 @@ void GUI() {
 	
 }
 
-void crashReport(const std::string& text) {
-	std::string crash_log_path = getEnv("tmp")+"/EAD7_crash.log";
-	std::ofstream(crash_log_path) << t::banner << "\n\n\n\n\n" << convUnixTime(getUnixTime())
-								  << ":   " << text << "\n";
-	openFile(crash_log_path);
-}
-
 int GUI_interface() {
 	bool crashed = false;
 	std::string err;
-	QString log;
+	QString log, statText;
 	for (int i = 1; i <= 100; ++i) {
 		try {
+			delete w;
+			delete ui;
 			w = new QMainWindow;
 			ui = new Ui::MainWindow;
 			ui->setupUi(w);
 			if (!crashed) u::log("EAD GUI 起動"); else {
 				crashed = false;
 				ui->log->setPlainText(log);
+				ui->statusbar->showMessage(statText,60*1000); // 1分
 				u::stat("RuntimeError: " + err);
 				u::log("RuntimeError: " + err);
 				u::log("EAD GUI 再起動");
@@ -210,6 +170,7 @@ int GUI_interface() {
 			crashed = true;
 			err = e.what();
 			log = ui->log->toPlainText();
+			statText = ui->statusbar->currentMessage();
 			w->close();
 			continue;
 		} catch (const std::exception& e) {

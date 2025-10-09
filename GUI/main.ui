@@ -158,26 +158,6 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="6">
-     <widget class="QLabel" name="dst_kek">
-      <property name="acceptDrops">
-       <bool>true</bool>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Shape::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Shadow::Plain</enum>
-      </property>
-      <property name="text">
-       <string>配布KEKファイルを
-ドラックアンドドロップ</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="5">
      <widget class="QCheckBox" name="adminMode">
       <property name="enabled">
@@ -216,6 +196,26 @@
     </item>
     <item row="8" column="0" colspan="7">
      <widget class="QPlainTextEdit" name="log"/>
+    </item>
+    <item row="0" column="6">
+     <widget class="FileButton" name="dst_file">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>配布KEKファイルを
+ドラックアンドドロップ</string>
+      </property>
+      <property name="icon">
+       <iconset theme="document-open"/>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
