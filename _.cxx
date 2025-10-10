@@ -151,3 +151,38 @@ inline KIDEntry getKID(const uint8_t& mkid mkid, const std::string& KIDlabel) {
 }
 */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void showMessage(const std::string& msg) {
+	QWidget* w = new QWidget;
+	w->setWindowTitle("通知");
+
+	QVBoxLayout* layout = new QVBoxLayout(w);
+	QLabel* label = new QLabel(QString::fromStdString(msg));
+	layout->addWidget(label);
+
+	QPushButton* button = new QPushButton("OK");
+	layout->addWidget(button);
+	QObject::connect(button, &QPushButton::clicked, w, &QWidget::close);
+	w->setLayout(layout);
+	w->show();
+}
+

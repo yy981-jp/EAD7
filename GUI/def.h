@@ -5,4 +5,5 @@
 extern Ui::MainWindow* ui;
 extern QMainWindow* w;
 extern FileButton* fb;
+extern QClipboard* clipboard;
 extern json PKEK;

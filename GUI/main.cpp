@@ -4,6 +4,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QtGui/QShortcut>
+#include <QtGui/QClipboard>
 
 #include <yy981/env.h>
 
@@ -18,25 +19,17 @@
 
 #include "widgets/fileButton.h"
 
-void showMessage(const std::string& msg) {
-	QWidget* w = new QWidget;
-	w->setWindowTitle("通知");
-
-	QVBoxLayout* layout = new QVBoxLayout(w);
-	QLabel* label = new QLabel(QString::fromStdString(msg));
-	layout->addWidget(label);
-
-	QPushButton* button = new QPushButton("OK");
-	layout->addWidget(button);
-	QObject::connect(button, &QPushButton::clicked, w, &QWidget::close);
-	w->setLayout(layout);
-	w->show();
-}
-
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
 	
-	void import_dst_kek(const QString& qstr) {
+	void setInpFrom(const INP_FROM& inp_from_new) {
+		inp_from = inp_from_new;
+		
+		int index = ui->inp_from->findData(QVariant::fromValue(inp_from));
+		if (index != -1) ui->inp_from->setCurrentIndex(index);
+	}
+	
+	void import_dst_kek(const QString& qstr, bool from_kek_window = false) {
 		std::string str = qstr.toStdString();
 		if (str.ends_with(".e7")) {
 			fs::path p = str;
@@ -50,6 +43,7 @@ namespace mw {
 						writeJson(p_kek,path::p_kek);
 						u::stat("P_KEK更新完了\n");
 						delm(pass,raw_kek);
+						if (from_kek_window) fb->close();
 						throw std::runtime_error("再起動信号(P_KEK再読み込み)");
 					} break;
 					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
@@ -64,13 +58,32 @@ namespace mw {
 		
 		int index = ui->selectKey->currentIndex();
 		std::string kid = ui->selectKey->itemData(index).toString().toStdString();
+		if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
+		if (kid.empty()) {
+			u::stat("使用する鍵を選択してください");
+			return;
+		}
+		json raw_kek = decPKEK(PKEK);
+		uint8_t mkid = raw_kek["keks"][kid]["mkid"];
+		BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
 		
 		if (ui->encMode->isChecked()) {
-			// out = EAD7::enc(kek,text,mkid,kid);
+			BIN outb = EAD7::enc(kek,conv::STRtoBIN(text),mkid,base::dec64(kid));
+			out = base::enc64(outb);
 		} else {
-			
+			BIN inputBin;
+			try {
+				inputBin = base::dec64(text);
+			} catch (const exception) {
+				u::stat("復号モードの入力がBase64URLSafe形式ではないので処理を中止しました");
+				delm(raw_kek,kek);
+				return;
+			}
+			BIN outb = EAD7::dec(kek,inputBin);
+			out = conv::BINtoSTR(outb);
 		}
 		ui->out->setPlainText(QString::fromStdString(out));
+		delm(raw_kek,kek,out);
 	}
 	
 	void fileProc(const std::string& text) {
@@ -94,9 +107,14 @@ void loadKeyCombobox() {
 	if (!fs::exists(path::p_kek)) {
 		w->close();
 		delete fb;
-		fb = new FileButton;
+		fb = new FileButton("配布KEKファイルを\n選択");
+		QFont f = fb->font();
+		f.setPointSize(72);
+		f.setWeight(QFont::Bold);
+		fb->setFont(f);
+		fb->adjustSize();
 		fb->show();
-		QObject::connect(ui->inp_file_button, &FileButton::fileSelected, mw::import_dst_kek);
+		QObject::connect(fb, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr,true);});
 		return;
 	}
 	PKEK = readJson(path::p_kek);
@@ -111,9 +129,11 @@ void loadKeyCombobox() {
 }
 
 void GUI() {
-	windowSave::settingFile = SD+"GUI_setting.json";	
 	ui->log->setVisible(false);
 	w->show();
+	
+	windowSave::settingFile = SD+"GUI_setting.json";
+	clipboard = QApplication::clipboard();
 	
 	ui->credit->setStyleSheet("color: tomato;");
 	ui->credit->setText(QString::fromStdString("EAD7 " + ver.str() + " (C) 2025 yy981"));
@@ -125,21 +145,34 @@ void GUI() {
 	QObject::connect(app, &QCoreApplication::aboutToQuit, windowSave::save);
 	QShortcut shortcut_inp_multi(QKeySequence("Alt+Return"), ui->inp_multi);
 	QObject::connect(ui->run, &QPushButton::clicked, mw::run);
-	QObject::connect(&shortcut_inp_multi, &QShortcut::activated, ui->run, &QPushButton::animateClick);
-	QObject::connect(ui->inp_line, &QLineEdit::returnPressed, []{mw::inp_from=INP_FROM::line; ui->run->animateClick();});
-	QObject::connect(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::inp_from=INP_FROM::file; ui->run->animateClick();});
+	QObject::connect(&shortcut_inp_multi, &QShortcut::activated, []{mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
+	QObject::connect(ui->inp_line, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::line); ui->run->animateClick();});
+	QObject::connect(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::file); ui->run->animateClick();});
 	QObject::connect(ui->inp_file_button, &FileButton::fileSelected, [](const QString& selectedFile){
-		mw::inp_from=INP_FROM::file;
+		mw::setInpFrom(INP_FROM::file);
 		ui->inp_file_path->setText(selectedFile);
 		ui->run->animateClick();
 	});
 	QObject::connect(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
+	QObject::connect(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
+	QObject::connect(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
+		mw::inp_from = ui->inp_from->itemData(index).value<INP_FROM>();
+	});
+	QObject::connect(ui->copy, &QPushButton::clicked, []{clipboard->setText(ui->out->toPlainText());});
+	QObject::connect(ui->clear, &QPushButton::clicked, ui->out, &QPlainTextEdit::clear);
 	
 	loadKeyCombobox();
+	
+	ui->inp_from->setItemData(0, QVariant::fromValue(INP_FROM::null));
+	ui->inp_from->setItemData(1, QVariant::fromValue(INP_FROM::line));
+	ui->inp_from->setItemData(2, QVariant::fromValue(INP_FROM::multi));
+	ui->inp_from->setItemData(3, QVariant::fromValue(INP_FROM::file));
 	
 	if (fs::exists(windowSave::settingFile)) windowSave::load();
 
 	u::log("ui setup完了");
+	
+	ui->inp_line->setFocus();
 	
 }
 

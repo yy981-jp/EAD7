@@ -4,4 +4,5 @@
 Ui::MainWindow* ui = nullptr;
 QMainWindow* w = nullptr;
 FileButton* fb = nullptr;
+QClipboard* clipboard = nullptr;
 json PKEK;
