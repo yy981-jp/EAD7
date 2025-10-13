@@ -20,6 +20,20 @@
 #include "widgets/fileButton.h"
 #include "widgets/mainWindow.h"
 
+namespace awv {
+	std::vector<uint8_t> mkids;
+	json MK;
+	
+	void loadMK() {
+		MK = readJson(path::MK);
+		awv::mkids.clear();
+		for (const auto& [index,object]: MK.items()) {
+			awv::mkids.emplace(std::stoi(index));
+		}
+	}
+
+}
+
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
 	
@@ -119,7 +133,7 @@ void loadKeyCombobox() {
 		fb->setFont(f);
 		fb->adjustSize();
 		fb->show();
-		QObject::connect(fb, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr,true);});
+		CN(fb, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr,true);});
 		return;
 	}
 	PKEK = readJson(path::p_kek);
@@ -149,38 +163,45 @@ void GUI() {
 	ui->inp_line->setEnabled(false);
 	
 	
-	QObject::connect(app, &QCoreApplication::aboutToQuit, windowSave::save);
+	CN(app, &QCoreApplication::aboutToQuit, windowSave::save);
 	shortcut_inp_multi = new QShortcut(QKeySequence("Alt+Return"), ui->inp_multi);
-	QObject::connect(ui->run, &QPushButton::clicked, mw::run);
-	QObject::connect(shortcut_inp_multi, &QShortcut::activated, []{u::stat("D: inp_multi"); mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
-	QObject::connect(ui->inp_line, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::line); ui->run->animateClick();});
-	QObject::connect(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::file); ui->run->animateClick();});
-	QObject::connect(ui->inp_file_button, &FileButton::fileSelected, [](const QString& selectedFile){
+	CN(ui->run, &QPushButton::clicked, mw::run);
+	CN(shortcut_inp_multi, &QShortcut::activated, []{u::stat("D: inp_multi"); mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
+	CN(ui->inp_line, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::line); ui->run->animateClick();});
+	CN(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::file); ui->run->animateClick();});
+	CN(ui->inp_file_button, &FileButton::fileSelected, [](const QString& selectedFile){
 		mw::setInpFrom(INP_FROM::file);
 		ui->inp_file_path->setText(selectedFile);
 		ui->run->animateClick();
 	});
 	
-	QObject::connect(ui->encMode, &QRadioButton::toggled, [](const bool encMode){
+	CN(ui->encMode, &QRadioButton::toggled, [](const bool encMode){
 		ui->inp_line->setEnabled(!encMode);
 		ui->inp_multi->setEnabled(encMode);
 	});
 	
-	QObject::connect(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
-	QObject::connect(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
-	QObject::connect(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
+	CN(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
+	CN(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
+	CN(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
 		mw::inp_from = ui->inp_from->itemData(index).value<INP_FROM>();
 	});
-	QObject::connect(ui->copy, &QPushButton::clicked, []{clipboard->setText(ui->out->toPlainText());});
-	QObject::connect(ui->clear, &QPushButton::clicked, ui->out, &QPlainTextEdit::clear);
+	CN(ui->copy, &QPushButton::clicked, []{clipboard->setText(ui->out->toPlainText());});
+	CN(ui->clear, &QPushButton::clicked, ui->out, &QPlainTextEdit::clear);
 	
 	loadKeyCombobox();
 	
+	// ui.inp_from
 	ui->inp_from->setItemData(0, QVariant::fromValue(INP_FROM::null));
 	ui->inp_from->setItemData(1, QVariant::fromValue(INP_FROM::line));
 	ui->inp_from->setItemData(2, QVariant::fromValue(INP_FROM::multi));
 	ui->inp_from->setItemData(3, QVariant::fromValue(INP_FROM::file));
 	
+	// aui.kek.twoTreeView
+	CN(aui->MK_load, &QPushButton::clicked, awv::loadMK);
+	CN(aui->MK_open, &QPushButton::clicked, []{openFile(path::MK);});
+	
+	
+	// restore window
 	if (fs::exists(windowSave::settingFile)) windowSave::load();
 
 	u::log("ui setup完了");

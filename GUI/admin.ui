@@ -27,7 +27,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QCheckBox" name="checkBox">
+    <widget class="QCheckBox" name="enableControl">
      <property name="text">
       <string>管理ウィンドウの操作を有効化</string>
      </property>
@@ -42,36 +42,47 @@
       <bool>true</bool>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab_mk">
       <attribute name="title">
        <string>MasterKey</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="2">
+        <widget class="QPushButton" name="MK_open">
+         <property name="text">
+          <string>MKファイルを開く</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0" colspan="3">
         <widget class="QGroupBox" name="MK_unWrap">
          <property name="title">
           <string>解読</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QComboBox" name="MK_unWrap_index"/>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="MK_unWrap_pass">
-            <property name="placeholderText">
-             <string>パスワードを入力</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
+          <item row="2" column="0" colspan="2">
            <widget class="QLineEdit" name="MK_unWrap_out">
             <property name="readOnly">
              <bool>true</bool>
             </property>
             <property name="placeholderText">
              <string>暗号化されていない鍵</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QComboBox" name="MK_unWrap_index">
+            <property name="placeholderText">
+             <string>MKIDを選択</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="MK_unWrap_pass">
+            <property name="placeholderText">
+             <string>パスワードを入力</string>
             </property>
            </widget>
           </item>
@@ -84,49 +95,34 @@
           <string>作成</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="0" column="0">
-           <widget class="QComboBox" name="MK_create_index"/>
-          </item>
-          <item row="0" column="1">
+          <item row="1" column="0">
            <widget class="QLineEdit" name="unWrap_pass_2">
             <property name="placeholderText">
              <string>新しいパスワードを入力</string>
             </property>
            </widget>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="3">
-        <widget class="QGroupBox" name="MK_insert">
-         <property name="title">
-          <string>追加</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="MK_insert_pass">
-            <property name="placeholderText">
-             <string>新しいパスワードを入力</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
-           <widget class="QComboBox" name="MK_insert_index"/>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLineEdit" name="MK_insert_b64">
+           <widget class="QComboBox" name="MK_create_index">
             <property name="placeholderText">
-             <string>追加するMK(base64UrlSafe)を入力</string>
+             <string>MKIDを選択</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLineEdit" name="MK_create_b64">
+            <property name="placeholderText">
+             <string>追加するMK(Base64UrlSafe) (省略した場合は自動で生成します)</string>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="MK_open">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="MK_load">
          <property name="text">
-          <string>MKファイルを開く</string>
+          <string>MKを読み込み</string>
          </property>
         </widget>
        </item>
@@ -137,12 +133,18 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QPushButton" name="pushButton">
-         <property name="text">
-          <string>MKを読み込み</string>
+       <item row="3" column="1">
+        <spacer name="MK_verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
-        </widget>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -158,7 +160,11 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_8">
           <item row="0" column="0">
-           <widget class="QComboBox" name="KID_recal_index"/>
+           <widget class="QComboBox" name="KID_recal_index">
+            <property name="placeholderText">
+             <string>MKIDを選択</string>
+            </property>
+           </widget>
           </item>
           <item row="0" column="1">
            <widget class="QPushButton" name="KID_recal_run">
@@ -171,7 +177,7 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QGroupBox" name="MK_unWrap_2">
+        <widget class="QGroupBox" name="KID_create">
          <property name="title">
           <string>作成と編集</string>
          </property>
@@ -180,6 +186,9 @@
            <widget class="QComboBox" name="KID_create_index">
             <property name="currentText">
              <string/>
+            </property>
+            <property name="placeholderText">
+             <string>MKIDを選択</string>
             </property>
            </widget>
           </item>
@@ -227,7 +236,7 @@
        <item row="0" column="0">
         <widget class="QPushButton" name="KID_open">
          <property name="text">
-          <string>ファイルを開く</string>
+          <string>フォルダを開く</string>
          </property>
         </widget>
        </item>
@@ -237,17 +246,154 @@
       <attribute name="title">
        <string>KEK</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_9"/>
+      <layout class="QGridLayout" name="gridLayout_9">
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="KEK_MKpass"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="KEK_label">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;操作対象KEK(新しく入力すると新規作成): &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QComboBox" name="KEK_MKID">
+         <property name="placeholderText">
+          <string>MKIDを選択</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QPushButton" name="KEK_write">
+         <property name="text">
+          <string>書き込み</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="4">
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>操作画面</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="0" column="0">
+           <widget class="TwoTreeView" name="KEK_leftTree"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="TwoTreeView" name="KEK_rightTree"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="2" colspan="2">
+        <widget class="QComboBox" name="KEK_target">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentText">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="4">
+        <widget class="QPushButton" name="KEK_load">
+         <property name="text">
+          <string>KIDリストを読み込み</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tab_other">
       <attribute name="title">
        <string>その他</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="1" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="OT_dst">
+         <property name="title">
+          <string>DST.KEKに変換</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="comboBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>対象のADM.KEKを選択</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="lineEdit_2">
+            <property name="placeholderText">
+             <string>MKIDのパスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEdit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>DST.KEKのパスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="pushButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>実行</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TwoTreeView</class>
+   <extends>QTreeView</extends>
+   <header>twoTreeView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

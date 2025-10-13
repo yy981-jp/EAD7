@@ -20,7 +20,7 @@ std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
 	QVBoxLayout *layout = new QVBoxLayout(&dialog);
 	QListWidget *listWidget = new QListWidget;
 
-	QObject::connect(listWidget, &QListWidget::itemClicked, [&](QListWidgetItem *item) {
+	CN(listWidget, &QListWidget::itemClicked, [&](QListWidgetItem *item) {
 		if (item->checkState() == Qt::Checked) {
 			item->setCheckState(Qt::Unchecked);
 		} else {
@@ -39,7 +39,7 @@ std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
 	QPushButton *okButton = new QPushButton("OK");
 	layout->addWidget(okButton);
 
-	QObject::connect(okButton, &QPushButton::clicked, [&]() {
+	CN(okButton, &QPushButton::clicked, [&]() {
 		dialog.accept();
 	});
 

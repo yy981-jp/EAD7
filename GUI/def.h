@@ -4,6 +4,12 @@
 #include "ui_admin.h"
 #include "mainWindow.h"
 
+
+template <typename... Args>
+auto CN(Args&&... args) {
+    return QObject::connect(std::forward<Args>(args)...);
+}
+
 class MainWindow;
 extern Ui::MainWindow* ui;
 extern Ui::AdminWindow* aui;
