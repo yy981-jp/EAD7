@@ -18,6 +18,7 @@
 #include "windowSave.h"
 
 #include "widgets/fileButton.h"
+#include "widgets/mainWindow.h"
 
 namespace mw {
 	INP_FROM inp_from = INP_FROM::null;
@@ -54,6 +55,10 @@ namespace mw {
 	}
 	
 	void textProc(const std::string& text) {
+		if (text.empty()) {
+			u::stat("入力がありません");
+			return;
+		}
 		std::string out;
 		
 		int index = ui->selectKey->currentIndex();
@@ -138,14 +143,16 @@ void GUI() {
 	ui->credit->setStyleSheet("color: tomato;");
 	ui->credit->setText(QString::fromStdString("EAD7 " + ver.str() + " (C) 2025 yy981"));
 	if (fs::exists(SDM)) {
-		ui->adminMode->setEnabled(true);
+		// ui->adminMode->setEnabled(true);
 		ui->adminMode->setChecked(true);
 	}
+	ui->inp_line->setEnabled(false);
+	
 	
 	QObject::connect(app, &QCoreApplication::aboutToQuit, windowSave::save);
-	QShortcut shortcut_inp_multi(QKeySequence("Alt+Return"), ui->inp_multi);
+	shortcut_inp_multi = new QShortcut(QKeySequence("Alt+Return"), ui->inp_multi);
 	QObject::connect(ui->run, &QPushButton::clicked, mw::run);
-	QObject::connect(&shortcut_inp_multi, &QShortcut::activated, []{mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
+	QObject::connect(shortcut_inp_multi, &QShortcut::activated, []{u::stat("D: inp_multi"); mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
 	QObject::connect(ui->inp_line, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::line); ui->run->animateClick();});
 	QObject::connect(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::file); ui->run->animateClick();});
 	QObject::connect(ui->inp_file_button, &FileButton::fileSelected, [](const QString& selectedFile){
@@ -153,6 +160,12 @@ void GUI() {
 		ui->inp_file_path->setText(selectedFile);
 		ui->run->animateClick();
 	});
+	
+	QObject::connect(ui->encMode, &QRadioButton::toggled, [](const bool encMode){
+		ui->inp_line->setEnabled(!encMode);
+		ui->inp_multi->setEnabled(encMode);
+	});
+	
 	QObject::connect(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
 	QObject::connect(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
 	QObject::connect(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
@@ -182,11 +195,9 @@ int GUI_interface() {
 	QString log, statText;
 	for (int i = 1; i <= 100; ++i) {
 		try {
-			delete w;
-			delete ui;
-			w = new QMainWindow;
-			ui = new Ui::MainWindow;
-			ui->setupUi(w);
+			delete w;	w = nullptr;
+			delete ui;	ui = nullptr;
+			w = new MainWindow;
 			if (!crashed) u::log("EAD GUI 起動"); else {
 				crashed = false;
 				ui->log->setPlainText(log);

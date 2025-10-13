@@ -44,10 +44,18 @@ set(SOURCES
 	GUI/def.cpp
 
 	GUI/widgets/fileButton.cpp
+	GUI/widgets/mainWindow.cpp
+	GUI/widgets/twoTreeView.cpp
 	GUI/main.ui
+	GUI/admin.ui
 )
 
-add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
+if(CMAKE_BUILD_TYPE STREQUAL "Releases")
+	add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
+else()
+	add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+endif()
+
 target_include_directories(${PROJECT_NAME} PRIVATE 
 	"C:/msys64/mingw64/include/qt6"
 	"${CMAKE_SOURCE_DIR}/GUI/widgets"

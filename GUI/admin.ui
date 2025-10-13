@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AdminWindow</class>
+ <widget class="QWidget" name="AdminWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Admin</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="checkBox">
+     <property name="text">
+      <string>管理ウィンドウの操作を有効化</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="autoFillBackground">
+      <bool>true</bool>
+     </property>
+     <property name="currentIndex">
+      <number>2</number>
+     </property>
+     <widget class="QWidget" name="tab_mk">
+      <attribute name="title">
+       <string>MasterKey</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="0" colspan="3">
+        <widget class="QGroupBox" name="MK_unWrap">
+         <property name="title">
+          <string>解読</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QComboBox" name="MK_unWrap_index"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="MK_unWrap_pass">
+            <property name="placeholderText">
+             <string>パスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLineEdit" name="MK_unWrap_out">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>暗号化されていない鍵</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QGroupBox" name="MK_create">
+         <property name="title">
+          <string>作成</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QComboBox" name="MK_create_index"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="unWrap_pass_2">
+            <property name="placeholderText">
+             <string>新しいパスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="3">
+        <widget class="QGroupBox" name="MK_insert">
+         <property name="title">
+          <string>追加</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="MK_insert_pass">
+            <property name="placeholderText">
+             <string>新しいパスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QComboBox" name="MK_insert_index"/>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLineEdit" name="MK_insert_b64">
+            <property name="placeholderText">
+             <string>追加するMK(base64UrlSafe)を入力</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="MK_open">
+         <property name="text">
+          <string>MKファイルを開く</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="MK_memzero">
+         <property name="text">
+          <string>メモリ上から鍵を抹消</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string>MKを読み込み</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_kid">
+      <attribute name="title">
+       <string>KID</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="KID_recal">
+         <property name="title">
+          <string>HMAC再計算</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <widget class="QComboBox" name="KID_recal_index"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="KID_recal_run">
+            <property name="text">
+             <string>実行</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QGroupBox" name="MK_unWrap_2">
+         <property name="title">
+          <string>作成と編集</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0">
+           <widget class="QComboBox" name="KID_create_index">
+            <property name="currentText">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="3">
+           <widget class="QPlainTextEdit" name="KID_create_note">
+            <property name="placeholderText">
+             <string>備考欄</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="KID_create_run">
+            <property name="text">
+             <string>実行</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="3">
+           <widget class="QLineEdit" name="KID_create_b64">
+            <property name="placeholderText">
+             <string>Base64UrlSafe (省略した場合は自動で生成します)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="QLineEdit" name="KID_create_mkpass">
+            <property name="placeholderText">
+             <string>パスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLineEdit" name="KID_create_label">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>新しいラベルを入力 (存在した場合はEnter押すとそれを読み込みます)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="KID_open">
+         <property name="text">
+          <string>ファイルを開く</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_kek">
+      <attribute name="title">
+       <string>KEK</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_9"/>
+     </widget>
+     <widget class="QWidget" name="tab_other">
+      <attribute name="title">
+       <string>その他</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

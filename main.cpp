@@ -13,11 +13,9 @@
 #include <yy981/string.h>
 #include <yy981/proc.h>
 
-#include "test.cpp"
 #include "def.h"
 #include "base.h"
 #include "master.h"
-// #include "interface.h"
 #include "CUI/ui.h"
 #include "CUI/text.h"
 

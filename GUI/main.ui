@@ -27,13 +27,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="7" column="0" colspan="3">
-     <widget class="QLabel" name="credit">
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;color:tomato&quot;&gt;EAD7 (C) 2025 yy981&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-     </widget>
-    </item>
     <item row="4" column="6">
      <widget class="QPushButton" name="run">
       <property name="layoutDirection">
@@ -44,16 +37,6 @@
       </property>
       <property name="icon">
        <iconset theme="media-playback-start"/>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="4">
-     <widget class="QCheckBox" name="log_checkbox">
-      <property name="text">
-       <string>LOG</string>
-      </property>
-      <property name="icon">
-       <iconset theme="go-down"/>
       </property>
      </widget>
     </item>
@@ -69,6 +52,35 @@
        <enum>QProgressBar::Direction::TopToBottom</enum>
       </property>
      </widget>
+    </item>
+    <item row="4" column="0" colspan="5">
+     <widget class="QComboBox" name="selectKey"/>
+    </item>
+    <item row="3" column="6">
+     <widget class="FileButton" name="inp_file_button">
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>入力ファイル</string>
+      </property>
+      <property name="icon">
+       <iconset theme="document-open"/>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="6">
+     <widget class="QPushButton" name="copy">
+      <property name="text">
+       <string>クリップボードにコピー</string>
+      </property>
+      <property name="icon">
+       <iconset theme="edit-copy"/>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="6">
+     <widget class="QLineEdit" name="inp_file_path"/>
     </item>
     <item row="4" column="5">
      <widget class="QToolButton" name="keyView">
@@ -86,30 +98,93 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0" colspan="5">
-     <widget class="QComboBox" name="selectKey"/>
-    </item>
-    <item row="0" column="5">
-     <widget class="QCheckBox" name="adminMode">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>管理者モード</string>
-      </property>
-      <property name="icon">
-       <iconset theme="user-available"/>
+    <item row="1" column="0" colspan="7">
+     <widget class="QLineEdit" name="inp_line">
+      <property name="placeholderText">
+       <string>入力(1行)</string>
       </property>
      </widget>
     </item>
-    <item row="7" column="6">
-     <widget class="QPushButton" name="copy">
+    <item row="8" column="0" colspan="7">
+     <widget class="QPlainTextEdit" name="log"/>
+    </item>
+    <item row="7" column="4">
+     <widget class="QCheckBox" name="log_checkbox">
       <property name="text">
-       <string>クリップボードにコピー</string>
+       <string>LOG</string>
       </property>
       <property name="icon">
-       <iconset theme="edit-copy"/>
+       <iconset theme="go-down"/>
       </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="5">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>動作モード</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="1" column="3">
+        <widget class="QComboBox" name="inp_from">
+         <item>
+          <property name="text">
+           <string>NULL</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>入力: 1行</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>入力: 複数行</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>入力: ファイル</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QRadioButton" name="encMode">
+         <property name="text">
+          <string>暗号化</string>
+         </property>
+         <property name="icon">
+          <iconset theme="media-seek-forward"/>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QRadioButton" name="decMode">
+         <property name="text">
+          <string>復号</string>
+         </property>
+         <property name="icon">
+          <iconset theme="media-seek-backward"/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;入力元:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item row="6" column="0" colspan="7">
@@ -122,10 +197,40 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="7">
-     <widget class="QLineEdit" name="inp_line">
+    <item row="7" column="5">
+     <widget class="QPushButton" name="clear">
+      <property name="text">
+       <string>削除</string>
+      </property>
+      <property name="icon">
+       <iconset theme="edit-clear"/>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="3">
+     <widget class="QLabel" name="credit">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;color:tomato&quot;&gt;EAD7 (C) 2025 yy981&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="5">
+     <widget class="QCheckBox" name="adminMode">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>管理者モード</string>
+      </property>
+      <property name="icon">
+       <iconset theme="user-available"/>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="7">
+     <widget class="QPlainTextEdit" name="inp_multi">
       <property name="placeholderText">
-       <string>入力(1行)</string>
+       <string>入力(複数行)</string>
       </property>
      </widget>
     </item>
@@ -152,98 +257,6 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0" colspan="5">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>動作モード</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
-        <widget class="QRadioButton" name="encMode">
-         <property name="text">
-          <string>暗号化</string>
-         </property>
-         <property name="icon">
-          <iconset theme="media-seek-forward"/>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QRadioButton" name="decMode">
-         <property name="text">
-          <string>復号</string>
-         </property>
-         <property name="icon">
-          <iconset theme="media-seek-backward"/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QComboBox" name="inp_from">
-         <item>
-          <property name="text">
-           <string>NULL</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>入力: 1行</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>入力: 複数行</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>入力: ファイル</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="7" column="5">
-     <widget class="QPushButton" name="clear">
-      <property name="text">
-       <string>削除</string>
-      </property>
-      <property name="icon">
-       <iconset theme="edit-clear"/>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0" colspan="7">
-     <widget class="QPlainTextEdit" name="inp_multi">
-      <property name="placeholderText">
-       <string>入力(複数行)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="0" colspan="7">
-     <widget class="QPlainTextEdit" name="log"/>
-    </item>
-    <item row="3" column="6">
-     <widget class="FileButton" name="inp_file_button">
-      <property name="acceptDrops">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>入力ファイル</string>
-      </property>
-      <property name="icon">
-       <iconset theme="document-open"/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0" colspan="6">
-     <widget class="QLineEdit" name="inp_file_path"/>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -255,24 +268,75 @@
      <height>33</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuKEK">
+   <widget class="QMenu" name="menu_setting">
     <property name="title">
-     <string>KEKカスタマイズ</string>
+     <string>設定</string>
     </property>
+    <addaction name="action_3"/>
+    <addaction name="action_2"/>
    </widget>
-   <widget class="QMenu" name="adminMenu">
+   <widget class="QMenu" name="menu_help">
     <property name="title">
-     <string>管理画面</string>
+     <string>Help</string>
     </property>
+    <addaction name="action_version"/>
+    <addaction name="action_keyborad"/>
    </widget>
-   <addaction name="menuKEK"/>
-   <addaction name="adminMenu"/>
+   <addaction name="menu_setting"/>
+   <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="sizeGripEnabled">
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QDockWidget" name="adminWidgetDock">
+   <property name="floating">
+    <bool>true</bool>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFeature::DockWidgetFloatable|QDockWidget::DockWidgetFeature::DockWidgetMovable</set>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="adminWidget"/>
+  </widget>
+  <action name="action">
+   <property name="text">
+    <string>ググレカス</string>
+   </property>
+  </action>
+  <action name="actionggrks">
+   <property name="text">
+    <string>ggrks = ググレカス</string>
+   </property>
+  </action>
+  <action name="actionggrks_2">
+   <property name="text">
+    <string>ggrks = ググレカス</string>
+   </property>
+  </action>
+  <action name="action_version">
+   <property name="text">
+    <string>バージョン情報</string>
+   </property>
+  </action>
+  <action name="action_keyborad">
+   <property name="text">
+    <string>キー操作一覧</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>設定(一般)</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>設定(管理者)</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
