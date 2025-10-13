@@ -9,9 +9,8 @@
 #include "text.h"
 #include "../master.h"
 #include "../base.h"
+#include "../GUI/CUI.h"
 
-
-bool UISwitch_failed = false;
 
 KIDIndex createKIDIndex(const json& j, KIDIndexType t) { // raw.kek必須
 	KIDIndex result;
@@ -196,23 +195,23 @@ static std::map<std::vector<std::string>, std::function<void()>> commands2 = {
 	{{"info","i","I"}, ui::f_info3},
 	{{"decrypt","dec","de","d"}, ui::decrypt}
 }, commands4 = {
-	{{"encrypt","enc","en","e"}, ui::encrypt},
+	{{"encrypt","enc","en","e"}, ui::encrypt}
 };
 /*
 void CUI_ini() {
 }
 */
-void UI() { // CUIの実質main関数
+int UI() { // CUIの実質main関数
 	// CUI_ini();
 	try {
 		switch (ca.size()) {
-			case 1: std::cout << "GUI未実装"; break;
+			case 1: return GUI_interface();
 			case 2: {
-				if (ui::dst()) return;
+				if (ui::dst()) return 0;
 				for (auto [aliases,handler]: commands2) {
 					if (is_or(ca[1],aliases)) {
 						handler();
-						return;
+						return 0;
 					}
 				}
 				throw std::runtime_error("CLI引数エラー argc2");
@@ -221,7 +220,7 @@ void UI() { // CUIの実質main関数
 				for (auto [aliases,handler]: commands3) {
 					if (is_or(ca[1],aliases)) {
 						handler();
-						return;
+						return 0;
 					}
 				}
 				throw std::runtime_error("CLI引数エラー argc3");
@@ -230,7 +229,7 @@ void UI() { // CUIの実質main関数
 				for (auto [aliases,handler]: commands4) {
 					if (is_or(ca[1],aliases)) {
 						handler();
-						return;
+						return 0;
 					}
 				}
 				throw std::runtime_error("CLI引数エラー argc4");
@@ -240,4 +239,5 @@ void UI() { // CUIの実質main関数
 	} catch (const std::runtime_error& err) {
 		std::cout << "R_ERR:\t" << err.what() << "\n";
 	}
+	return 1;
 }

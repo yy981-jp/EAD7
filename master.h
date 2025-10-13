@@ -55,13 +55,18 @@ struct MKEntryB64 {
 	operator bool() {return status;}
 };
 
+namespace ca_ori {
+	extern int argc;
+	extern char** argv;
+}
+
 struct CryptoGCM {BIN cipher, tag;};
 
 // util
 extern BIN deriveKey(const BIN& ikm, const std::string &info, size_t keyLen, const BIN& salt = BIN());
 extern BIN randomBIN(size_t size);
-extern CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD);
-extern BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD, const BIN& tag);
+extern CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD = BIN(0));
+extern BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& tag, const BIN& AAD = BIN(0));
 extern json readJson(const std::string& path);
 extern void writeJson(const json& j, const std::string& path);
 extern std::wstring to_wstring(const std::string& u8);

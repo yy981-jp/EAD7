@@ -35,7 +35,7 @@ CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const 
 	else		return encAES256GCM_cryptopp(key, nonce, text, AAD);	// AES-NI無し 低速
 }
 
-BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD, const BIN& tag) {
+BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& tag, const BIN& AAD) {
 	if (AESNI) return decAES256GCM_sodium(key, nonce, text, AAD, tag);		// AES-NI在り 高速
 	else		return decAES256GCM_cryptopp(key, nonce, text, AAD, tag);	// AES-NI無し 低速
 }
