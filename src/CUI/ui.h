@@ -13,6 +13,8 @@ extern std::string inp_s(const std::string& out);
 extern void out_s(const std::string& out);
 extern char choice(const std::string& message, const std::string& validChars);
 
+extern bool isBase64UrlSafe(const std::string& input);
+
 namespace env {
 	extern UINT cp;
 }

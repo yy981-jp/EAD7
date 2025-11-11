@@ -5,7 +5,6 @@
 
 #include "master.h"
 #include "base.h"
-#include "GUI/gui.h"
 
 
 #pragma pack(push, 1)

@@ -12,7 +12,8 @@
 class TwoTreeView : public QTreeView {
 	Q_OBJECT
 public:
-	TwoTreeView(const bool isLeft, QStandardItemModel* model, QWidget *parent = nullptr);
+	TwoTreeView(QWidget *parent = nullptr);
+	void init(const bool isLeft, QStandardItemModel* model);
 	bool isLeft;
 	std::vector<std::string> getFlatModel() const;
 	static QStandardItemModel* convModel(const std::string& label, const std::map<std::string, std::vector<std::string>>& i);

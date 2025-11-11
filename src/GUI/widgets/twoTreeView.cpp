@@ -5,25 +5,27 @@
 
 #include <QtCore/QMimeData>
 
-	TwoTreeView::TwoTreeView(const bool isLeft, QStandardItemModel* model, QWidget *parent)
-		: QTreeView(parent), isLeft(isLeft) {
-			setModel(model);
-			setDragEnabled(true);
-			setAcceptDrops(true);
-			setDropIndicatorShown(true);
-			if (isLeft) {
-				setDragDropMode(QAbstractItemView::InternalMove);
-				// 親ノード（1層目）はドラッグ不可
-				for (int i = 0; i < model->rowCount(); ++i) {
-					QStandardItem *item = model->item(i);
-					item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
-				}
-			} else {
-				setDragDropMode(QAbstractItemView::DragDrop);
-				setDefaultDropAction(Qt::MoveAction);
+	TwoTreeView::TwoTreeView(QWidget *parent): QTreeView(parent) {}
+	
+	void TwoTreeView::init(const bool isLeft_i, QStandardItemModel* model) {
+		isLeft = isLeft_i;
+		setModel(model);
+		setDragEnabled(true);
+		setAcceptDrops(true);
+		setDropIndicatorShown(true);
+		if (isLeft) {
+			setDragDropMode(QAbstractItemView::InternalMove);
+			// 親ノード（1層目）はドラッグ不可
+			for (int i = 0; i < model->rowCount(); ++i) {
+				QStandardItem *item = model->item(i);
+				item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
 			}
-			expandAll();
+		} else {
+			setDragDropMode(QAbstractItemView::DragDrop);
+			setDefaultDropAction(Qt::MoveAction);
 		}
+		expandAll();
+	}
 
 	std::vector<std::string> TwoTreeView::getFlatModel() const {
 		std::vector<std::string> result;

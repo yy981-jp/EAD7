@@ -6,8 +6,8 @@
 
 
 template <typename... Args>
-auto CN(Args&&... args) {
-    return QObject::connect(std::forward<Args>(args)...);
+void CN(Args&&... args) {
+	QObject::connect(std::forward<Args>(args)...);
 }
 
 class MainWindow;

@@ -18,47 +18,23 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 
-
-set(SOURCES
-	main.cpp
-	base.cpp
-	def.cpp
-	util.cpp
-	MK.cpp
-	MK_io.cpp
-	KID.cpp
-	KEK.cpp
-	DEK.cpp
-	token.cpp
-	AES256GCM.cpp
-	del.cpp
-	file.cpp
-
-	CUI/main.cpp
-	CUI/admin.cpp
-	CUI/util.cpp
-	GUI/main.cpp
-	GUI/util.cpp
-	GUI/gui.cpp
-	GUI/windowSave.cpp
-	GUI/def.cpp
-
-	GUI/widgets/fileButton.cpp
-	GUI/widgets/mainWindow.cpp
-	GUI/widgets/twoTreeView.cpp
-	GUI/main.ui
-	GUI/admin.ui
-)
+file(GLOB_RECURSE SOURCES src/*.cpp src/*.ui)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Releases")
-	add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
+	add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
+
+	file(GLOB LIBSRC src/*.cpp)
+	list(REMOVE_ITEM LIBSRC "${CMAKE_SOURCE_DIR}/src/main.cpp")
+	add_library(LIBEXE STATIC ${LIBSRC})
+	set_target_properties(LIBEXE PROPERTIES OUTPUT_NAME "EAD7")
 else()
-	add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+	add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
+
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
 	"C:/msys64/mingw64/include/qt6"
-	"${CMAKE_SOURCE_DIR}/GUI/widgets"
+	"${CMAKE_SOURCE_DIR}/src/GUI/widgets"
 )
 
 # ライブラリ

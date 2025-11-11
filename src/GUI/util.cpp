@@ -65,3 +65,18 @@ std::string prompt(const std::string& placeholderText) {
 	if (ok) return text.toStdString();
 	return "";
 }
+
+json getKIDEntry(const std::string& label, const BIN& mk) {
+	json result;
+	for (const auto x: fs::recursive_directory_iterator(SDM)) {
+		int number = -1;
+		std::string pathString = x.path().stem().stem().string();
+		try {
+			number = std::stoi(pathString);
+		} catch (...) {
+			continue;
+		}
+		if (0 <= number && number <= 255) result = loadKID(mk,number);
+	}
+	return result;
+}
