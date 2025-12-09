@@ -5,8 +5,9 @@
 
 #include "master.h"
 #include "base.h"
+#include <limits>
 
-
+#include <iostream>
 #pragma pack(push, 1)
 struct fixedFHeader {
 	uint8_t magic, ver;
@@ -15,60 +16,154 @@ struct FHeader {
 	uint8_t mkid;
 	std::array<uint8_t,16> kid;
 	uint64_t chunkSize;
+	uint64_t chunkNumber;
 };
 struct FChunk {
 	std::array<uint8_t,12> nonce;
 	std::array<uint8_t,16> tag;
 };
-struct footer {
-	std::array<uint8_t,32> hmac;
-};
 #pragma pack(pop)
 static_assert(sizeof(fixedFHeader) == 1+1, "fixedFHeader size mismatch!");
-static_assert(sizeof(FHeader) == 1+16+8, "FHeader size mismatch!");
-static_assert(sizeof(FHeader) == 1+16+8, "FHeader size mismatch!");
+static_assert(sizeof(FHeader) == 1+16+8+8, "FHeader size mismatch!");
+static_assert(sizeof(FChunk) == 12+16, "FChunk size mismatch!");
+
+
+static size_t toBufferSize(uint64_t requested) {
+	// clamp to allowed range
+	uint64_t v = requested;
+	if (v < CHUNKSIZE::min) v = CHUNKSIZE::min;
+	if (v > CHUNKSIZE::max) v = CHUNKSIZE::max;
+	// align to 16-byte boundary for AES-GCM block friendliness
+	if (v % 16 != 0) v += (16 - (v % 16));
+	if (v > static_cast<uint64_t>(std::numeric_limits<size_t>::max()))
+		throw std::runtime_error("chunkSize too large for this platform");
+	return static_cast<size_t>(v);
+}
 
 class binFReader {
 protected:
-	size_t chunkSize;
 	std::ifstream file;
 public:
-	binFReader(const std::string& path, const uint64_t& chunkSize): chunkSize(chunkSize) {
+	binFReader(const std::string& path) {
 		file.open(fs::path(to_wstring(path)), std::ios::binary | std::ios::ate);
-		data.resize(chunkSize);
+		if (!file) throw std::runtime_error("binFReader::file open error");
+		data.resize(loadChunkSize);
+		fileSize = file.tellg();
+		file.seekg(0, std::ios::beg);
+	}
+	binFReader(const std::string& path, const uint64_t requestedChunkSize): loadChunkSize(toBufferSize(requestedChunkSize)){
+		file.open(fs::path(to_wstring(path)), std::ios::binary | std::ios::ate);
+		if (!file) throw std::runtime_error("binFReader::file open error");
+		data.resize(loadChunkSize);
 		fileSize = file.tellg();
 		file.seekg(0, std::ios::beg);
 	}
 
-	std::streampos next() {
-		++totalChunk;
-		file.read(reinterpret_cast<char*>(data.BytePtr()), chunkSize);
+	void init(const uint64_t requestedChunkSize) {
+		loadChunkSize = toBufferSize(requestedChunkSize);
+		// ensure internal buffer matches requested chunk size
+		data.resize(loadChunkSize);
+	}
+
+	virtual std::streampos next(bool skipHash = false) {
+		++currentChunk;
+		if (skipHash) {
+			std::cout << "D: fileSize: " << fileSize << " tellg: " << file.tellg() << "\n";
+			if (fileSize - file.tellg() == static_cast<std::streamoff>(loadChunkSize) + 32) {
+				std::streampos cur = file.tellg();
+			    file.seekg(0, std::ios::end);
+			    std::streampos end_minus_32 = file.tellg() - std::streamoff(32);
+				std::streamsize toRead = end_minus_32 - cur;
+				if (toRead < 0) throw std::runtime_error("binFReader::next()::skipHash size underflow");
+				if (toRead > loadChunkSize) throw std::runtime_error("binFReader::next()::skipHash size overflow");
+				file.read(reinterpret_cast<char*>(data.data()), toRead);
+				return file.gcount();  // 実際に読み込んだバイト数
+			} else throw std::runtime_error("binFReader::next()::skipHash isn't EOF");
+		}
+		file.read(reinterpret_cast<char*>(data.data()), loadChunkSize);
 		return file.gcount();  // 実際に読み込んだバイト数
 	}
 
-	operator bool() const { return !file.eof(); }
+	operator bool() {
+		if (!file.is_open()) return false;
+		if (!file.good()) return false;
+		std::streampos pos = file.tellg();
+		if (pos == std::streampos(-1)) return file.good(); // tellg failed -> fall back to stream state
+		return static_cast<size_t>(pos) < fileSize;
+	}
+
 	BIN data;
 	size_t fileSize;
-	int totalChunk = 0;
+	uint64_t currentChunk = 0;
+	size_t loadChunkSize = 0;
 };
 
 class E7BinFReader: public binFReader {
 public:
-	E7BinFReader(const std::string& path, const uint64_t& chunkSize): binFReader(path,chunkSize) {
+	E7BinFReader(const std::string& path): binFReader(path) {
 		if (fileSize < sizeof(FHeader)+32) throw std::runtime_error("E7BinFReader::ファイルサイズ不足");
 		file.seekg(-32, std::ios::end);
-		
-		file.read(reinterpret_cast<char*>(hmac.BytePtr()), hmac.size());
+		file.read(reinterpret_cast<char*>(hmac.data()), hmac.size());
+
 		file.seekg(0, std::ios::beg);
-		
 		file.read(reinterpret_cast<char*>(&fh), sizeof(fixedFHeader));
+
 		if (fh.magic != HEADER::magicData || fh.ver != 1) throw std::runtime_error("e7バイナリファイルが不正な内容です");
+
+		file.read(reinterpret_cast<char*>(&h), sizeof(FHeader));
+		
+		totalChunk = h.chunkNumber;
+		uint64_t chunkSize = toBufferSize(h.chunkSize+sizeof(FChunk));
+		init(chunkSize);
+	}
+
+	std::streampos next() {
+		if (eof) return 0;
+		// data load
+		++currentChunk;
+		std::cout << "D: E7BinFReader::next() currentChunk: " << currentChunk << "/" << totalChunk << "\n";
+		std::streampos readBytes;
+		if (currentChunk >= totalChunk) {
+			readBytes = binFReader::next(true);
+			eof = true;
+		} else readBytes = binFReader::next(false);
+
+		// chunk fixed load
+		FChunk chunk_header;
+		// 確実に実際に読み込んだバイト数を使う（最後のチャンクは loadChunkSize より小さい可能性がある）
+		if (readBytes <= static_cast<std::streampos>(sizeof(FChunk))) throw std::runtime_error("E7BinFReader::next()::chunk too small");
+		const size_t payloadSize = static_cast<size_t>(readBytes) - sizeof(FChunk);
+		memcpy(&chunk_header, data.data(), sizeof(FChunk));
+
+		// ct を実際のペイロード長で確保してからコピー
+		ct = BIN(payloadSize);
+		memcpy(ct.data(), data.data() + sizeof(FChunk), payloadSize);
+
+		// set
+		nonce = conv::ARRtoBIN<12>(chunk_header.nonce);
+		tag = conv::ARRtoBIN<16>(chunk_header.tag);
+
+		return file.gcount();
+	}
+
+	operator bool() {
+		if (eof) return false;
+		if (!file.is_open()) return false;
+		if (!file.good()) return false;
+		std::streampos pos = file.tellg();
+		if (pos == std::streampos(-1)) return file.good(); // tellg failed -> fall back to stream state
+		return static_cast<size_t>(pos) < fileSize - 32; // footer分を除外
 	}
 	
 	fixedFHeader fh;
 	FHeader h;
+
+	uint64_t totalChunk = 0;
 	
 	BIN hmac{32};
+
+	bool eof = false;
+	BIN nonce{12}, tag{16}, ct; // next()毎に更新
 };
 
 inline BIN deriveE7FileHmacKey(const BIN& key) {
@@ -81,22 +176,16 @@ inline BIN deriveDECFileKey(const BIN& kek, const BIN& nonce) {
 }
 
 
-BIN concat(const BIN& a, const BIN& b) {
-    BIN out(a.size() + b.size());
-    memcpy(out, a, a.size());
-    memcpy(out + a.size(), b, b.size());
-    return out;
-}
-
 namespace EAD7 {
-	void encFile(const BIN& kek, const std::string& path, const uint8_t& mkid, const BIN& kid, const uint64_t& chunkSize) {
+	void encFile(const BIN& kek, const std::string& path, const uint8_t& mkid, const BIN& kid, uint64_t chunkSize) {
 		std::string opath = path + ".e7";
 		std::ofstream ofs(fs::path(to_wstring(opath)),std::ios::binary);
-		if (!ofs) std::runtime_error("encFile()::ofs");
+		if (!ofs) throw std::runtime_error("encFile()::ofs");
 		
 		binFReader file(path,chunkSize);
 		fixedFHeader fh(HEADER::magicData,1);
-		FHeader h(mkid,conv::BINtoARR<16>(kid),chunkSize);
+		uint64_t chunkNumber = (file.fileSize / file.loadChunkSize) + (file.fileSize % file.loadChunkSize == 0 ? 0 : 1);
+		FHeader h(mkid,conv::BINtoARR<16>(kid),chunkSize,chunkNumber);
 		
 		BIN hmacKey = deriveE7FileHmacKey(kek);
 		HMAC<SHA256> hmac(hmacKey, hmacKey.size());
@@ -108,11 +197,17 @@ namespace EAD7 {
 		
 		// body構成
 		while (file) {
-			if (file.next() != chunkSize) std::runtime_error("encFile()::チャンク読み込み失敗");
+			if (file.next() == 0) throw std::runtime_error("encFile()::チャンク読み込み失敗");
 			BIN nonce = randomBIN(12);
 			BIN decKey = deriveDECFileKey(kek, nonce);
 			
 			CryptoGCM out = encAES256GCM(decKey, nonce, file.data);
+
+			std::cout << "D: enc:nonce: " << base::encHex(nonce)
+					  << " tag: " << base::encHex(out.tag)
+					  << " ct size: " << out.cipher.size() << "\n";
+
+
 			// Chunk構成
 			BIN chunk(sizeof(FChunk)+out.cipher.size());
 			FChunk chunk_fixed(conv::BINtoARR<12>(nonce),conv::BINtoARR<16>(out.tag));
@@ -126,5 +221,55 @@ namespace EAD7 {
 		BIN digest(hmac.DigestSize());
 		hmac.Final(digest);
 		ofs.write(reinterpret_cast<const char*>(digest.data()), digest.size());
+	}
+
+	/// @return errorChunkNumbers
+	std::vector<uint64_t> decFile(const BIN& kek, const std::string& path) {
+		std::vector<uint64_t> errorChunkNumbers;
+		fs::path path_f(path);
+		std::string opath = (path_f.parent_path()/path_f.stem()).string();
+		std::ofstream ofs(fs::path(to_wstring(opath)),std::ios::binary);
+		if (!ofs) std::runtime_error("decFile()::ofs");
+		
+		E7BinFReader file(path);
+		
+		BIN hmacKey = deriveE7FileHmacKey(kek);
+		HMAC<SHA256> hmac(hmacKey, hmacKey.size());
+
+		hmac.Update(reinterpret_cast<const uint8_t*>(&file.fh), sizeof(fixedFHeader));
+		hmac.Update(reinterpret_cast<const uint8_t*>(&file.h), sizeof(FHeader));
+		
+		// body構成
+		while (file) {
+			if (file.next() == 0) throw std::runtime_error("decFile()::チャンク読み込み失敗");
+			BIN decKey = deriveDECFileKey(kek, file.nonce);
+			
+			BIN out;
+
+			std::cout << "D: nonce: " << base::encHex(file.nonce)
+					  << " tag: " << base::encHex(file.tag)
+					  << " ct size: " << file.ct.size() << "\n";
+
+			try {
+				out = decAES256GCM(decKey, file.nonce, file.ct, file.tag);
+			} catch (const CryptoPP::Exception& e) {
+				out.resize(file.h.chunkSize); // ダミー出力 0埋め
+				errorChunkNumbers.push_back(file.currentChunk);
+				continue;
+			}
+
+			// Chunk
+			hmac.Update(reinterpret_cast<const uint8_t*>(file.data.data()), file.loadChunkSize);
+			ofs.write(reinterpret_cast<const char*>(out.data()), out.size());
+
+			delm(decKey,out);
+		}
+		
+		// 全体HMAC検証
+		BIN digest(hmac.DigestSize());
+		hmac.Final(digest);
+		if (digest != file.hmac) errorChunkNumbers.push_back(0); // 全体HMACエラー
+
+		return errorChunkNumbers;
 	}
 }

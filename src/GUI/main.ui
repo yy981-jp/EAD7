@@ -27,36 +27,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="4" column="6">
-     <widget class="QPushButton" name="run">
-      <property name="layoutDirection">
-       <enum>Qt::LayoutDirection::LeftToRight</enum>
-      </property>
-      <property name="text">
-       <string>実行</string>
-      </property>
-      <property name="icon">
-       <iconset theme="media-playback-start"/>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="7">
-     <widget class="QProgressBar" name="progressBar">
-      <property name="value">
-       <number>100</number>
-      </property>
-      <property name="textVisible">
-       <bool>true</bool>
-      </property>
-      <property name="textDirection">
-       <enum>QProgressBar::Direction::TopToBottom</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="5">
-     <widget class="QComboBox" name="selectKey"/>
-    </item>
-    <item row="3" column="6">
+    <item row="3" column="5">
      <widget class="FileButton" name="inp_file_button">
       <property name="acceptDrops">
        <bool>true</bool>
@@ -69,20 +40,7 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="6">
-     <widget class="QPushButton" name="copy">
-      <property name="text">
-       <string>クリップボードにコピー</string>
-      </property>
-      <property name="icon">
-       <iconset theme="edit-copy"/>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0" colspan="6">
-     <widget class="QLineEdit" name="inp_file_path"/>
-    </item>
-    <item row="4" column="5">
+    <item row="4" column="4">
      <widget class="QToolButton" name="keyView">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -98,27 +56,17 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="7">
-     <widget class="QLineEdit" name="inp_line">
-      <property name="placeholderText">
-       <string>入力(1行)</string>
+    <item row="5" column="0" colspan="6">
+     <widget class="QPlainTextEdit" name="out">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="8" column="0" colspan="7">
-     <widget class="QPlainTextEdit" name="log"/>
-    </item>
-    <item row="7" column="4">
-     <widget class="QCheckBox" name="log_checkbox">
-      <property name="text">
-       <string>LOG</string>
-      </property>
-      <property name="icon">
-       <iconset theme="go-down"/>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="5">
+    <item row="0" column="0" colspan="3">
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
        <string>動作モード</string>
@@ -187,17 +135,60 @@
       </layout>
      </widget>
     </item>
-    <item row="6" column="0" colspan="7">
-     <widget class="QPlainTextEdit" name="out">
-      <property name="enabled">
-       <bool>true</bool>
+    <item row="3" column="4">
+     <widget class="QComboBox" name="chunkSize"/>
+    </item>
+    <item row="6" column="2">
+     <widget class="QCheckBox" name="log_checkbox">
+      <property name="text">
+       <string>LOG</string>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
+      <property name="icon">
+       <iconset theme="go-down"/>
       </property>
      </widget>
     </item>
-    <item row="7" column="5">
+    <item row="1" column="0" colspan="6">
+     <widget class="QLineEdit" name="inp_line">
+      <property name="placeholderText">
+       <string>入力(1行)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="6">
+     <widget class="QPlainTextEdit" name="log"/>
+    </item>
+    <item row="4" column="5">
+     <widget class="QPushButton" name="run">
+      <property name="layoutDirection">
+       <enum>Qt::LayoutDirection::LeftToRight</enum>
+      </property>
+      <property name="text">
+       <string>実行</string>
+      </property>
+      <property name="icon">
+       <iconset theme="media-playback-start"/>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="2">
+     <widget class="QLabel" name="credit">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;color:tomato&quot;&gt;EAD7 (C) 2025 yy981&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="4">
+     <widget class="QComboBox" name="selectKey"/>
+    </item>
+    <item row="2" column="0" colspan="6">
+     <widget class="QPlainTextEdit" name="inp_multi">
+      <property name="placeholderText">
+       <string>入力(複数行)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3">
      <widget class="QPushButton" name="clear">
       <property name="text">
        <string>削除</string>
@@ -207,14 +198,17 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="0" colspan="3">
-     <widget class="QLabel" name="credit">
+    <item row="6" column="5">
+     <widget class="QPushButton" name="copy">
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;color:tomato&quot;&gt;EAD7 (C) 2025 yy981&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>クリップボードにコピー</string>
+      </property>
+      <property name="icon">
+       <iconset theme="edit-copy"/>
       </property>
      </widget>
     </item>
-    <item row="0" column="5">
+    <item row="0" column="3">
      <widget class="QCheckBox" name="adminMode">
       <property name="enabled">
        <bool>true</bool>
@@ -227,14 +221,7 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0" colspan="7">
-     <widget class="QPlainTextEdit" name="inp_multi">
-      <property name="placeholderText">
-       <string>入力(複数行)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="6">
+    <item row="0" column="5">
      <widget class="FileButton" name="dst_file">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -256,6 +243,9 @@
        <iconset theme="document-open"/>
       </property>
      </widget>
+    </item>
+    <item row="3" column="0" colspan="4">
+     <widget class="QLineEdit" name="inp_file_path"/>
     </item>
    </layout>
   </widget>

@@ -9,10 +9,16 @@
 
 namespace HEADER {
 	constexpr uint8_t magic(1), ver(1), mkid(1), kid(16), nonce(12), tag(16),
-		magicData(0xE7), verData(1),
+		magicData(0xE7), verData(1), verDataF(1),
 		aad_all(magic+ver+mkid+kid+nonce),
 		all(magic+ver+mkid+kid+nonce+tag);
 }
+namespace CHUNKSIZE {
+	constexpr uint64_t default_size = 1ULL * 1024 * 1024, // 1 MiB
+						min = 4ULL * 1024,            // 4 KiB
+						max = 16ULL * 1024 * 1024;    // 16 MiB (safety upper bound)
+}
+
 
 inline std::string getMkid(const std::string& KIDPath) {
 	return std::to_string(std::stoi(KIDPath.substr(0,2)));
@@ -96,6 +102,8 @@ extern json decDstKEK(const std::string &password, const json &dst_json);
 namespace EAD7 {
 	extern BIN enc(const BIN& kek, const BIN& plaintext, const uint8_t& mkid, const BIN& kid);
 	extern BIN dec(const BIN& kek, const BIN& blob);
+	extern void encFile(const BIN& kek, const std::string& path, const uint8_t& mkid, const BIN& kid, uint64_t chunkSize);
+	extern std::vector<uint64_t> decFile(const BIN& kek, const std::string& path);
 }
 
 // token

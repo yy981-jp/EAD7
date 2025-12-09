@@ -8,14 +8,9 @@
 #include "../CUI/text.h"
 #include "ui_main.h"
 
-void u::setPrg(const int& v) {
-    ui->progressBar->setValue(v);
-}
-void u::setPrgMax(const int& v) {
-    ui->progressBar->setMaximum(v);
-}
-void u::log(const std::string& str) {
-    ui->log->appendPlainText(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str));
+void u::log(const std::string& str, bool continueLine) {
+    if (!continueLine) ui->log->appendPlainText(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str));
+    else ui->log->appendPlainText(QString::fromStdString("                 :::     " + str));
 }
 void u::stat(const std::string& str) {
     ui->statusbar->showMessage(QString::fromStdString(convUnixTime(getUnixTime()) + ":     " + str), 60 * 1000);

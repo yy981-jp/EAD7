@@ -71,7 +71,7 @@ namespace EAD7 {
 	}
 
 	BIN dec(const BIN& kek, const BIN& blob) {
-		if (blob.size() < HEADER::all) throw std::runtime_error("ESD7::dec()");;
+		if (blob.size() < HEADER::all) throw std::runtime_error("EAD7::dec()");;
 
 		// 切り出し
 		size_t pos = 0;
@@ -89,7 +89,7 @@ namespace EAD7 {
 		if (magic != HEADER::magicData // 明らかに違うデータ
 		|| ver != HEADER::verData // 未対応バージョン
 		|| blob.size() < pos + HEADER::tag) // 不正長
-			throw std::runtime_error("ESD7::dec()");
+			throw std::runtime_error("EAD7::dec()");
 
 		return decCore(kek, cipher, aad, nonce, tag);
 	}

@@ -179,37 +179,97 @@ namespace mw {
 		std::string out;
 		
 		int index = ui->selectKey->currentIndex();
-		std::string kid = ui->selectKey->itemData(index).toString().toStdString();
-		if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
-		if (kid.empty()) {
-			u::stat("使用する鍵を選択してください");
-			return;
-		}
 		json raw_kek = decPKEK(PKEK);
-		uint8_t mkid = raw_kek["keks"][kid]["mkid"];
-		BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
 		
 		if (ui->encMode->isChecked()) {
+
+			std::string kid = ui->selectKey->itemData(index).toString().toStdString();
+			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
+			if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
+			if (kid.empty()) {
+				u::stat("使用する鍵を選択してください");
+				return;
+			}
+			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
 			BIN outb = EAD7::enc(kek,conv::STRtoBIN(text),mkid,base::dec64(kid));
 			out = base::enc64(outb);
+			delm(kek);
 		} else {
 			BIN inputBin;
 			try {
 				inputBin = base::dec64(text);
 			} catch (const exception) {
 				u::stat("復号モードの入力がBase64URLSafe形式ではないので処理を中止しました");
-				delm(raw_kek,kek);
+				delm(raw_kek);
 				return;
 			}
+			
+			BIN kidb;
+			std::memcpy(kidb.data(), inputBin.data()+3, 16);
+			std::string kid = base::enc64(kidb);
+			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
+
+			if (!raw_kek["keks"].contains(kid)) {
+				u::stat("指定されたKIDは鍵リストに存在しません");
+				delm(raw_kek);
+				return;
+			}
+				
+			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
+
 			BIN outb = EAD7::dec(kek,inputBin);
 			out = conv::BINtoSTR(outb);
 		}
 		ui->out->setPlainText(QString::fromStdString(out));
-		delm(raw_kek,kek,out);
+		delm(raw_kek,out);
 	}
 	
-	void fileProc(const std::string& text) {
+	void fileProc(const std::string& path) {
+		if (!fs::exists(path)) {
+			u::stat("指定されたファイルが存在しません");
+			return;
+		}
+
+		int index = ui->selectKey->currentIndex();
+		std::string kid = ui->selectKey->itemData(index).toString().toStdString();
+		if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
+		if (kid.empty()) {
+			u::stat("使用する鍵を選択してください");
+			return;
+		}
 		
+		if (ui->encMode->isChecked()) {
+
+			json raw_kek = decPKEK(PKEK);
+			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
+			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
+			uint64_t chunkSize = ui->chunkSize->currentData().toULongLong();
+			
+			EAD7::encFile(kek,path,mkid,base::dec64(kid),chunkSize);
+			delm(raw_kek,kek);
+
+		} else {
+
+			json raw_kek = decPKEK(PKEK);
+			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
+
+			std::vector<uint64_t> outv = EAD7::decFile(kek,path);
+			if (outv.empty()) {
+				u::stat("ファイルの復号を正常に終了しました");
+			} else {
+				u::stat("ファイルの復号中にエラーが発生しました 詳細はログを確認してください");
+				bool headerERR = false;
+				for (const uint64_t& cn: outv) {
+					if (cn == 0) {
+						headerERR = true;
+						continue;
+					}
+					u::log("破損したチャンク番号: " + std::to_string(cn));
+				}
+				if (headerERR) u::log("ファイルヘッダーの復号に失敗しました",true);
+			}
+			delm(raw_kek,kek);
+		}
 	}
 	
 	void run() {
@@ -298,6 +358,24 @@ void GUI() {
 	ui->inp_from->setItemData(1, QVariant::fromValue(INP_FROM::line));
 	ui->inp_from->setItemData(2, QVariant::fromValue(INP_FROM::multi));
 	ui->inp_from->setItemData(3, QVariant::fromValue(INP_FROM::file));
+
+	// ui.chunkSize
+	ui->chunkSize->addItem("4 KiB",		QVariant(4ULL * 1024));
+	ui->chunkSize->addItem("8 KiB",		QVariant(8ULL * 1024));
+	ui->chunkSize->addItem("16 KiB",	QVariant(16ULL * 1024));
+	ui->chunkSize->addItem("32 KiB",	QVariant(32ULL * 1024));
+	ui->chunkSize->addItem("64 KiB",	QVariant(64ULL * 1024));
+	ui->chunkSize->addItem("128 KiB",	QVariant(128ULL * 1024));
+	ui->chunkSize->addItem("256 KiB",	QVariant(256ULL * 1024));
+	ui->chunkSize->addItem("512 KiB",	QVariant(512ULL * 1024));
+	ui->chunkSize->addItem("1 MiB",		QVariant(1ULL * 1024 * 1024));
+	ui->chunkSize->addItem("2 MiB",		QVariant(2ULL * 1024 * 1024));
+	ui->chunkSize->addItem("4 MiB",		QVariant(4ULL * 1024 * 1024));
+	ui->chunkSize->addItem("8 MiB",		QVariant(8ULL * 1024 * 1024));
+	ui->chunkSize->addItem("16 MiB",	QVariant(16ULL * 1024 * 1024));
+
+	int idx = ui->chunkSize->findData(QVariant(CHUNKSIZE::default_size));
+	ui->chunkSize->setCurrentIndex(idx);
 	
 	// admin ui
 	
@@ -342,7 +420,7 @@ int GUI_interface() {
 			}
 			GUI(); // Core
 			int result = app->exec();
-			delete w; // QThreadStorageエラー対策
+			delete w; // QThreadStorageエラー対策 (できてない)
 			return result;
 		} catch (const std::runtime_error& e) {
 			crashed = true;
