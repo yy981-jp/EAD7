@@ -27,8 +27,6 @@ extern std::string prompt(const std::string& placeholderText);
 extern json getKIDEntry(const std::string& label, const BIN& mk);
 
 namespace u {
-    void setPrg(const int& v);
-    void setPrgMax(const int& v);
     void log(const std::string& str, bool continueLine = false);
     void stat(const std::string& str);
     void sl(const std::string& str);

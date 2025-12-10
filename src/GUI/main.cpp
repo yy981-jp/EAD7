@@ -247,6 +247,7 @@ namespace mw {
 			
 			EAD7::encFile(kek,path,mkid,base::dec64(kid),chunkSize);
 			delm(raw_kek,kek);
+			u::stat("ファイルの暗号化を正常に終了しました");
 
 		} else {
 

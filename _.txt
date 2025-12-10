@@ -1,9 +1,11 @@
 Text:	[magic(0xE7):1b][ver:1b][mkid:1b][kid:16b][nonce:12b][本文(ct)][tag:16b]
 
-File:	fixedHeader{ [magic(0xE7):1b][ver:1b] }
-		header{ [mkid:1b][kid:16b][chunkSize:32b][chunkNumber:64b] }
-		body{ [nonce:12b][tag:16b][本文(ct)]... }
+File:	fixedHeader{ [magic(0xE7,46,5F,79,79,39,38,31):8b][ver:1b] }
+		header{ [mkid:1b][kid:16b][chunkSize(=ct.size):32b][chunkNumber:64b][lastChunkSize:32b] }
+		body{ chunk([nonce:12b][tag:16b][本文(ct)])... }
 		footer{ [hmac:32b] }
+
+46,5F,79,79,39,38,31 = F_yy981(char[])
 
 暗号空間(MKの作者固有) > MK空間(MK固有) < ユーザー空間(ユーザー固有)
 暗号空間:	MK作者の管理空間 (SDM)
@@ -53,11 +55,11 @@ KEK + nonce -> DEC	利用者(システム内部で処理)
 
 鍵の型
 	核部分: BIN
-	UI部分: base64url?
+	UI部分: base64url
 
 ==================================================
 通常: CUI + GUI
-管理: GUI
+管理: GUI (少しだけならCUIも)
 
 
 
@@ -71,3 +73,8 @@ KEK + nonce -> DEC	利用者(システム内部で処理)
 
 
 鍵の失効を通達する機構がない どうすべきか
+
+file.cpp
+	なぜか復号後ファイルにゴミデータが入っている 暗号化前<復号後
+	chunkシステムのせいかと思ったが、0で埋まっているわけでもなさそう?
+	HxDによると、余分以外は一致しているらしいのでやっぱりchunkシステムのせい?
