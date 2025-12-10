@@ -1,6 +1,7 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
+#include <QtWidgets/QRadioButton>
 
 #include "windowSave.h"
 #include "../master.h"
@@ -16,8 +17,9 @@
 			std::string name = w->objectName().toStdString();
 			if (name.empty()) continue;
 
-			if (auto cb = qobject_cast<QCheckBox*>(w))			j[name] = cb->isChecked();
-			else if (auto combo = qobject_cast<QComboBox*>(w))	j[name] = combo->currentIndex();
+			if (auto cb = qobject_cast<QCheckBox*>(w))				j[name] = cb->isChecked();
+			else if (auto combo = qobject_cast<QComboBox*>(w))		j[name] = combo->currentIndex();
+			else if (auto radio = qobject_cast<QRadioButton*>(w))	j[name] = radio->isChecked();
 		}
 		return j;
 	}
@@ -27,8 +29,9 @@
 			std::string name = w->objectName().toStdString();
 			if (name.empty() || !j.contains(name)) continue;
 
-			if (auto cb = qobject_cast<QCheckBox*>(w))			cb->setChecked(j[name]);
-			else if (auto combo = qobject_cast<QComboBox*>(w))	combo->setCurrentIndex(j[name]);
+			if (auto cb = qobject_cast<QCheckBox*>(w))				cb->setChecked(j[name]);
+			else if (auto combo = qobject_cast<QComboBox*>(w))		combo->setCurrentIndex(j[name]);
+			else if (auto radio = qobject_cast<QRadioButton*>(w))	radio->setChecked(j[name]);
 		}
 	}
 	

@@ -1,6 +1,8 @@
 #pragma once
 #include <QtWidgets/QMainWindow>
 
+#include "def.h"
+
 namespace Ui { class MainWindow; }
 
 struct VER {
@@ -19,18 +21,15 @@ struct VER {
 		return (uint64_t)gen<<(16*3) | (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
 	}
 };
-constexpr VER ver(0,2);
-
-extern Ui::MainWindow* ui;
-extern QMainWindow* w;
+constexpr VER ver(0,3);
 
 extern std::string prompt(const std::string& placeholderText);
+extern json getKIDEntry(const std::string& label, const BIN& mk);
 
 namespace u {
-    void setPrg(const int& v);
-    void setPrgMax(const int& v);
-    void log(const std::string& str);
+    void log(const std::string& str, bool continueLine = false);
     void stat(const std::string& str);
+    void sl(const std::string& str);
 }
 
 void crashReport(const std::string& text);

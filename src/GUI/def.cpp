@@ -1,8 +1,9 @@
 #include "def.h"
-#include "ui_main.h"
 
 Ui::MainWindow* ui = nullptr;
-QMainWindow* w = nullptr;
+Ui::AdminWindow* aui = nullptr;
+MainWindow* w = nullptr;
 FileButton* fb = nullptr;
 QClipboard* clipboard = nullptr;
+QShortcut* shortcut_inp_multi = nullptr;
 json PKEK;

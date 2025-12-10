@@ -20,7 +20,7 @@ std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
 	QVBoxLayout *layout = new QVBoxLayout(&dialog);
 	QListWidget *listWidget = new QListWidget;
 
-	QObject::connect(listWidget, &QListWidget::itemClicked, [&](QListWidgetItem *item) {
+	CN(listWidget, &QListWidget::itemClicked, [&](QListWidgetItem *item) {
 		if (item->checkState() == Qt::Checked) {
 			item->setCheckState(Qt::Unchecked);
 		} else {
@@ -39,7 +39,7 @@ std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
 	QPushButton *okButton = new QPushButton("OK");
 	layout->addWidget(okButton);
 
-	QObject::connect(okButton, &QPushButton::clicked, [&]() {
+	CN(okButton, &QPushButton::clicked, [&]() {
 		dialog.accept();
 	});
 
@@ -64,4 +64,19 @@ std::string prompt(const std::string& placeholderText) {
 	);
 	if (ok) return text.toStdString();
 	return "";
+}
+
+json getKIDEntry(const std::string& label, const BIN& mk) {
+	json result;
+	for (const auto x: fs::recursive_directory_iterator(SDM)) {
+		int number = -1;
+		std::string pathString = x.path().stem().stem().string();
+		try {
+			number = std::stoi(pathString);
+		} catch (...) {
+			continue;
+		}
+		if (0 <= number && number <= 255) result = loadKID(mk,number);
+	}
+	return result;
 }
