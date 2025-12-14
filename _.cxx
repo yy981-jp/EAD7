@@ -186,3 +186,53 @@ void showMessage(const std::string& msg) {
 	w->show();
 }
 
+
+
+
+
+
+
+
+
+
+
+
+#include <curl/curl.h>
+
+#include "def.h"
+
+
+static size_t WriteToString(void* ptr, size_t size, size_t nmemb, void* userdata) {
+	auto* str = static_cast<std::string*>(userdata);
+	str->append(static_cast<char*>(ptr), size * nmemb);
+	return size * nmemb;
+}
+
+std::string download(const std::string& url) {
+	CURL* curl = curl_easy_init();
+	if(!curl) throw std::runtime_error("curl init failed");
+
+	std::string out;
+
+	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteToString);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &out);
+
+	CURLcode res = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+
+	if(res != CURLE_OK)
+		throw std::runtime_error(curl_easy_strerror(res));
+
+	return out;
+}
+
+
+void updater() {
+    ver.numAll();
+}
+
+
+void loadVer() {
+	ver.loadCSV();
+}

@@ -134,8 +134,7 @@ json encAdmKEK(const BIN& mk, const json& raw_json, const uint8_t& mkid_adm) {
 		adm["keks"][kid_b64] = adm_entry;
 
 		// 7) zero sensitive memory
-		delm(kek_plain);
-		delm(entry_key);
+
 	}
 
 	return adm;
@@ -199,7 +198,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 		raw["keks"][kid_b64] = raw_entry;
 
 		// zero sensitive memory
-		delm(kek_plain,entry_key,salt,cipher,tag,nonce);
+
 	}
 
 	return raw;
@@ -254,8 +253,7 @@ json encPKEK(const json& raw_json) {
 	};
 
 	// --- 7) センシティブデータ削除
-	delm(keks_bin);
-	delm(file_key);
+
 
 	return p;
 }
@@ -304,8 +302,7 @@ json decPKEK(const json& p_json) {
 	raw["keks"] = keks;
 
 	// --- 7) センシティブデータ削除 ---
-	delm(file_key);
-	delm(plain);
+
 
 	return raw;
 }
@@ -371,10 +368,7 @@ json encDstKEK(const std::string &password, const json &raw_json, unsigned long 
 	};
 
 	// ゼロ化
-	delm(fileKey);
-	delm(keks_bin);
-	delm(nonce);
-	delm(aad_bin);
+
 
 	return dst;
 }
@@ -402,7 +396,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 
 	// 構造検査
 	if (!dst_json.contains("enc") || !dst_json["enc"].is_object()) {
-		delm(fileKey);
+
 		throw std::runtime_error("dst_json missing 'enc' object");
 	}
 	json enc = dst_json["enc"];
@@ -435,7 +429,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	try {
 		keks_bin = decAES256GCM(fileKey, nonce, cipher, tag, aad_bin);
 	} catch (const std::exception &e) {
-		delm(fileKey,cipher,tag,nonce,aad_bin);
+
 		throw std::runtime_error(std::string("dst decryption failed: ") + e.what());
 	}
 
@@ -453,12 +447,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	raw["keks"] = raw_keks;
 
 	// ゼロ化
-	delm(fileKey);
-	delm(keks_bin);
-	delm(cipher);
-	delm(tag);
-	delm(nonce);
-	delm(aad_bin);
+
 
 	return raw;
 }

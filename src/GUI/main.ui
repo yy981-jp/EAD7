@@ -156,7 +156,11 @@
      </widget>
     </item>
     <item row="7" column="0" colspan="6">
-     <widget class="QPlainTextEdit" name="log"/>
+     <widget class="QPlainTextEdit" name="log">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
     </item>
     <item row="4" column="5">
      <widget class="QPushButton" name="run">

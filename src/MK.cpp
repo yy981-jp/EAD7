@@ -49,7 +49,7 @@ MKEntryB64 WrapMK_WithPass(const BIN &mk,
 	(void)outlen;
 
 	// clear wrapKey from memory
-	delm(wrapKey);
+
 
 	MKEntryB64 r;
 	r.salt = base::enc64(salt);
@@ -91,12 +91,10 @@ BIN UnwrapMK_WithPass(const std::string &password,
 												   nonce.data(),
 												   wrapKey.data()) != 0) {
 		// auth failed
-		delm(wrapKey);
 		throw std::runtime_error("decryption failed (auth mismatch)");
 	}
 
 	// clear wrapKey
-	delm(wrapKey);
 	return mk;
 }
 
@@ -116,7 +114,6 @@ MKEntryB64 createMKCore(const std::string& pass, BIN mk) {
 */
 	MKEntryB64 res = WrapMK_WithPass(mk, pass);
 
-	// wipe mk from memory after wrap
-	delm(mk);
+	// wipe mk from memory after wrap (SecByteBlock destructor will zero)
 	return res;
 }

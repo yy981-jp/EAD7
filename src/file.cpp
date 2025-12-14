@@ -258,8 +258,6 @@ namespace EAD7 {
 			// Chunk: 実際に読み込んだバイト数分をHMAC更新
 			hmac.Update(reinterpret_cast<const uint8_t*>(file.data.data()), static_cast<size_t>(readBytes));
 			ofs.write(reinterpret_cast<const char*>(out.data()), out.size());
-
-			delm(decKey,out);
 		}
 		
 		// 全体HMAC検証

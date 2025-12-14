@@ -19,6 +19,7 @@
 #include "CUI/ui.h"
 #include "CUI/text.h"
 
+
 QApplication* app;
 std::vector<std::string> ca;
 UINT oldOutCP, oldInCP;

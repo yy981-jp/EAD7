@@ -16,275 +16,14 @@
 #include "../CUI/ui.h"
 #include "../CUI/text.h"
 #include "windowSave.h"
+#include "../version.h"
+
+#include "mw.h"
+#include "awv.h"
 
 #include "widgets/fileButton.h"
 #include "widgets/mainWindow.h"
 
-namespace awv {
-	void MK_load() {
-		const std::vector<QComboBox*> comboBoxes = {
-			aui->MK_unWrap_index,
-			aui->KID_create_index,
-			aui->KID_recal_index,
-			aui->KEK_index,
-			aui->OT_dst_index
-		};
-
-		json MK = readJson(path::MK);
-		QStringList mkids;
-		for (const auto& [index,object]: MK.items()) {
-			mkids << QString::fromStdString(index);
-		}
-		
-		for (QComboBox* c: comboBoxes) {
-			c->clear();
-			c->addItems(mkids);
-		}
-		
-	}
-	
-	void MK_clear() {
-		aui->MK_unWrap_pass->clear();
-		aui->MK_unWrap_out->clear();
-		aui->MK_create_pass->clear();
-		aui->MK_create_b64->clear();
-	}
-
-
-	void MK_unWrap() {
-		QString mkid_qs = aui->MK_unWrap_index->currentText();
-		std::string mkpass = aui->MK_unWrap_pass->text().toStdString();
-		if (mkid_qs.isEmpty() || mkpass.empty()) {u::stat("MK_unWrap: 入力が不足しています");return;}
-		uint8_t mkid = mkid_qs.toInt();
-		QString out_qs = QString::fromStdString(base::enc64(loadMK(mkid,mkpass)));
-		aui->MK_unWrap_out->setText(out_qs);
-		delm(mkpass);
-	}
-	
-	void MK_create() {
-		uint8_t mkid = aui->MK_create_index->value();
-		std::string mkpass = aui->MK_create_pass->text().toStdString();
-		if (mkpass.empty()) {
-			u::stat("MK_create: 入力が不足しています");
-			delm(mkpass);
-			return;
-		}
-		
-		std::string b64 = aui->MK_create_b64->text().toStdString();
-		if (b64.empty()) {
-			createMK(mkid,mkpass);
-		} else {
-			BIN b64_bin;
-			try {
-				b64_bin = base::dec64(b64);
-			} catch (...) {
-				u::stat("MK_create: Base64URLSafeの形式が不正です");
-				delm(mkpass);
-				return;
-			}
-			createMK(mkid,mkpass,b64_bin);
-		}
-		u::sl("MK_create: 完了");
-		delm(mkpass);
-	}
-	
-	void KID_create() {
-		QString mkid_qs = aui->KID_create_index->currentText();
-		std::string mkpass = aui->KID_create_mkpass->text().toStdString();
-		KIDEntry entry;
-		entry.label = aui->KID_create_label->text().toStdString();
-		entry.b64 = aui->KID_create_b64->text().toStdString();
-		entry.note = aui->KID_create_note->toPlainText().toStdString();
-		entry.status = KStat::active;
-		
-		if (mkid_qs.isEmpty() || mkpass.empty() || entry.label.empty()) {
-			u::stat("KID_create: 入力が不足しています");
-			return;
-		}
-		uint8_t mkid = mkid_qs.toInt();
-		BIN mk = loadMK(mkid,mkpass);
-		ordered_json j = loadKID(mk,mkid);
-		if (j.contains(entry.label)) {
-			// 中断
-		}
-		if (!isBase64UrlSafe(entry.b64)) {
-			u::stat("KID_create: Base64URLSafeの形式が不正です");
-			return;
-		}
-		
-		addNewKid(j,entry);
-		saveKID(mk,mkid,j);
-		
-		u::sl("KID_create: 完了");
-		delm(mk,mkpass);
-	}
-	
-	void KID_recal() {
-		QString mkid_qs = aui->KID_recal_index->currentText();
-		std::string mkpass = aui->KID_recal_mkpass->text().toStdString();
-		if (mkid_qs.isEmpty() || mkpass.empty()) {
-			u::stat("KID_recal: 入力が不足しています");
-			return;
-		}
-		uint8_t mkid = mkid_qs.toInt();
-		BIN mk = loadMK(mkid,mkpass);
-		
-		json j = readJson(SDM+std::to_string(mkid)+".kid.e7").at("body");
-		saveKID(mk,mkid,j);
-		
-		u::sl("KID_recal: 完了");
-		delm(mk,mkpass);
-	}
-}
-
-namespace mw {
-	INP_FROM inp_from = INP_FROM::null;
-	
-	void setInpFrom(const INP_FROM& inp_from_new) {
-		inp_from = inp_from_new;
-		
-		int index = ui->inp_from->findData(QVariant::fromValue(inp_from));
-		if (index != -1) ui->inp_from->setCurrentIndex(index);
-	}
-	
-	void import_dst_kek(const QString& qstr, bool from_kek_window = false) {
-		std::string str = qstr.toStdString();
-		if (str.ends_with(".e7")) {
-			fs::path p = str;
-			if (fs::exists(p)) {
-				FDat f = getFileType(p);
-				switch (f.type) {
-					case FSType::dst_kek: {
-						std::string pass = prompt("DST.KEKファイルのパスワード: ");
-						json raw_kek = decDstKEK(pass,f.json);
-						json p_kek = encPKEK(raw_kek);
-						writeJson(p_kek,path::p_kek);
-						u::stat("P_KEK更新完了\n");
-						delm(pass,raw_kek);
-						if (from_kek_window) fb->close();
-						throw std::runtime_error("再起動信号(P_KEK再読み込み)");
-					} break;
-					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
-				}
-			}
-		}
-		u::stat("dst_kekとして入力されたファイルはe7ファイルではありません(ファイル拡張子で判断)");
-	}
-	
-	void textProc(const std::string& text) {
-		if (text.empty()) {
-			u::stat("入力がありません");
-			return;
-		}
-		std::string out;
-		
-		int index = ui->selectKey->currentIndex();
-		json raw_kek = decPKEK(PKEK);
-		
-		if (ui->encMode->isChecked()) {
-
-			std::string kid = ui->selectKey->itemData(index).toString().toStdString();
-			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
-			if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
-			if (kid.empty()) {
-				u::stat("使用する鍵を選択してください");
-				return;
-			}
-			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
-			BIN outb = EAD7::enc(kek,conv::STRtoBIN(text),mkid,base::dec64(kid));
-			out = base::enc64(outb);
-			delm(kek);
-		} else {
-			BIN inputBin;
-			try {
-				inputBin = base::dec64(text);
-			} catch (const exception) {
-				u::stat("復号モードの入力がBase64URLSafe形式ではないので処理を中止しました");
-				delm(raw_kek);
-				return;
-			}
-			
-			BIN kidb;
-			std::memcpy(kidb.data(), inputBin.data()+3, 16);
-			std::string kid = base::enc64(kidb);
-			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
-
-			if (!raw_kek["keks"].contains(kid)) {
-				u::stat("指定されたKIDは鍵リストに存在しません");
-				delm(raw_kek);
-				return;
-			}
-				
-			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
-
-			BIN outb = EAD7::dec(kek,inputBin);
-			out = conv::BINtoSTR(outb);
-		}
-		ui->out->setPlainText(QString::fromStdString(out));
-		delm(raw_kek,out);
-	}
-	
-	void fileProc(const std::string& path) {
-		if (!fs::exists(path)) {
-			u::stat("指定されたファイルが存在しません");
-			return;
-		}
-
-		int index = ui->selectKey->currentIndex();
-		std::string kid = ui->selectKey->itemData(index).toString().toStdString();
-		if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
-		if (kid.empty()) {
-			u::stat("使用する鍵を選択してください");
-			return;
-		}
-		
-		if (ui->encMode->isChecked()) {
-
-			json raw_kek = decPKEK(PKEK);
-			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
-			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
-			uint64_t chunkSize = ui->chunkSize->currentData().toULongLong();
-			
-			EAD7::encFile(kek,path,mkid,base::dec64(kid),chunkSize);
-			delm(raw_kek,kek);
-			u::stat("ファイルの暗号化を正常に終了しました");
-
-		} else {
-
-			json raw_kek = decPKEK(PKEK);
-			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
-
-			std::vector<uint64_t> outv = EAD7::decFile(kek,path);
-			if (outv.empty()) {
-				u::stat("ファイルの復号を正常に終了しました");
-			} else {
-				u::stat("ファイルの復号中にエラーが発生しました 詳細はログを確認してください");
-				bool headerERR = false;
-				for (const uint64_t& cn: outv) {
-					if (cn == 0) {
-						headerERR = true;
-						continue;
-					}
-					u::log("破損したチャンク番号: " + std::to_string(cn));
-				}
-				if (headerERR) u::log("ファイルヘッダーの復号に失敗しました",true);
-			}
-			delm(raw_kek,kek);
-		}
-	}
-	
-	void run() {
-		std::string text;
-		switch (inp_from) {
-			case INP_FROM::null: u::stat("入力元が特定できません"); return;
-			case INP_FROM::line: text = ui->inp_line->text().toStdString(); break;
-			case INP_FROM::multi: text = ui->inp_multi->toPlainText().toStdString(); break;
-			case INP_FROM::file: text = ui->inp_file_path->text().toStdString(); break;
-		}
-		if (inp_from == INP_FROM::file) fileProc(text); else textProc(text);
-	}
-	
-}
 
 void loadKeyCombobox() {
 	if (!fs::exists(path::p_kek)) {
@@ -310,6 +49,7 @@ void loadKeyCombobox() {
 	}
 	delm(raw_kek);
 }
+
 
 void GUI() {
 	ui->log->setVisible(false);
@@ -349,8 +89,28 @@ void GUI() {
 	CN(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
 		mw::inp_from = ui->inp_from->itemData(index).value<INP_FROM>();
 	});
-	CN(ui->copy, &QPushButton::clicked, []{clipboard->setText(ui->out->toPlainText());});
+	CN(ui->copy, &QPushButton::clicked, []{
+		QString qstring = ui->out->toPlainText();
+		if (qstring.isEmpty()) {
+			u::stat("出力内容が空です");
+			return;
+		}
+		clipboard->setText(qstring);
+		u::stat("出力内容をクリップボードにコピーしました");
+	});
 	CN(ui->clear, &QPushButton::clicked, ui->out, &QPlainTextEdit::clear);
+
+	// shortcuts
+	CN(new QShortcut(QKeySequence("Ctrl+C"), w), &QShortcut::activated, ui->copy, &QPushButton::animateClick);
+	CN(new QShortcut(QKeySequence("Ctrl+X"), w), &QShortcut::activated, ui->clear, &QPushButton::animateClick);
+	CN(new QShortcut(QKeySequence("Ctrl+O"), w), &QShortcut::activated, ui->inp_file_button, &QPushButton::animateClick);
+	CN(new QShortcut(QKeySequence("Ctrl+E"), w), &QShortcut::activated, [&]{ui->encMode->setChecked(true);});
+	CN(new QShortcut(QKeySequence("Ctrl+D"), w), &QShortcut::activated, [&]{ui->decMode->setChecked(true);});
+	CN(new QShortcut(QKeySequence("ESC"), w), &QShortcut::activated, [&]{w->setFocus();});
+	CN(new QShortcut(QKeySequence("Ctrl+I"), w), &QShortcut::activated, [&]{
+		if (ui->inp_line->isEnabled()) ui->inp_line->setFocus();
+			else ui->inp_multi->setFocus();
+	});
 	
 	loadKeyCombobox();
 	

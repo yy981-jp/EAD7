@@ -91,6 +91,8 @@ static void f_infoCore(FDat& f) {
 						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
 						  << "\n\t}";
 			}
+			// clear sensitive data
+			delm(pass, j);
 		} break;
 /*			case FSType::base64: {
 			std::cout << "base64urlsafe\n";
@@ -130,11 +132,11 @@ namespace ui {
 		json entry = raw_kek["keks"][kid];
 		if (entry["status"] != "active") throw std::runtime_error("このKEKは現在有効ではありません");
 		uint8_t mkid = entry["mkid"].get<uint8_t>();
-		BIN kek = base::dec64(entry["kek"]);
-		BIN plaintext = conv::STRtoBIN(ca[3]);
-		BIN cipher = EAD7::enc(kek,plaintext,mkid,base::dec64(kid));
-		std::cout << "暗号: " << base::enc64(cipher) << "\n";
-		delm(raw_kek,kek);
+			BIN kek = base::dec64(entry["kek"]);
+			BIN plaintext = conv::STRtoBIN(ca[3]);
+			BIN cipher = EAD7::enc(kek,plaintext,mkid,base::dec64(kid));
+			std::cout << "暗号: " << base::enc64(cipher) << "\n";
+			delm(raw_kek);
 	}
 
 	void decrypt() {
@@ -146,9 +148,11 @@ namespace ui {
 			std::cerr << "あなたはこのルームの鍵を持っていないため、解読できません\n";
 			return;
 		}
-		BIN kek = base::dec64(entry["kek"]);
-		BIN plaintext = EAD7::dec(kek,cipher);
-		std::cout << "原文: " << conv::BINtoSTR(plaintext) << "\n";
+			BIN kek = base::dec64(entry["kek"]);
+			BIN plaintext = EAD7::dec(kek,cipher);
+			std::cout << "原文: " << conv::BINtoSTR(plaintext) << "\n";
+			// clear sensitive buffers (keep non-BIN items)
+			delm(raw_kek);
 	}
 	
 	void f_info3() {
@@ -197,12 +201,9 @@ static std::map<std::vector<std::string>, std::function<void()>> commands2 = {
 }, commands4 = {
 	{{"encrypt","enc","en","e"}, ui::encrypt}
 };
-/*
-void CUI_ini() {
-}
-*/
+
+
 int UI() { // CUIの実質main関数
-	// CUI_ini();
 	try {
 		switch (ca.size()) {
 			case 1: return GUI_interface();
