@@ -63,7 +63,6 @@ namespace mw {
 			BIN outb = EAD7::enc(kek,conv::STRtoBIN(text),mkid,base::dec64(kid));
 			out = base::enc64(outb);
 			u::stat("暗号化処理完了");
-			delm(kek);
 		} else {
 			BIN inputBin;
 			try {
@@ -126,7 +125,7 @@ namespace mw {
 			uint64_t chunkSize = ui->chunkSize->currentData().toULongLong();
 			
 			EAD7::encFile(kek,path,mkid,base::dec64(kid),chunkSize);
-			delm(raw_kek,kek);
+			delm(raw_kek);
 			u::stat("ファイルの暗号化を正常に終了しました");
 
 		} else {
@@ -149,7 +148,7 @@ namespace mw {
 				}
 				if (headerERR) u::log("ファイルヘッダーの復号に失敗しました",true);
 			}
-			delm(raw_kek,kek);
+			delm(raw_kek);
 		}
 	}
 	

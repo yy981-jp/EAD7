@@ -62,7 +62,7 @@ namespace uim {
 				std::string mk_b64 = inp_s("追加するMK(base64): ");
 				BIN mk = base::dec64(mk_b64);
 				::createMK(mkid,pass,mk);
-				delm(mk,mk_b64);
+				delm(mk_b64);
 			} break;
 			case 'R': {
 				uint8_t mkid = choice("対象MKID(候補="+index+"): ",index) - '0';
@@ -70,7 +70,7 @@ namespace uim {
 				BIN mk = loadMK(mkid,pass);
 				std::string mk_b64 = base::enc64(mk);
 				out_s("生MK(Base64): " + mk_b64 + "\n");
-				delm(mk,mk_b64);
+				delm(mk_b64);
 			} break;
 			case 'O': openFile(path::MK); break;
 		}
@@ -90,7 +90,7 @@ namespace uim {
 				kidEntry.status = KStat::active;
 				addNewKid(j,kidEntry);
 				saveKID(mk,mkid,j);
-				delm(mk,mkpass);
+				delm(mkpass);
 			} break;
 			case 'I': {
 				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
@@ -104,14 +104,15 @@ namespace uim {
 				kidEntry.status = KStat::active;
 				addNewKid(j,kidEntry);
 				saveKID(mk,mkid,j);
-				delm(mk,mkpass);
+				delm(mkpass);
 			} break;
 			case 'S': {
 				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
 				ordered_json j = readJson(SDM+std::to_string(mkid)+".kid.e7")["body"];
-				const std::string pass = inp_s("対象MKIDのパスワード: ");
+				std::string pass = inp_s("対象MKIDのパスワード: ");
 				BIN mk = loadMK(mkid,pass);
 				saveKID(mk,mkid,j);
+				delm(pass);
 			} break;
 			case 'O': {
 				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
@@ -131,7 +132,7 @@ namespace uim {
 				json selectedKid = loadKIDEntry(kid);
 				json raw_kek = createRawKEK(mk,{},selectedKid,mkid);
 				json adm_kek = encAdmKEK(mk,raw_kek,mkid);
-				delm(mk,raw_kek);
+				delm(raw_kek);
 				std::string oname = inp("保存KEKリストファイル(***.adm.kek.e7)の名前(拡張子無し): ");
 				writeJson(adm_kek,getAdmKEKPath(oname));
 				delm(pass);
@@ -171,7 +172,8 @@ namespace uim {
 		std::string oname = inp("配布KEKリストファイル(***.dst.kek.e7)の名前(拡張子無し): ");
 		fs::path opath = fs::current_path()/oname;
 		writeJson(dst_kek,opath.string()+".dst.kek.e7");
-		delm(mk,dst_pass);
+		// clear sensitive temporaries
+		delm(dst_pass, adm_kek);
 	}
 }
 

@@ -101,7 +101,7 @@ namespace awv {
 		saveKID(mk,mkid,j);
 		
 		u::sl("KID_create: 完了");
-		delm(mk,mkpass);
+		delm(mkpass);
 	}
 	
 	void KID_recal() {
@@ -118,6 +118,6 @@ namespace awv {
 		saveKID(mk,mkid,j);
 		
 		u::sl("KID_recal: 完了");
-		delm(mk,mkpass);
+		delm(mkpass);
 	}
 }

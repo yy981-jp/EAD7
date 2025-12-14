@@ -84,7 +84,6 @@ json loadKID(const BIN& mk, const uint8_t& mkid) {
 	BIN mac = hmac_sha256(hkey, body_dump);
 
 	// 後始末（MK→hkeyを消す）
-	delm(hkey);
 
 	// 比較
 	BIN mac_stored = base::dec64(hmac_b64);
@@ -101,7 +100,6 @@ void saveKID(const BIN& mk, const uint8_t& mkid, const ordered_json& body) {
 	BIN hkey = deriveKidlistHmacKey(mk);
 	std::string body_dump = body.dump();
 	BIN mac = hmac_sha256(hkey, body_dump);
-	delm(hkey);
 
 	// JSON組み立て
 	ordered_json j;
