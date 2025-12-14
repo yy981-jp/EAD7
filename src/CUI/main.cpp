@@ -197,12 +197,9 @@ static std::map<std::vector<std::string>, std::function<void()>> commands2 = {
 }, commands4 = {
 	{{"encrypt","enc","en","e"}, ui::encrypt}
 };
-/*
-void CUI_ini() {
-}
-*/
+
+
 int UI() { // CUIの実質main関数
-	// CUI_ini();
 	try {
 		switch (ca.size()) {
 			case 1: return GUI_interface();

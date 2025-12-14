@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QListWidget>
@@ -7,6 +8,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QInputDialog>
+
+#include <yy981/string.h>
 
 #include "cui.h"
 #include "gui.h"
