@@ -18,7 +18,8 @@ struct VER {
 		return (uint64_t)gen<<(16*3) | (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
 	}
 
-	void loadCSV();
+	void fromCSVString(const std::string& line);
+	void loadCSV(std::string path = csvPath);
 	constexpr static std::string csvPath = "ver.csv";
 };
 
