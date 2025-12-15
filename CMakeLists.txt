@@ -28,12 +28,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	add_library(LIBEXE STATIC ${LIBSRC})
 	set_target_properties(LIBEXE PROPERTIES OUTPUT_NAME "EAD7")
 else()
-	add_library(version_obj OBJECT src/version.cpp)
-	list(REMOVE_ITEM SOURCES "${CMAKE_SOURCE_DIR}/src/version.cpp")
-	add_executable(${PROJECT_NAME} ${SOURCES} $<TARGET_OBJECTS:version_obj>)
-	
-	file(GLOB DSTSRC dst/src/*.cpp)
-	add_executable(EAD7_DST ${DSTSRC} $<TARGET_OBJECTS:version_obj>)
+	add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
 
 
