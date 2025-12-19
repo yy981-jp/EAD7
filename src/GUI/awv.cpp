@@ -12,7 +12,8 @@ namespace awv {
 			aui->KID_create_index,
 			aui->KID_recal_index,
 			aui->KEK_index,
-			aui->OT_dst_index
+			aui->OT_dst_index,
+			aui->OT_dec_mk_index
 		};
 
 		json MK = readJson(path::MK);
@@ -73,7 +74,7 @@ namespace awv {
 		delm(mkpass);
 	}
 	
-	void KID_create() {
+	void KID_create_write() {
 		QString mkid_qs = aui->KID_create_index->currentText();
 		std::string mkpass = aui->KID_create_mkpass->text().toStdString();
 		KIDEntry entry;
@@ -82,26 +83,53 @@ namespace awv {
 		entry.note = aui->KID_create_note->toPlainText().toStdString();
 		entry.status = KStat::active;
 		
+		if (entry.b64.empty()) entry.b64 = base::enc64(randomBIN(16));
+		
 		if (mkid_qs.isEmpty() || mkpass.empty() || entry.label.empty()) {
-			u::stat("KID_create: 入力が不足しています");
+			u::stat("KID_create_write: 入力が不足しています");
 			return;
 		}
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
-		ordered_json j = loadKID(mk,mkid);
-		if (j.contains(entry.label)) {
-			// 中断
-		}
+		json j = loadKID(mk,mkid);
 		if (!isBase64UrlSafe(entry.b64)) {
-			u::stat("KID_create: Base64URLSafeの形式が不正です");
+			u::stat("KID_create_write: Base64URLSafeの形式が不正です");
+			return;
+		}
+
+		std::pair<std::string,ordered_json> entry_j = makeKidEntry(entry);
+		j["kids"][entry_j.first] = entry_j.second;
+
+		saveKID(mk,mkid,j);
+		
+		u::sl("KID_create_write: 完了");
+		delm(mkpass);
+	}
+
+	void KID_create_load() {
+		QString mkid_qs = aui->KID_create_index->currentText();
+		std::string mkpass = aui->KID_create_mkpass->text().toStdString();
+		uint8_t mkid = mkid_qs.toInt();
+		BIN mk = loadMK(mkid,mkpass);
+		if (aui->KID_create_label->text().isEmpty()) {
+			u::stat("KID_create_load: 入力が不足しています");
+			return;
+		} 
+		ordered_json j = loadKID(mk,mkid);
+		
+		KIDEntry entry;
+		
+		entry.label = aui->KID_create_label->text().toStdString();
+
+		if (!j.at("keks").contains(entry.label)) {
+			u::stat("KID_create_load: 対象のエントリが見つかりません");
 			return;
 		}
 		
-		addNewKid(j,entry);
-		saveKID(mk,mkid,j);
-		
-		u::sl("KID_create: 完了");
-		delm(mkpass);
+		json entry_j = j["keks"][entry.label];
+		aui->KID_create_b64->setText(QString::fromStdString(entry_j["b64"]));
+		aui->KID_create_note->setPlainText(QString::fromStdString(entry_j["note"]));
+
 	}
 	
 	void KID_recal() {
@@ -119,5 +147,16 @@ namespace awv {
 		
 		u::sl("KID_recal: 完了");
 		delm(mkpass);
+	}
+
+	/// @param kid 
+	/// @return kek 
+	BIN OT_dec(BIN kid) {
+		QString mkid_qs = aui->OT_dec_mk_index->currentText();
+		std::string mkpass = aui->OT_dec_mk_pass->text().toStdString();
+		if (mkid_qs.isEmpty() || mkpass.empty()) throw std::runtime_error("OT_dec: 入力が不足しています");
+		uint8_t mkid = mkid_qs.toInt();
+		BIN mk = loadMK(mkid,mkpass);
+		return deriveKEK(mk, base::enc64(kid));
 	}
 }

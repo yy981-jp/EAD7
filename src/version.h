@@ -8,7 +8,7 @@ struct VER {
 	uint16_t gen{7}, major{0}, minor{0}, patch{0};
 	
 	constexpr std::string str() const {
-		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+patch);
+		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+std::to_string(patch));
 	}
 	
 	constexpr uint64_t num() const {

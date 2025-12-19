@@ -38,12 +38,123 @@
    </item>
    <item row="1" column="0">
     <widget class="QTabWidget" name="tabWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="autoFillBackground">
       <bool>true</bool>
      </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <widget class="QWidget" name="tab_other">
+      <attribute name="title">
+       <string>一般</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="2" column="0">
+        <spacer name="OT_verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0">
+        <widget class="QGroupBox" name="OT_dst">
+         <property name="title">
+          <string>DST.KEKに変換</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="OT_dst_index">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>対象のADM.KEKを選択</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="OT_dst_mkpass">
+            <property name="placeholderText">
+             <string>MKIDのパスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="OT_dst_pass">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="placeholderText">
+             <string>DST.KEKのパスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="OT_dst_run">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>実行</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="dec">
+         <property name="title">
+          <string>マスターキーを使用して復号</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_12">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="OT_dec_mk_index">
+            <property name="placeholderText">
+             <string>MKIDを選択</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="OT_dec_enable">
+            <property name="text">
+             <string>モードを使用</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLineEdit" name="OT_dec_mk_pass">
+            <property name="placeholderText">
+             <string>パスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab_mk">
       <attribute name="title">
        <string>MasterKey</string>
@@ -196,6 +307,16 @@
           <string>作成と編集</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
+          <item row="1" column="0" colspan="2">
+           <widget class="QLineEdit" name="KID_create_label">
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+            <property name="placeholderText">
+             <string>新しいラベルを入力 (存在した場合は読み込みが可能です)</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QComboBox" name="KID_create_index">
             <property name="currentText">
@@ -206,41 +327,44 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="3">
-           <widget class="QPlainTextEdit" name="KID_create_note">
-            <property name="placeholderText">
-             <string>備考欄</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2">
-           <widget class="QPushButton" name="KID_create_run">
+           <widget class="QPushButton" name="KID_create_write">
             <property name="text">
-             <string>実行</string>
+             <string>書き込み</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="3">
+          <item row="1" column="3">
+           <widget class="QPushButton" name="KID_create_load">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>読込</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="4">
            <widget class="QLineEdit" name="KID_create_b64">
             <property name="placeholderText">
              <string>Base64UrlSafe (省略した場合は自動で生成します)</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1" colspan="2">
+          <item row="0" column="1" colspan="3">
            <widget class="QLineEdit" name="KID_create_mkpass">
             <property name="placeholderText">
              <string>パスワードを入力</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLineEdit" name="KID_create_label">
-            <property name="readOnly">
-             <bool>false</bool>
-            </property>
+          <item row="3" column="0" colspan="4">
+           <widget class="QPlainTextEdit" name="KID_create_note">
             <property name="placeholderText">
-             <string>新しいラベルを入力 (存在した場合はEnter押すとそれを読み込みますが、更新はできません)</string>
+             <string>備考欄</string>
             </property>
            </widget>
           </item>
@@ -268,13 +392,6 @@
         <widget class="QLabel" name="KEK_label">
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;操作対象KEK(新しく入力すると新規作成): &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="2">
-        <widget class="QComboBox" name="KEK_index">
-         <property name="placeholderText">
-          <string>MKIDを選択</string>
          </property>
         </widget>
        </item>
@@ -320,79 +437,17 @@
          </property>
         </widget>
        </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tab_other">
-      <attribute name="title">
-       <string>その他</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_5">
-       <item row="1" column="0">
-        <spacer name="OT_verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
+       <item row="3" column="0">
+        <widget class="QComboBox" name="KEK_index">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
+         <property name="placeholderText">
+          <string>MKIDを選択</string>
          </property>
-        </spacer>
-       </item>
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="OT_dst">
-         <property name="title">
-          <string>DST.KEKに変換</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_11">
-          <item row="0" column="1">
-           <widget class="QComboBox" name="OT_dst_index">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="placeholderText">
-             <string>対象のADM.KEKを選択</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLineEdit" name="OT_dst_mkpass">
-            <property name="placeholderText">
-             <string>MKIDのパスワードを入力</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="OT_dst_pass">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="placeholderText">
-             <string>DST.KEKのパスワードを入力</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="OT_dst_run">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>実行</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
       </layout>

@@ -1,9 +1,12 @@
+#include <sstream>
+
 #include "gui.h"
 #include "../cui/ui.h"
 #include "../master.h"
 #include "../base.h"
 
 #include "mw.h"
+#include "awv.h"
 
 
 namespace mw {
@@ -40,6 +43,24 @@ namespace mw {
 		u::stat("dst_kekとして入力されたファイルはe7ファイルではありません(ファイル拡張子で判断)");
 	}
 	
+	std::string textInfo(const std::string& text) {
+		BIN bin = base::dec64(text);
+		THEADER t;
+		std::memcpy(&t, bin.data(),sizeof(THEADER));
+		std::stringstream ss;
+		ss << "[情報]\n"
+		   << "ver: " << std::to_string(t.ver)
+		   << "\nMK-ID: " << std::to_string(t.mkid)
+		   << "\nKEK-ID: " << base::enc64(conv::ARRtoBIN(t.kid))
+		   << "\nnonce: " << base::enc64(conv::ARRtoBIN(t.nonce));
+		return ss.str();
+	}
+
+	void fileInfo(const std::string& path) {
+		FDat f = getFileType(fs::path(path));
+		u::stat("情報モード: ファイル形式 " + std::to_string(static_cast<int>(f.type)));
+	}
+
 	void textProc(const std::string& text) {
 		if (text.empty()) {
 			u::stat("入力がありません");
@@ -63,7 +84,9 @@ namespace mw {
 			BIN outb = EAD7::enc(kek,conv::STRtoBIN(text),mkid,base::dec64(kid));
 			out = base::enc64(outb);
 			u::stat("暗号化処理完了");
-		} else {
+
+		} else if (ui->decMode->isChecked()) {
+
 			BIN inputBin;
 			try {
 				inputBin = base::dec64(text);
@@ -83,22 +106,28 @@ namespace mw {
 			std::memcpy(kidb.data(), inputBin.data()+3, 16);
 			std::string kid = base::enc64(kidb);
 
-			if (!raw_kek["keks"].contains(kid)) {
-				u::stat("指定されたKIDは鍵リストに存在しません");
-				delm(raw_kek);
-				return;
+			// uint8_t mkid = inputBin[2];
+			BIN kek;
+
+			if (aui->OT_dec_enable->isChecked()) {
+				kek = awv::OT_dec(base::dec64(kid));
+			} else {
+				if (!raw_kek["keks"].contains(kid)) {
+					u::stat("指定されたKIDは鍵リストに存在しません");
+					delm(raw_kek);
+					return;
+				}				
+				kek = base::dec64(raw_kek["keks"][kid]["kek"]);
 			}
 
-			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
-				
-			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
 			std::string key_label = raw_kek["keks"][kid]["label"];
 
 			BIN outb = EAD7::dec(kek,inputBin);
 			out = conv::BINtoSTR(outb);
 
 			u::stat("復号処理完了 使用した鍵: " + key_label);
-		}
+
+		} else out = mw::textInfo(text);
 		ui->out->setPlainText(QString::fromStdString(out));
 		delm(raw_kek,out);
 	}
@@ -109,15 +138,16 @@ namespace mw {
 			return;
 		}
 
-		int index = ui->selectKey->currentIndex();
-		std::string kid = ui->selectKey->itemData(index).toString().toStdString();
-		if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
-		if (kid.empty()) {
-			u::stat("使用する鍵を選択してください");
-			return;
-		}
 		
 		if (ui->encMode->isChecked()) {
+
+			int index = ui->selectKey->currentIndex();
+			std::string kid = ui->selectKey->itemData(index).toString().toStdString();
+			if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
+			if (kid.empty()) {
+				u::stat("使用する鍵を選択してください");
+				return;
+			}
 
 			json raw_kek = decPKEK(PKEK);
 			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
@@ -128,11 +158,24 @@ namespace mw {
 			delm(raw_kek);
 			u::stat("ファイルの暗号化を正常に終了しました");
 
-		} else {
+		} else if (ui->decMode->isChecked()) {
+
+			FHeader fh = getFileHeader(path);
+			BIN kid = conv::ARRtoBIN(fh.kid);
 
 			json raw_kek = decPKEK(PKEK);
-			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
+			BIN kek;
 
+			if (aui->OT_dec_enable->isChecked()) {
+				kek = awv::OT_dec(kid);
+			} else {
+				if (!raw_kek["keks"].contains(base::enc64(kid))) {
+					u::stat("指定されたKIDは鍵リストに存在しません");
+					delm(raw_kek);
+					return;
+				}				
+				kek = base::dec64(raw_kek["keks"][base::enc64(kid)]["kek"]);
+			}
 			std::vector<uint64_t> outv = EAD7::decFile(kek,path);
 			if (outv.empty()) {
 				u::stat("ファイルの復号を正常に終了しました");
@@ -149,6 +192,7 @@ namespace mw {
 				if (headerERR) u::log("ファイルヘッダーの復号に失敗しました",true);
 			}
 			delm(raw_kek);
+
 		}
 	}
 	

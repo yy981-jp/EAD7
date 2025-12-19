@@ -5,6 +5,7 @@
 
 #include "def.h"
 #include "del.h"
+#include "file.h"
 
 namespace HEADER {
 	constexpr uint8_t magic(1), ver(1), mkid(1), kid(16), nonce(12), tag(16),
@@ -79,45 +80,50 @@ struct CryptoGCM {
 };
 
 // util
-extern BIN deriveKey(const BIN &ikm, const std::string &info, size_t keyLen, const BIN &salt = BIN());
-extern BIN randomBIN(size_t size);
-extern CryptoGCM encAES256GCM(const BIN &key, const BIN &nonce, const BIN &text, const BIN &AAD = BIN(0));
-extern BIN decAES256GCM(const BIN &key, const BIN &nonce, const BIN &text, const BIN &tag, const BIN &AAD = BIN(0));
-extern json readJson(const std::string &path);
-extern void writeJson(const json &j, const std::string &path);
-extern std::wstring to_wstring(const std::string &u8);
+BIN deriveKey(const BIN &ikm, const std::string &info, size_t keyLen, const BIN &salt = BIN());
+BIN randomBIN(size_t size);
+CryptoGCM encAES256GCM(const BIN &key, const BIN &nonce, const BIN &text, const BIN &AAD = BIN(0));
+BIN decAES256GCM(const BIN &key, const BIN &nonce, const BIN &text, const BIN &tag, const BIN &AAD = BIN(0));
+json readJson(const std::string &path);
+void writeJson(const json &j, const std::string &path);
+std::wstring to_wstring(const std::string &u8);
 
 // MK
-extern MKEntryB64 createMKCore(const std::string &pass, BIN mk = randomBIN(32));
-extern BIN loadMKCore(const std::string &pass, const MKEntryB64 &res);
-extern void createMK(int index, const std::string &pass, BIN mk = randomBIN(32));
-extern BIN loadMK(int index, const std::string &pass);
+MKEntryB64 createMKCore(const std::string &pass, BIN mk = randomBIN(32));
+BIN loadMKCore(const std::string &pass, const MKEntryB64 &res);
+void createMK(int index, const std::string &pass, BIN mk = randomBIN(32));
+BIN loadMK(int index, const std::string &pass);
 
 // KID
-extern void saveKID(const BIN &mk, const uint8_t &mkid, const ordered_json &body);
-extern json loadKID(const BIN &mk, const uint8_t &mkid);
-extern void addNewKid(ordered_json &body, const KIDEntry &kid_e);
+void saveKID(const BIN &mk, const uint8_t &mkid, const ordered_json &body);
+json loadKID(const BIN &mk, const uint8_t &mkid);
+std::pair<std::string,ordered_json> makeKidEntry(const KIDEntry& kid_e);
+void addNewKid(ordered_json &body, const KIDEntry &kid_e);
 
 // KEK
-extern json createRawKEK(const BIN &mk, json kek_json, const json &kid_json, const uint8_t &mkid);
-extern json encAdmKEK(const BIN &mk, const json &raw_json, const uint8_t &mkid);
-extern json decAdmKEK(const BIN &mk, const json &adm_json);
-extern json encPKEK(const json &raw_json);
-extern json decPKEK(const json &p_json);
-extern json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit = crypto_pwhash_OPSLIMIT_MODERATE, size_t memlimit = crypto_pwhash_MEMLIMIT_MODERATE);
-extern json decDstKEK(const std::string &password, const json &dst_json);
+BIN deriveKEK(const BIN& mk, const std::string kid_b64);
+json createRawKEK(const BIN &mk, json kek_json, const json &kid_json, const uint8_t &mkid);
+json encAdmKEK(const BIN &mk, const json &raw_json, const uint8_t &mkid);
+json decAdmKEK(const BIN &mk, const json &adm_json);
+json encPKEK(const json &raw_json);
+json decPKEK(const json &p_json);
+json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit = crypto_pwhash_OPSLIMIT_MODERATE, size_t memlimit = crypto_pwhash_MEMLIMIT_MODERATE);
+json decDstKEK(const std::string &password, const json &dst_json);
 
 // Core (DEK.cpp)
 namespace EAD7 {
-	extern BIN enc(const BIN &kek, const BIN &plaintext, const uint8_t &mkid, const BIN &kid);
-	extern BIN dec(const BIN &kek, const BIN &blob);
-	extern void encFile(const BIN &kek, const std::string &path, const uint8_t &mkid, const BIN &kid, uint32_t chunkSize);
-	extern std::vector<uint64_t> decFile(const BIN &kek, const std::string &path);
+	BIN enc(const BIN &kek, const BIN &plaintext, const uint8_t &mkid, const BIN &kid);
+	BIN dec(const BIN &kek, const BIN &blob);
+	void encFile(const BIN &kek, const std::string &path, const uint8_t &mkid, const BIN &kid, uint32_t chunkSize);
+	std::vector<uint64_t> decFile(const BIN &kek, const std::string &path);
 }
 
 // token
 extern void saveToken(const BIN &token);
 extern BIN loadToken();
+
+// file
+FHeader getFileHeader(const std::string& path);
 
 // admin view
 extern void adminUI();

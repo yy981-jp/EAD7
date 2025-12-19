@@ -22,6 +22,11 @@ BIN derivekey_password(const std::string& password, const BIN& salt,
 	return key;
 }
 
+BIN deriveKEK(const BIN& mk, const std::string kid_b64) {
+	std::string infoKEK = "EAD7|KEK|v1|" + kid_b64;
+	return deriveKey(mk, infoKEK, 32);
+}
+
 
 json convert_kid_kek(const BIN& mk, const json& kid_json, const uint8_t& mkid) {
 	int64_t unix_now = getUnixTime();
@@ -33,8 +38,7 @@ json convert_kid_kek(const BIN& mk, const json& kid_json, const uint8_t& mkid) {
 		std::string note   = entry.value("note", "");
 		int64_t created	= entry.value("created", unix_now);
 
-		std::string infoKEK = "EAD7|KEK|v1|" + kid_b64;
-		std::string kek_b64 = base::enc64(deriveKey(mk, infoKEK, 32));
+		std::string kek_b64 = base::enc64(deriveKEK(mk, kid_b64));
 
 		keks[kid_b64]["label"] = label;
 		keks[kid_b64]["status"] = status;

@@ -8,26 +8,6 @@
 #include <limits>
 
 #include  <iostream>
-#pragma pack(push, 1)
-struct fixedFHeader {
-	uint64_t magic;
-	uint8_t ver;
-};
-struct FHeader {
-	uint8_t mkid;
-	std::array<uint8_t,16> kid;
-	uint32_t chunkSize;
-	uint64_t chunkNumber;
-	uint32_t lastChunkSize;
-};
-struct FChunk {
-	std::array<uint8_t,12> nonce;
-	std::array<uint8_t,16> tag;
-};
-#pragma pack(pop)
-static_assert(sizeof(fixedFHeader) == 1+8, "fixedFHeader size mismatch!");
-static_assert(sizeof(FHeader) == 1+16+8+8, "FHeader size mismatch!");
-static_assert(sizeof(FChunk) == 12+16, "FChunk size mismatch!");
 
 
 static size_t toBufferSize(uint64_t requested) {
@@ -165,6 +145,11 @@ inline BIN deriveE7FileHmacKey(const BIN& key) {
 inline BIN deriveDECFileKey(const BIN& kek, const BIN& nonce) {
 	std::string info = "EAD7|DECFile|v1";
 	return deriveKey(kek, info, 32, nonce);
+}
+
+FHeader getFileHeader(const std::string& path) {
+	E7BinFReader file(path);
+	return file.h;
 }
 
 

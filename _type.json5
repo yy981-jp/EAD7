@@ -42,7 +42,7 @@
 		"<base64>": { // KID
 			"label": "example-label",
 			"status": "active",
-			"created": 1756617060
+			"created": 1756617060,
 			"mkid": 1,
 			"kek": "<base64>", // 平文 KEK
 		}
@@ -62,8 +62,8 @@
 			"label": "example-label", // (AAD)
 			"status": "active", // (AAD)
 			"created": 1756617060, // (AAD)
-			"salt": "<base64>"
-			"mkid": 1 // KEKの導出に使うMK (AAD)
+			"salt": "<base64>",
+			"mkid": 1, // KEKの導出に使うMK (AAD)
 			"enc": {
 				"ct": "<base64>",
 				"tag": "<base64>",
@@ -83,7 +83,7 @@
 	"enc": {
 		"ct": "<base64>",   // KEKs部分の暗号文
 		"tag": "<base64>",
-		"nonce": "<base64>"
+		"nonce": "<base64>",
 		"salt": "<base64>"
 	}
 }
