@@ -4,7 +4,7 @@
 
 #include "../master.h"
 #include "gui.h"
-#include "../CUI/ui.h"
+#include "../UI/util.h"
 #include "../CUI/text.h"
 #include "ui_main.h"
 

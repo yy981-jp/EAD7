@@ -117,57 +117,6 @@ std::string toUTF8(const std::string& s) {
 	return out;
 }
 
-bool isBase64UrlSafe(const std::string& input) {
-	try {
-		base::dec64(input);
-	} catch (const Exception&) {
-		return false;
-	}
-
-	return true;
-}
-
-bool isJson(const std::string& input) {
-	// if (input.starts_with("{")) return false;
-	try {
-		json j = json::parse(input);
-	}
-	catch (...) {
-		return false;
-	}
-	return true;
-}
-
-FDat getJsonType(const json& j) {
-	if (j.contains("hmac")) return FDat(FSType::kid,j);
-	std::string kek_type = j.at("type");
-	if (kek_type=="p")   return FDat(FSType::p_kek,j);
-	if (kek_type=="raw") return FDat(FSType::raw_kek,j);
-	if (kek_type=="cus") return FDat(FSType::cus_kek,j);
-	if (kek_type=="adm") return FDat(FSType::adm_kek,j);
-	if (kek_type=="dst") return FDat(FSType::dst_kek,j);
-	return FDat(FSType::unknown_json,{});
-}
-
-FDat getFileType(const fs::path& file) {
-	if (file.extension() != ".e7") return FDat(FSType::fe_e7,{});
-	if (file.stem()=="mk") return FDat(FSType::MK,readJson(file.string()));
-	if (!file.stem().has_extension() && file.stem()=="kek") return FDat(FSType::p_kek,readJson(file.string()));
-	if (file.stem().extension()==".kid") return FDat(FSType::kid,readJson(file.string()));
-	if (file.stem().extension()==".kek") return getJsonType(readJson(file.string()));
-	return FDat(FSType::unknown_file,{});
-}
-
-FDat getFileType(std::string& file) {
-	while (file.starts_with(" ")) {file.erase(0,1);}
-	if (fs::exists(to_wstring(file))) return getFileType(fs::path(file));
-	if (isJson(file)) return getJsonType(readJson(file));
-	if (isBase64UrlSafe(file)) {
-		if (base::dec64(file)[0]==HEADER::magicData) return FDat(FSType::encBin,{});
-		else return FDat(FSType::unknown_bin,{});
-	}
-	return FDat(FSType::unknown,{});
-}
 /*
 void loadSubcommand(const std::map<std::vector<std::string>, std::function<void()>> commandList) {
 	for (auto [aliases,handler]: commandList) {

@@ -1,7 +1,7 @@
 #include "gui.h"
-#include "../cui/ui.h"
 #include "../master.h"
 #include "../base.h"
+#include "../UI/util.h"
 
 #include "awv.h"
 
@@ -129,7 +129,6 @@ namespace awv {
 		json entry_j = j["keks"][entry.label];
 		aui->KID_create_b64->setText(QString::fromStdString(entry_j["b64"]));
 		aui->KID_create_note->setPlainText(QString::fromStdString(entry_j["note"]));
-
 	}
 	
 	void KID_recal() {

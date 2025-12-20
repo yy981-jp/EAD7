@@ -38,10 +38,13 @@
 	void windowSave::save() {
 		json setting;
 		setting["MainWindow"] = saveWidgetCore(w);
+		setting["MainWindowSys"]["width"] = w->width();
+		setting["MainWindowSys"]["height"] = w->height();
 		writeJson(setting,settingFile);
 	}
 
 	void windowSave::load() {
 		json setting = readJson(settingFile);
 		loadWidgetCore(w,setting["MainWindow"]);
+		w->resize(setting["MainWindowSys"]["width"],setting["MainWindowSys"]["height"]);
 	}

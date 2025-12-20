@@ -7,6 +7,7 @@
 
 #include "../CUI/ui.h"
 #include "../GUI/gui.h"
+#include "../UI/util.h"
 
 
 std::string getFileInfo(bool isGUI, FDat& f) {
@@ -104,9 +105,14 @@ std::string getFileInfo(bool isGUI, FDat& f) {
             sout << "base64urlsafe\n";
 
         } break;
-		case FSType::encBin: {
+		case FSType::bin_e7: {
 
-			sout << "[暗号化されたファイル]";
+			sout << "[暗号化されたファイル]\n"
+                 << "チャンク数: " << f.json["chunkNumber"] << "\n"
+                 << "チャンクサイズ: " << formatBytes(f.json["chunkSize"]) << "\n"
+                 << "最終チャンクサイズ: " << formatBytes(f.json["lastChunkSize"]) << "\n"
+                 << "MK-ID: " << f.json["mkid"] << "\n"
+                 << "KEK-ID: " << f.json["kid"] << "\n";
 
         } break;
 			default: sout << "多分正しいe7系統データではない"; // 処理を実装してない部分だったらごめん

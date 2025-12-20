@@ -1,9 +1,10 @@
 #include <sstream>
 
 #include "gui.h"
-#include "../cui/ui.h"
+#include "../UI/util.h"
 #include "../master.h"
 #include "../base.h"
+#include "../UI/info.h"
 
 #include "mw.h"
 #include "awv.h"
@@ -58,7 +59,8 @@ namespace mw {
 
 	void fileInfo(const std::string& path) {
 		FDat f = getFileType(fs::path(path));
-		u::stat("情報モード: ファイル形式 " + std::to_string(static_cast<int>(f.type)));
+		std::string str = getFileInfo(true, f);
+		ui->out->setPlainText(QString::fromStdString("[情報] - " + str));
 	}
 
 	void textProc(const std::string& text) {
@@ -193,7 +195,7 @@ namespace mw {
 			}
 			delm(raw_kek);
 
-		}
+		} else mw::fileInfo(path);
 	}
 	
 	void run() {

@@ -45,13 +45,11 @@ struct KIDEntry {
 	KStat status;
 
 	// KIDEntry(std::string label, std::string note, KStat status = KStat::active): label(label), note(note), status(status) {}
-	operator bool()
-	{
+	operator bool() {
 		return (status == KStat::active);
 	}
 
-	static std::string statusSTR(const KStat &stat)
-	{
+	static std::string statusSTR(const KStat &stat) {
 		switch (stat)
 		{
 		case KStat::active:
@@ -119,11 +117,11 @@ namespace EAD7 {
 }
 
 // token
-extern void saveToken(const BIN &token);
-extern BIN loadToken();
+void saveToken(const BIN &token);
+BIN loadToken();
 
 // file
 FHeader getFileHeader(const std::string& path);
 
 // admin view
-extern void adminUI();
+void adminUI();

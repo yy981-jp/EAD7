@@ -13,6 +13,7 @@
 #include "cui.h"
 #include "gui.h"
 #include "ui_main.h"
+#include "../UI/util.h"
 #include "../CUI/ui.h"
 #include "../CUI/text.h"
 #include "windowSave.h"
@@ -95,6 +96,7 @@ void GUI() {
 	
 	CN(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
 	CN(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
+	CN(ui->resizeWindow, &QPushButton::clicked, []{w->resize(730,460);});
 	CN(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
 		mw::inp_from = ui->inp_from->itemData(index).value<INP_FROM>();
 	});
