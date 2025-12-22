@@ -144,7 +144,7 @@
        <string>管理パネル</string>
       </property>
       <property name="icon">
-       <iconset theme="start-here"/>
+       <iconset theme="utilities-system-monitor"/>
       </property>
      </widget>
     </item>
@@ -306,6 +306,9 @@
      <widget class="QPushButton" name="resizeWindow">
       <property name="text">
        <string>ResizeWindow</string>
+      </property>
+      <property name="icon">
+       <iconset theme="window-new"/>
       </property>
      </widget>
     </item>
