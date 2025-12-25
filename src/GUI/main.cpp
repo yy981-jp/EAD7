@@ -73,9 +73,7 @@ void GUI() {
 	
 	
 	CN(app, &QCoreApplication::aboutToQuit, windowSave::save);
-	shortcut_inp_multi = new QShortcut(QKeySequence("Alt+Return"), ui->inp_multi);
 	CN(ui->run, &QPushButton::clicked, mw::run);
-	CN(shortcut_inp_multi, &QShortcut::activated, []{mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
 	CN(ui->inp_line, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::line); ui->run->animateClick();});
 	CN(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::file); ui->run->animateClick();});
 	CN(ui->inp_file_button, &FileButton::fileSelected, [](const QString& selectedFile){
@@ -112,6 +110,8 @@ void GUI() {
 	CN(ui->clear, &QPushButton::clicked, ui->out, &QPlainTextEdit::clear);
 
 	// shortcuts
+	CN(new QShortcut(QKeySequence("Alt+Return"), ui->inp_multi), &QShortcut::activated, []{mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
+
 	CN(new QShortcut(QKeySequence("Ctrl+C"), w), &QShortcut::activated, ui->copy, &QPushButton::animateClick);
 	CN(new QShortcut(QKeySequence("Ctrl+X"), w), &QShortcut::activated, ui->clear, &QPushButton::animateClick);
 	CN(new QShortcut(QKeySequence("Ctrl+O"), w), &QShortcut::activated, ui->inp_file_button, &QPushButton::animateClick);
@@ -164,6 +164,9 @@ void GUI() {
 	CN(aui->KID_create_write, &QPushButton::clicked, awv::KID_create_write);
 	CN(aui->KID_create_load, &QPushButton::clicked, awv::KID_create_load);
 	CN(aui->KID_recal_run, &QPushButton::clicked, awv::KID_recal);
+
+	// ### AdminUI KEK
+	CN(aui->KEK_load, QPushButton::clicked, awv::KEK_KIDLoad);
 	
 	
 	awv::MK_load();

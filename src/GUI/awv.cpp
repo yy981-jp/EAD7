@@ -1,12 +1,16 @@
+#include <QtGui/QStandardItemModel>
+
 #include "gui.h"
 #include "../master.h"
 #include "../base.h"
+#include "widgets/twoTreeView.h"
 #include "../UI/util.h"
 
 #include "awv.h"
 
 namespace awv {
-	void MK_load() {
+	std::vector<uint8_t> MK_load() {
+		std::vector<uint8_t> result;
 		const std::vector<QComboBox*> comboBoxes = {
 			aui->MK_unWrap_index,
 			aui->KID_create_index,
@@ -19,6 +23,7 @@ namespace awv {
 		json MK = readJson(path::MK);
 		QStringList mkids;
 		for (const auto& [index,object]: MK.items()) {
+			result.emplace_back(std::stoi(index));
 			mkids << QString::fromStdString(index);
 		}
 		
@@ -27,6 +32,7 @@ namespace awv {
 			c->addItems(mkids);
 		}
 		
+		return result;
 	}
 	
 	void MK_clear() {
@@ -141,11 +147,28 @@ namespace awv {
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
 		
-		json j = readJson(SDM+std::to_string(mkid)+".kid.e7").at("body");
+		json j = readJson(getKIDFilePath(mkid)).at("body");
 		saveKID(mk,mkid,j);
 		
 		u::sl("KID_recal: 完了");
 		delm(mkpass);
+	}
+
+	void KEK_KIDLoad() {
+		std::vector<uint8_t> mkids = MK_load();
+		std::map<std::string,std::vector<std::string>> items;
+		for (const uint8_t mkid: mkids) {
+			std::vector<std::string> items_child;
+			std::string kidfpath = getKIDFilePath(mkid);
+			if (!fs::exists(kidfpath)) continue;
+			json kids = readJson(kidfpath).at("body").at("kids");
+			for (auto [label,entry]: kids.items()) {
+				items_child.emplace_back(label);
+			}
+			items[std::string{"MK-ID: "} + std::to_string(mkid)] = items_child;
+		}
+
+		aui->KEK_leftTree->init(true,TwoTreeView::convModel("KIDAllList", items));
 	}
 
 	/// @param kid 

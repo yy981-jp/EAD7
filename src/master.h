@@ -33,6 +33,10 @@ inline int64_t getUnixTime() {
 	return static_cast<int64_t>(std::time(nullptr));
 }
 
+inline std::string getKIDFilePath(const uint8_t& mkid) {
+	return SDM + std::to_string(mkid) + ".kid.e7";
+}
+
 enum class KStat {
 	active,
 	disabled,

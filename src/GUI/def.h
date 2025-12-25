@@ -16,7 +16,6 @@ extern Ui::AdminWindow* aui;
 extern MainWindow* w;
 extern FileButton* fb;
 extern QClipboard* clipboard;
-extern QShortcut* shortcut_inp_multi;
 extern json PKEK;
 
 struct THEADER {

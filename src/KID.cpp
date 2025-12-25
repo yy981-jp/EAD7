@@ -55,7 +55,7 @@ void addNewKid(ordered_json& body, const KIDEntry& kid_e) {
 
 json loadKID(const BIN& mk, const uint8_t& mkid) {
 	if (mk.empty()) throw std::runtime_error("loadKID()::MKが破損しています");
-	const std::string path = SDM + std::to_string(mkid) + ".kid.e7";
+	const std::string path = getKIDFilePath(mkid);
 	ordered_json j;
 	if (!fs::exists(path)) {
 		j = {
@@ -95,7 +95,7 @@ json loadKID(const BIN& mk, const uint8_t& mkid) {
 
 void saveKID(const BIN& mk, const uint8_t& mkid, const ordered_json& body) {
 	if (mk.empty()) throw std::runtime_error("saveKID()::MKが破損しています");
-	const std::string path = SDM + std::to_string(mkid) + ".kid.e7";
+	const std::string path = getKIDFilePath(mkid);
 	// HMAC計算
 	BIN hkey = deriveKidlistHmacKey(mk);
 	std::string body_dump = body.dump();
