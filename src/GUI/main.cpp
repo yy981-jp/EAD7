@@ -94,7 +94,7 @@ void GUI() {
 	
 	CN(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
 	CN(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
-	CN(ui->resizeWindow, &QPushButton::clicked, []{w->resize(730,460);});
+	CN(ui->resizeWindow, &QPushButton::clicked, []{w->resize(730,500);});
 	CN(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
 		mw::inp_from = ui->inp_from->itemData(index).value<INP_FROM>();
 	});
@@ -173,6 +173,7 @@ void GUI() {
 	// restore window
 	if (fs::exists(windowSave::settingFile)) windowSave::load();
 
+	u::log(std::string("AES-NI 高速化: ") + (AESNI? "有効": "無効"));
 	u::log("ui setup完了");
 	
 	ui->inp_line->setFocus();

@@ -16,6 +16,7 @@ public:
 	void init(const bool isLeft, QStandardItemModel* model);
 	bool isLeft;
 	std::vector<std::string> getFlatModel() const;
+	operator bool() const;
 	static QStandardItemModel* convModel(const std::string& label, const std::map<std::string, std::vector<std::string>>& i);
 	static QStandardItemModel* convModel(const std::string& label, const std::vector<std::string>& i);
 
@@ -23,4 +24,5 @@ protected:
 	void dragEnterEvent(QDragEnterEvent *event) override;
 	void dragMoveEvent(QDragMoveEvent *event) override;
 	void dropEvent(QDropEvent *event) override;
+	bool enable;
 };

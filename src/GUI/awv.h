@@ -11,5 +11,6 @@ namespace awv {
 	void KID_create_load();
 	void KID_recal();
 	void KEK_KIDLoad();
+	void KEK_write();
 	BIN OT_dec(BIN kid);
 }

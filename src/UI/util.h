@@ -9,7 +9,8 @@
 #include "../master.h"
 #include "../base.h"
 
-std::string formatBytes(std::uint64_t bytes);
+std::string formatBytes(uint64_t bytes);
+std::string formatSeconds(uint64_t totalSeconds);
 
 inline void openFile(const std::string& path) {
 	ShellExecuteA(NULL, "open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);

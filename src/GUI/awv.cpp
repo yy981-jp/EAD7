@@ -168,7 +168,14 @@ namespace awv {
 			items[std::string{"MK-ID: "} + std::to_string(mkid)] = items_child;
 		}
 
+		std::vector<std::string> nullData;
+
 		aui->KEK_leftTree->init(true,TwoTreeView::convModel("KIDAllList", items));
+		aui->KEK_rightTree->init(false,TwoTreeView::convModel("rihtPanel", nullData));
+	}
+
+	void KEK_write() {
+		
 	}
 
 	/// @param kid 

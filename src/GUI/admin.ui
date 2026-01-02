@@ -27,16 +27,6 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QCheckBox" name="enableControl">
-     <property name="text">
-      <string>管理ウィンドウの操作を有効化</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -48,25 +38,42 @@
       <bool>true</bool>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab_other">
       <attribute name="title">
        <string>一般</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
-       <item row="2" column="0">
-        <spacer name="OT_verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="dec">
+         <property name="title">
+          <string>マスターキーを使用して復号</string>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+         <layout class="QGridLayout" name="gridLayout_12">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="OT_dec_mk_index">
+            <property name="placeholderText">
+             <string>MKIDを選択</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="OT_dec_enable">
+            <property name="text">
+             <string>モードを使用</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLineEdit" name="OT_dec_mk_pass">
+            <property name="placeholderText">
+             <string>パスワードを入力</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="OT_dst">
@@ -123,35 +130,18 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="dec">
-         <property name="title">
-          <string>マスターキーを使用して復号</string>
+       <item row="2" column="0">
+        <spacer name="OT_verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
-         <layout class="QGridLayout" name="gridLayout_12">
-          <item row="0" column="1">
-           <widget class="QComboBox" name="OT_dec_mk_index">
-            <property name="placeholderText">
-             <string>MKIDを選択</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="OT_dec_enable">
-            <property name="text">
-             <string>モードを使用</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QLineEdit" name="OT_dec_mk_pass">
-            <property name="placeholderText">
-             <string>パスワードを入力</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -385,13 +375,16 @@
        <string>KEK</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_9">
-       <item row="3" column="2">
-        <widget class="QLineEdit" name="KEK_MKpass"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="KEK_label">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;操作対象KEK(新しく入力すると新規作成): &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <item row="1" column="2" colspan="2">
+        <widget class="QComboBox" name="KEK_target">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="currentText">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string/>
          </property>
         </widget>
        </item>
@@ -417,19 +410,6 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="2" colspan="2">
-        <widget class="QComboBox" name="KEK_target">
-         <property name="editable">
-          <bool>true</bool>
-         </property>
-         <property name="currentText">
-          <string/>
-         </property>
-         <property name="placeholderText">
-          <string/>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0" colspan="4">
         <widget class="QPushButton" name="KEK_load">
          <property name="text">
@@ -447,6 +427,26 @@
          </property>
          <property name="placeholderText">
           <string>MKIDを選択</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="KEK_label">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;操作対象KEK(新しく入力すると新規作成): &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="KEK_MKpass">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="placeholderText">
+          <string>パスワードを入力</string>
          </property>
         </widget>
        </item>

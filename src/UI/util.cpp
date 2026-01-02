@@ -7,7 +7,7 @@
 #include <iomanip>
 
 
-std::string formatBytes(std::uint64_t bytes) {
+std::string formatBytes(uint64_t bytes) {
 	static constexpr std::array<std::string, 7> units = {
 		"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"
 	};
@@ -25,6 +25,42 @@ std::string formatBytes(std::uint64_t bytes) {
 		<< v << " " << units[i];
 	return oss.str();
 }
+
+std::string formatSeconds(uint64_t totalSeconds) {
+	uint64_t sec = totalSeconds;
+
+	uint64_t days = sec / 86400;
+	sec %= 86400;
+
+	uint64_t hours = sec / 3600;
+	sec %= 3600;
+
+	uint64_t minutes = sec / 60;
+	sec %= 60;
+
+	std::ostringstream oss;
+	bool first = true;
+
+	if (days > 0) {
+		oss << days << "d";
+		first = false;
+	}
+	if (hours > 0 || !first) {
+		if (!first) oss << ":";
+		oss << hours << "h";
+		first = false;
+	}
+	if (minutes > 0 || !first) {
+		if (!first) oss << ":";
+		oss << minutes << "m";
+		first = false;
+	}
+	if (!first) oss << ":";
+	oss << sec << "s";
+
+	return oss.str();
+}
+
 
 bool isBase64UrlSafe(const std::string& input) {
 	try {

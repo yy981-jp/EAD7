@@ -154,7 +154,7 @@ FHeader getFileHeader(const std::string& path) {
 
 
 namespace EAD7 {
-	void encFile(const BIN& kek, const std::string& path, const uint8_t& mkid, const BIN& kid, uint32_t chunkSize) {
+	void encFile(const BIN& kek, const std::string& path, const uint8_t& mkid, const BIN& kid, uint32_t chunkSize, std::atomic<uint64_t>* currentChunkNumber) {
 		std::string opath = path + ".e7";
 		std::ofstream ofs(fs::path(to_wstring(opath)),std::ios::binary);
 		if (!ofs) throw std::runtime_error("encFile()::ofs");
@@ -172,11 +172,12 @@ namespace EAD7 {
 		hmac.Update(reinterpret_cast<const uint8_t*>(&h), sizeof(FHeader));
 		ofs.write(reinterpret_cast<const char*>(&fh), sizeof(fixedFHeader));
 		ofs.write(reinterpret_cast<const char*>(&h), sizeof(FHeader));
-		
+
 		// body構成
 		while (file) {
 			std::streampos readChunkSize = file.next();
 			if (readChunkSize == 0) throw std::runtime_error("encFile()::チャンク読み込み失敗");
+			if (currentChunkNumber) currentChunkNumber->store(file.currentChunk);
 			BIN nonce = randomBIN(12);
 			BIN decKey = deriveDECFileKey(kek, nonce);
 			
@@ -205,7 +206,7 @@ namespace EAD7 {
 	}
 
 	/// @return errorChunkNumbers
-	std::vector<uint64_t> decFile(const BIN& kek, const std::string& path) {
+	std::vector<uint64_t> decFile(const BIN& kek, const std::string& path, std::atomic<uint64_t>* currentChunkNumber) {
 		std::vector<uint64_t> errorChunkNumbers;
 		fs::path path_f(path);
 		std::string opath = (path_f.parent_path()/path_f.stem()).string();
@@ -219,11 +220,12 @@ namespace EAD7 {
 
 		hmac.Update(reinterpret_cast<const uint8_t*>(&file.fh), sizeof(fixedFHeader));
 		hmac.Update(reinterpret_cast<const uint8_t*>(&file.h), sizeof(FHeader));
-		
+
 		// body構成
 		while (file) {
 			std::streampos readBytes = file.next();
 			if (readBytes == 0) throw std::runtime_error("decFile()::チャンク読み込み失敗");
+			if (currentChunkNumber) currentChunkNumber->store(file.currentChunk);
 			BIN decKey = deriveDECFileKey(kek, file.nonce);
 			
 			BIN out;
@@ -234,7 +236,7 @@ namespace EAD7 {
 */
 			try {
 				out = decAES256GCM(decKey, file.nonce, file.ct, file.tag);
-			} catch (const CryptoPP::Exception& e) {
+			} catch (...) {
 				out.resize(file.h.chunkSize); // ダミー出力 0埋め
 				errorChunkNumbers.push_back(file.currentChunk);
 				continue;
@@ -248,7 +250,7 @@ namespace EAD7 {
 		// 全体HMAC検証
 		BIN digest(hmac.DigestSize());
 		hmac.Final(digest);
-		if (digest != file.hmac) errorChunkNumbers.push_back(0); // 全体HMACエラー
+		// if (digest != file.hmac) errorChunkNumbers.push_back(0); // 全体HMACエラー
 
 		return errorChunkNumbers;
 	}

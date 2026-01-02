@@ -116,8 +116,8 @@ json decDstKEK(const std::string &password, const json &dst_json);
 namespace EAD7 {
 	BIN enc(const BIN &kek, const BIN &plaintext, const uint8_t &mkid, const BIN &kid);
 	BIN dec(const BIN &kek, const BIN &blob);
-	void encFile(const BIN &kek, const std::string &path, const uint8_t &mkid, const BIN &kid, uint32_t chunkSize);
-	std::vector<uint64_t> decFile(const BIN &kek, const std::string &path);
+	void encFile(const BIN &kek, const std::string &path, const uint8_t &mkid, const BIN &kid, uint32_t chunkSize, std::atomic<uint64_t>* currentChunkNumber = nullptr);
+	std::vector<uint64_t> decFile(const BIN &kek, const std::string &path, std::atomic<uint64_t>* currentChunkNumber = nullptr);
 }
 
 // token
