@@ -1,23 +1,29 @@
+#include <QtGui/QStandardItemModel>
+
 #include "gui.h"
-#include "../cui/ui.h"
 #include "../master.h"
 #include "../base.h"
+#include "widgets/twoTreeView.h"
+#include "../UI/util.h"
 
 #include "awv.h"
 
 namespace awv {
-	void MK_load() {
+	std::vector<uint8_t> MK_load() {
+		std::vector<uint8_t> result;
 		const std::vector<QComboBox*> comboBoxes = {
 			aui->MK_unWrap_index,
 			aui->KID_create_index,
 			aui->KID_recal_index,
 			aui->KEK_index,
-			aui->OT_dst_index
+			aui->OT_dst_index,
+			aui->OT_dec_mk_index
 		};
 
 		json MK = readJson(path::MK);
 		QStringList mkids;
 		for (const auto& [index,object]: MK.items()) {
+			result.emplace_back(std::stoi(index));
 			mkids << QString::fromStdString(index);
 		}
 		
@@ -26,6 +32,7 @@ namespace awv {
 			c->addItems(mkids);
 		}
 		
+		return result;
 	}
 	
 	void MK_clear() {
@@ -73,7 +80,7 @@ namespace awv {
 		delm(mkpass);
 	}
 	
-	void KID_create() {
+	void KID_create_write() {
 		QString mkid_qs = aui->KID_create_index->currentText();
 		std::string mkpass = aui->KID_create_mkpass->text().toStdString();
 		KIDEntry entry;
@@ -82,26 +89,52 @@ namespace awv {
 		entry.note = aui->KID_create_note->toPlainText().toStdString();
 		entry.status = KStat::active;
 		
+		if (entry.b64.empty()) entry.b64 = base::enc64(randomBIN(16));
+		
 		if (mkid_qs.isEmpty() || mkpass.empty() || entry.label.empty()) {
-			u::stat("KID_create: 入力が不足しています");
+			u::stat("KID_create_write: 入力が不足しています");
 			return;
 		}
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
-		ordered_json j = loadKID(mk,mkid);
-		if (j.contains(entry.label)) {
-			// 中断
-		}
+		json j = loadKID(mk,mkid);
 		if (!isBase64UrlSafe(entry.b64)) {
-			u::stat("KID_create: Base64URLSafeの形式が不正です");
+			u::stat("KID_create_write: Base64URLSafeの形式が不正です");
+			return;
+		}
+
+		std::pair<std::string,ordered_json> entry_j = makeKidEntry(entry);
+		j["kids"][entry_j.first] = entry_j.second;
+
+		saveKID(mk,mkid,j);
+		
+		u::sl("KID_create_write: 完了");
+		delm(mkpass);
+	}
+
+	void KID_create_load() {
+		QString mkid_qs = aui->KID_create_index->currentText();
+		std::string mkpass = aui->KID_create_mkpass->text().toStdString();
+		uint8_t mkid = mkid_qs.toInt();
+		BIN mk = loadMK(mkid,mkpass);
+		if (aui->KID_create_label->text().isEmpty()) {
+			u::stat("KID_create_load: 入力が不足しています");
+			return;
+		} 
+		ordered_json j = loadKID(mk,mkid);
+		
+		KIDEntry entry;
+		
+		entry.label = aui->KID_create_label->text().toStdString();
+
+		if (!j.at("keks").contains(entry.label)) {
+			u::stat("KID_create_load: 対象のエントリが見つかりません");
 			return;
 		}
 		
-		addNewKid(j,entry);
-		saveKID(mk,mkid,j);
-		
-		u::sl("KID_create: 完了");
-		delm(mkpass);
+		json entry_j = j["keks"][entry.label];
+		aui->KID_create_b64->setText(QString::fromStdString(entry_j["b64"]));
+		aui->KID_create_note->setPlainText(QString::fromStdString(entry_j["note"]));
 	}
 	
 	void KID_recal() {
@@ -114,10 +147,45 @@ namespace awv {
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
 		
-		json j = readJson(SDM+std::to_string(mkid)+".kid.e7").at("body");
+		json j = readJson(getKIDFilePath(mkid)).at("body");
 		saveKID(mk,mkid,j);
 		
 		u::sl("KID_recal: 完了");
 		delm(mkpass);
+	}
+
+	void KEK_KIDLoad() {
+		std::vector<uint8_t> mkids = MK_load();
+		std::map<std::string,std::vector<std::string>> items;
+		for (const uint8_t mkid: mkids) {
+			std::vector<std::string> items_child;
+			std::string kidfpath = getKIDFilePath(mkid);
+			if (!fs::exists(kidfpath)) continue;
+			json kids = readJson(kidfpath).at("body").at("kids");
+			for (auto [label,entry]: kids.items()) {
+				items_child.emplace_back(label);
+			}
+			items[std::string{"MK-ID: "} + std::to_string(mkid)] = items_child;
+		}
+
+		std::vector<std::string> nullData;
+
+		aui->KEK_leftTree->init(true,TwoTreeView::convModel("KIDAllList", items));
+		aui->KEK_rightTree->init(false,TwoTreeView::convModel("rihtPanel", nullData));
+	}
+
+	void KEK_write() {
+		
+	}
+
+	/// @param kid 
+	/// @return kek 
+	BIN OT_dec(BIN kid) {
+		QString mkid_qs = aui->OT_dec_mk_index->currentText();
+		std::string mkpass = aui->OT_dec_mk_pass->text().toStdString();
+		if (mkid_qs.isEmpty() || mkpass.empty()) throw std::runtime_error("OT_dec: 入力が不足しています");
+		uint8_t mkid = mkid_qs.toInt();
+		BIN mk = loadMK(mkid,mkpass);
+		return deriveKEK(mk, base::enc64(kid));
 	}
 }

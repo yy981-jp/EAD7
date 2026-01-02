@@ -15,6 +15,7 @@ public:
 	
 	FileButton(QWidget *parent = nullptr) : QPushButton(parent) {
 		setAcceptDrops(true);
+		QObject::connect(this, &QPushButton::clicked, this, &FileButton::onPressed);
 	}
 
 protected:
@@ -32,15 +33,12 @@ protected:
 		}
 	}
 
-	void mousePressEvent(QMouseEvent *event) override {
-		if (event->button() == Qt::LeftButton) {
-			QString filePath = QFileDialog::getOpenFileName(this, tr("ファイルを選択"));
-			if (!filePath.isEmpty()) {
-				emit fileSelected(filePath);
-			}
-		}
-	}
-
 signals:
 	void fileSelected(const QString &filePath);
+
+public slots:
+	void onPressed() {
+		QString filePath = QFileDialog::getOpenFileName(this, tr("ファイルを選択"));
+		if (!filePath.isEmpty()) emit fileSelected(filePath);
+	}
 };

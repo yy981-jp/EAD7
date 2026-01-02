@@ -16,5 +16,10 @@ extern Ui::AdminWindow* aui;
 extern MainWindow* w;
 extern FileButton* fb;
 extern QClipboard* clipboard;
-extern QShortcut* shortcut_inp_multi;
 extern json PKEK;
+
+struct THEADER {
+	uint8_t magic, ver, mkid;
+	std::array<uint8_t,16> kid;
+	std::array<uint8_t,12> nonce;
+};

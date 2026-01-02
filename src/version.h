@@ -8,7 +8,7 @@ struct VER {
 	uint16_t gen{7}, major{0}, minor{0}, patch{0};
 	
 	constexpr std::string str() const {
-		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+patch);
+		return "v"+std::to_string(major)+"."+std::to_string(minor)+(patch==0? "": "."+std::to_string(patch));
 	}
 	
 	constexpr uint64_t num() const {
@@ -18,7 +18,8 @@ struct VER {
 		return (uint64_t)gen<<(16*3) | (uint64_t)major<<(16*2) | (uint64_t)minor<<(16*1) | (uint64_t)patch;
 	}
 
-	void loadCSV();
+	void fromCSVString(const std::string& line);
+	void loadCSV(std::string path = csvPath);
 	constexpr static std::string csvPath = "ver.csv";
 };
 

@@ -9,6 +9,7 @@
 #include "../base.h"
 #include "ui.h"
 #include "../GUI/cui.h"
+#include "../UI/util.h"
 
 
 json getAdmKEK(const bool embed = false) {
@@ -24,7 +25,7 @@ json getAdmKEK(const bool embed = false) {
 	return j;
 }
 
-json loadKIDEntry(const json& kid) { //mkid 1つずつのみ対応 増やしたかったらその時作る?     kid全体を受け取り、選択されたエントリだけで構築されたkidのkids部分のみ返す
+json selectKIDEntry(const json& kid) { //mkid 1つずつのみ対応 増やしたかったらその時作る?     kid全体を受け取り、選択されたエントリだけで構築されたkidのkids部分のみ返す
 	std::vector<Entry> list_i;
 	for (const auto& [key,value]: kid["kids"].items()) {
 		list_i.emplace_back(Entry(value.at("label"),key));
@@ -108,7 +109,7 @@ namespace uim {
 			} break;
 			case 'S': {
 				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
-				ordered_json j = readJson(SDM+std::to_string(mkid)+".kid.e7")["body"];
+				ordered_json j = readJson(getKIDFilePath(mkid))["body"];
 				std::string pass = inp_s("対象MKIDのパスワード: ");
 				BIN mk = loadMK(mkid,pass);
 				saveKID(mk,mkid,j);
@@ -116,7 +117,7 @@ namespace uim {
 			} break;
 			case 'O': {
 				uint8_t mkid = cmkid(inp("対象のKIDのMKID: "));
-				openFile(SDM+std::to_string(mkid)+".kid.e7");
+				openFile(getKIDFilePath(mkid));
 			} break;
 		}
 	}
@@ -129,7 +130,7 @@ namespace uim {
 				std::string pass = inp_s("MKIDのMKのパスワード: ");
 				BIN mk = loadMK(mkid,pass);
 				json kid = loadKID(mk,mkid);
-				json selectedKid = loadKIDEntry(kid);
+				json selectedKid = selectKIDEntry(kid);
 				json raw_kek = createRawKEK(mk,{},selectedKid,mkid);
 				json adm_kek = encAdmKEK(mk,raw_kek,mkid);
 				delm(raw_kek);

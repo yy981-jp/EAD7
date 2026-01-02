@@ -10,6 +10,7 @@
 #include "../master.h"
 #include "../base.h"
 #include "../GUI/CUI.h"
+#include "../UI/info.h"
 
 
 KIDIndex createKIDIndex(const json& j, KIDIndexType t) { // raw.kek必須
@@ -22,90 +23,6 @@ KIDIndex createKIDIndex(const json& j, KIDIndexType t) { // raw.kek必須
 	}
 	return result;
 }
-
-static void f_infoCore(FDat& f) {
-	switch (f.type) {
-		case FSType::MK: {
-			std::cout << "[MK]:マスターキーリスト\n存在するMKID: ";
-			for (auto [key,value]: f.json.items()) {
-				std::cout << key << ",";
-			}
-			std::cout << "\nより詳細な情報は管理者モードで起動して操作してください\n";
-		} break;
-		case FSType::kid: {
-			std::cout << "[kid]:KIDリスト\nより詳細な情報は管理者モードで起動して操作してください\n";
-		} break;
-		case FSType::raw_kek: {
-			std::cout << "[raw.kek]:生KEK"
-					  << "\n作成日時:     " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
-					  << "\n最終更新日時: " << convUnixTime(f.json["meta"]["last_updated"].get<int64_t>());
-			for (auto [key,v]: f.json["keks"].items()) {
-				std::cout << "\n\t" << v["label"] << " {"
-						  << "\n\t\tID: " << key
-						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
-						  << "\n\t}";
-			}
-			delm(f.json);
-		} break;
-		case FSType::p_kek: {
-			json j = decPKEK(f.json);
-			std::cout << "[p.kek]:通常KEK"
-					  << "\n作成日時:     " << convUnixTime(j["meta"]["created"].get<int64_t>())
-					  << "\n最終更新日時: " << convUnixTime(j["meta"]["last_updated"].get<int64_t>());
-			for (auto [key,v]: j["keks"].items()) {
-				std::cout << "\n\t" << v["label"] << " {"
-						  << "\n\t\tID: " << key
-						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
-						  << "\n\t}";
-			}
-			delm(j);
-		} break;
-		case FSType::cus_kek: {
-			// 後で実装するはず 未来の自分よろ
-			exit(1000);
-		} break;
-		case FSType::adm_kek: {
-			std::cout << "[p.kek]:管理者KEK"
-					  << "\n作成日時:     " << convUnixTime(f.json["meta"]["created"].get<int64_t>())
-					  << "\n最終更新日時: " << convUnixTime(f.json["meta"]["last_updated"].get<int64_t>());
-			for (auto [key,v]: f.json["keks"].items()) {
-				std::cout << "\n\t" << v["label"] << " {"
-						  << "\n\t\tID: " << key
-						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
-						  << "\n\t}";
-			}
-		} break;
-		case FSType::dst_kek: {
-			std::cout << "[dst.kek]:配布KEK\n";
-			std::string pass = inp_s("パスワード: ");
-			json j = decDstKEK(pass,f.json);
-			std::cout << "\n作成日時:     " << convUnixTime(j["meta"]["created"].get<int64_t>())
-					  << "\n最終更新日時: " << convUnixTime(j["meta"]["last_updated"].get<int64_t>());
-			for (auto [key,v]: j["keks"].items()) {
-				std::cout << "\n\t" << v["label"] << " {"
-						  << "\n\t\tID: " << key
-						  << "\n\t\t状態: " << v["status"]
-						  << "\n\t\t作成日時: " << convUnixTime(v["created"])
-						  << "\n\t}";
-			}
-			// clear sensitive data
-			delm(pass, j);
-		} break;
-/*			case FSType::base64: {
-			std::cout << "base64urlsafe\n";
-		} break;
-		case FSType::encBin: {
-			std::cout << "[暗号文()]"
-		} break;
-*/			default: std::cout << "多分正しいe7系統データではない"; // 処理を実装してない部分だったらごめん
-	}
-}
-
-
-
 
 
 namespace ui {
@@ -157,13 +74,13 @@ namespace ui {
 	
 	void f_info3() {
 		FDat f = getFileType(fs::path(ca[2]));
-		f_infoCore(f);
+		std::cout << getFileInfo(false, f);
 	}
 	
 	void f_info2() {
 		const std::string dat = inp("対象のファイルパス,base64,json: ");
 		FDat f = getFileType(dat);
-		f_infoCore(f);
+		std::cout << getFileInfo(false, f);
 	}
 	
 	bool dst() {

@@ -1,4 +1,4 @@
-# set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
 # set(CMAKE_BUILD_TYPE Releases)
 
 
@@ -20,7 +20,7 @@ set(CMAKE_AUTOUIC ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.ui)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Releases")
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
 
 	file(GLOB LIBSRC src/*.cpp)

@@ -6,8 +6,8 @@
 
 namespace windowSave {
 	extern std::string settingFile;
-	extern json saveWidgetCore(QWidget *parent);
-	extern void loadWidgetCore(QWidget *parent, const json& j);
-	extern void save();
-	extern void load();
+	json saveWidgetCore(QWidget *parent);
+	void loadWidgetCore(QWidget *parent, const json& j);
+	void save();
+	void load();
 }

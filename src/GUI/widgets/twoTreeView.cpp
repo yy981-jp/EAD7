@@ -5,7 +5,7 @@
 
 #include <QtCore/QMimeData>
 
-	TwoTreeView::TwoTreeView(QWidget *parent): QTreeView(parent) {}
+	TwoTreeView::TwoTreeView(QWidget *parent): QTreeView(parent), enable(false) {}
 	
 	void TwoTreeView::init(const bool isLeft_i, QStandardItemModel* model) {
 		isLeft = isLeft_i;
@@ -25,6 +25,7 @@
 			setDefaultDropAction(Qt::MoveAction);
 		}
 		expandAll();
+		enable = true;
 	}
 
 	std::vector<std::string> TwoTreeView::getFlatModel() const {
@@ -46,8 +47,11 @@
 
 		for (const auto& [root, items] : i) {
 			auto* rootItem = new QStandardItem(QString::fromStdString(root));
+			rootItem->setFlags(rootItem->flags() & ~Qt::ItemIsEditable);
 			for (const auto& child : items) {
-				rootItem->appendRow(new QStandardItem(QString::fromStdString(child)));
+				auto* item = new QStandardItem(QString::fromStdString(child));
+				item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+				rootItem->appendRow(item);
 			}
 
 			qmodel->appendRow(rootItem);
@@ -61,7 +65,9 @@
 		qmodel->setHorizontalHeaderLabels(QStringList() << QString::fromStdString(label));
 
 		for (const std::string& root : i) {
-			qmodel->appendRow(new QStandardItem(QString::fromStdString(root)));
+			QStandardItem* item = new QStandardItem(QString::fromStdString(root));
+			item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+			qmodel->appendRow(item);
 		}
 
 		return qmodel;
@@ -91,18 +97,19 @@
 			}
 		}
 	}
-
+#include <iostream>
 	void TwoTreeView::dropEvent(QDropEvent *event) {
 		if (isLeft) {
+			std::cout << "D: dropEvent.left\n";
 			// 左にドロップされたら右側から削除
 			if (event->source() != this) {
 				event->acceptProposedAction();
 
 				// 右側モデルから削除処理
-				auto src = qobject_cast<QTreeView *>(event->source());
+				auto src = qobject_cast<QTreeView*>(event->source());
 				if (src) {
 					QModelIndex idx = src->currentIndex();
-					auto model = qobject_cast<QStandardItemModel *>(src->model());
+					auto model = qobject_cast<QStandardItemModel*>(src->model());
 					if (model) {
 						QStandardItem *item = model->itemFromIndex(idx);
 						if (item && item->parent()) {
@@ -110,11 +117,16 @@
 						} else if (item) {
 							model->removeRow(idx.row());
 						}
-					}
-				}
-			}
+					} else std::cout << "D: if model else\n";
+				} else std::cout << "D: if src else\n";
+			} else std::cout << "D: if event->source else\n";
 		} else {
+			std::cout << "D: dropEvent.right\n";
 			// 通常ドロップ処理
 			QTreeView::dropEvent(event);
 		}
+	}
+
+	TwoTreeView::operator bool() const {
+		return enable;
 	}

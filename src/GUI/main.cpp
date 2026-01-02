@@ -13,6 +13,7 @@
 #include "cui.h"
 #include "gui.h"
 #include "ui_main.h"
+#include "../UI/util.h"
 #include "../CUI/ui.h"
 #include "../CUI/text.h"
 #include "windowSave.h"
@@ -43,9 +44,13 @@ void loadKeyCombobox() {
 	
 	json raw_kek = decPKEK(PKEK);
 	u::log("Keyリスト(P_KEK)読み込み完了   最終更新日時: " + convUnixTime(raw_kek["meta"]["last_updated"].get<uint64_t>()));
-	KIDIndex index = createKIDIndex(raw_kek);
-	for (const auto [label,kid]: index) {
-		ui->selectKey->addItem(QString::fromStdString(label),QString::fromStdString(kid));
+	for (auto [kid,entry]: raw_kek["keks"].items()) {
+		std::string mkidAndLabel = "MK-ID: " + std::to_string(entry["mkid"].get<uint8_t>())
+									+ "\t|" + convUnixTime(entry["created"].get<uint64_t>()) 
+									+ "|:\t" + entry["label"].get<std::string>();
+		delm(entry);
+
+		ui->selectKey->addItem(QString::fromStdString(mkidAndLabel),QString::fromStdString(kid));
 	}
 	delm(raw_kek);
 }
@@ -68,9 +73,7 @@ void GUI() {
 	
 	
 	CN(app, &QCoreApplication::aboutToQuit, windowSave::save);
-	shortcut_inp_multi = new QShortcut(QKeySequence("Alt+Return"), ui->inp_multi);
 	CN(ui->run, &QPushButton::clicked, mw::run);
-	CN(shortcut_inp_multi, &QShortcut::activated, []{u::stat("D: inp_multi"); mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
 	CN(ui->inp_line, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::line); ui->run->animateClick();});
 	CN(ui->inp_file_path, &QLineEdit::returnPressed, []{mw::setInpFrom(INP_FROM::file); ui->run->animateClick();});
 	CN(ui->inp_file_button, &FileButton::fileSelected, [](const QString& selectedFile){
@@ -79,13 +82,19 @@ void GUI() {
 		ui->run->animateClick();
 	});
 	
-	CN(ui->encMode, &QRadioButton::toggled, [](const bool encMode){
-		ui->inp_line->setEnabled(!encMode);
-		ui->inp_multi->setEnabled(encMode);
+	CN(ui->encMode, &QRadioButton::toggled, [](const bool multiLine){
+		ui->inp_line->setEnabled(!multiLine);
+		ui->inp_multi->setEnabled(multiLine);
+		/*
+		enc -> multi
+		dec -> one
+		info -> one
+		*/
 	});
 	
 	CN(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
 	CN(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
+	CN(ui->resizeWindow, &QPushButton::clicked, []{w->resize(730,500);});
 	CN(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
 		mw::inp_from = ui->inp_from->itemData(index).value<INP_FROM>();
 	});
@@ -101,13 +110,16 @@ void GUI() {
 	CN(ui->clear, &QPushButton::clicked, ui->out, &QPlainTextEdit::clear);
 
 	// shortcuts
+	CN(new QShortcut(QKeySequence("Alt+Return"), ui->inp_multi), &QShortcut::activated, []{mw::setInpFrom(INP_FROM::multi); ui->run->animateClick();});
+
 	CN(new QShortcut(QKeySequence("Ctrl+C"), w), &QShortcut::activated, ui->copy, &QPushButton::animateClick);
 	CN(new QShortcut(QKeySequence("Ctrl+X"), w), &QShortcut::activated, ui->clear, &QPushButton::animateClick);
 	CN(new QShortcut(QKeySequence("Ctrl+O"), w), &QShortcut::activated, ui->inp_file_button, &QPushButton::animateClick);
 	CN(new QShortcut(QKeySequence("Ctrl+E"), w), &QShortcut::activated, [&]{ui->encMode->setChecked(true);});
 	CN(new QShortcut(QKeySequence("Ctrl+D"), w), &QShortcut::activated, [&]{ui->decMode->setChecked(true);});
+	CN(new QShortcut(QKeySequence("Ctrl+I"), w), &QShortcut::activated, [&]{ui->infoMode->setChecked(true);});
 	CN(new QShortcut(QKeySequence("ESC"), w), &QShortcut::activated, [&]{w->setFocus();});
-	CN(new QShortcut(QKeySequence("Ctrl+I"), w), &QShortcut::activated, [&]{
+	CN(new QShortcut(QKeySequence("/"), w), &QShortcut::activated, [&]{
 		if (ui->inp_line->isEnabled()) ui->inp_line->setFocus();
 			else ui->inp_multi->setFocus();
 	});
@@ -149,13 +161,19 @@ void GUI() {
 	
 	// ### AdminUI KID
 	CN(aui->KID_open, &QPushButton::clicked, []{openFile(SDM);});
-	CN(aui->KID_create_run, &QPushButton::clicked, awv::KID_create);
+	CN(aui->KID_create_write, &QPushButton::clicked, awv::KID_create_write);
+	CN(aui->KID_create_load, &QPushButton::clicked, awv::KID_create_load);
+	CN(aui->KID_recal_run, &QPushButton::clicked, awv::KID_recal);
+
+	// ### AdminUI KEK
+	CN(aui->KEK_load, QPushButton::clicked, awv::KEK_KIDLoad);
 	
 	
 	awv::MK_load();
 	// restore window
 	if (fs::exists(windowSave::settingFile)) windowSave::load();
 
+	u::log(std::string("AES-NI 高速化: ") + (AESNI? "有効": "無効"));
 	u::log("ui setup完了");
 	
 	ui->inp_line->setFocus();
@@ -171,13 +189,13 @@ int GUI_interface() {
 			delete w;	w = nullptr;
 			delete ui;	ui = nullptr;
 			w = new MainWindow;
-			if (!crashed) u::log("EAD GUI 起動"); else {
+			if (!crashed) u::log("EAD7 GUI 起動"); else {
 				crashed = false;
 				ui->log->setPlainText(log);
 				ui->statusbar->showMessage(statText,60*1000); // 1分
 				u::stat("RuntimeError: " + err);
 				u::log("RuntimeError: " + err);
-				u::log("EAD GUI 再起動");
+				u::log("EAD7 GUI 再起動");
 			}
 			GUI(); // Core
 			int result = app->exec();

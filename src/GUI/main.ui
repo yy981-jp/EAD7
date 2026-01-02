@@ -9,12 +9,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>730</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>EAD7</string>
+  </property>
+  <property name="windowIcon">
+   <iconset theme="system-lock-screen"/>
   </property>
   <property name="toolButtonStyle">
    <enum>Qt::ToolButtonStyle::ToolButtonIconOnly</enum>
@@ -27,52 +30,26 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="3" column="5">
-     <widget class="FileButton" name="inp_file_button">
-      <property name="acceptDrops">
-       <bool>true</bool>
-      </property>
+    <item row="5" column="0" colspan="7">
+     <widget class="QLineEdit" name="inp_file_path"/>
+    </item>
+    <item row="1" column="7">
+     <widget class="QPushButton" name="resizeWindow">
       <property name="text">
-       <string>入力ファイル</string>
+       <string>ResizeWindow</string>
       </property>
       <property name="icon">
-       <iconset theme="document-open"/>
+       <iconset theme="window-new"/>
       </property>
      </widget>
     </item>
-    <item row="4" column="4">
-     <widget class="QToolButton" name="keyView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>...</string>
-      </property>
-      <property name="icon">
-       <iconset theme="format-justify-center"/>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="6">
-     <widget class="QPlainTextEdit" name="out">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="3">
+    <item row="0" column="0" colspan="7">
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
        <string>動作モード</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="3">
+       <item row="1" column="4">
         <widget class="QComboBox" name="inp_from">
          <item>
           <property name="text">
@@ -98,6 +75,9 @@
        </item>
        <item row="1" column="0">
         <widget class="QRadioButton" name="encMode">
+         <property name="toolTip">
+          <string>Ctrl+E</string>
+         </property>
          <property name="text">
           <string>暗号化</string>
          </property>
@@ -109,18 +89,8 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QRadioButton" name="decMode">
-         <property name="text">
-          <string>復号</string>
-         </property>
-         <property name="icon">
-          <iconset theme="media-seek-backward"/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="label">
+       <item row="1" column="3">
+        <widget class="QLabel" name="label_inputfrom">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -132,78 +102,70 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="1">
+        <widget class="QRadioButton" name="decMode">
+         <property name="toolTip">
+          <string>Ctrl+D</string>
+         </property>
+         <property name="text">
+          <string>復号</string>
+         </property>
+         <property name="icon">
+          <iconset theme="media-seek-backward"/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QRadioButton" name="infoMode">
+         <property name="toolTip">
+          <string>Ctrl+I</string>
+         </property>
+         <property name="text">
+          <string>情報</string>
+         </property>
+         <property name="icon">
+          <iconset theme="system-help"/>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
-    <item row="3" column="4">
-     <widget class="QComboBox" name="chunkSize"/>
-    </item>
-    <item row="6" column="2">
-     <widget class="QCheckBox" name="log_checkbox">
-      <property name="text">
-       <string>LOG</string>
+    <item row="7" column="0" colspan="8">
+     <widget class="QPlainTextEdit" name="out">
+      <property name="enabled">
+       <bool>true</bool>
       </property>
-      <property name="icon">
-       <iconset theme="go-down"/>
+      <property name="readOnly">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="6">
-     <widget class="QLineEdit" name="inp_line">
-      <property name="placeholderText">
-       <string>入力(1行)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0" colspan="6">
+    <item row="10" column="0" colspan="8">
      <widget class="QPlainTextEdit" name="log">
       <property name="readOnly">
        <bool>true</bool>
       </property>
      </widget>
     </item>
-    <item row="4" column="5">
-     <widget class="QPushButton" name="run">
-      <property name="layoutDirection">
-       <enum>Qt::LayoutDirection::LeftToRight</enum>
-      </property>
-      <property name="text">
-       <string>実行</string>
-      </property>
-      <property name="icon">
-       <iconset theme="media-playback-start"/>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0" colspan="2">
-     <widget class="QLabel" name="credit">
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;color:tomato&quot;&gt;EAD7 (C) 2025 yy981&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="4">
-     <widget class="QComboBox" name="selectKey"/>
-    </item>
-    <item row="2" column="0" colspan="6">
+    <item row="4" column="0" colspan="8">
      <widget class="QPlainTextEdit" name="inp_multi">
+      <property name="toolTip">
+       <string>Alt+Enter</string>
+      </property>
       <property name="placeholderText">
        <string>入力(複数行)</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="3">
-     <widget class="QPushButton" name="clear">
-      <property name="text">
-       <string>削除</string>
-      </property>
-      <property name="icon">
-       <iconset theme="edit-clear"/>
-      </property>
-     </widget>
+    <item row="1" column="3">
+     <widget class="QComboBox" name="chunkSize"/>
     </item>
-    <item row="6" column="5">
+    <item row="9" column="6" colspan="2">
      <widget class="QPushButton" name="copy">
+      <property name="toolTip">
+       <string>Ctrl+C</string>
+      </property>
       <property name="text">
        <string>クリップボードにコピー</string>
       </property>
@@ -212,10 +174,22 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="3">
+    <item row="1" column="0">
      <widget class="QCheckBox" name="adminMode">
       <property name="enabled">
        <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>110</width>
+        <height>0</height>
+       </size>
       </property>
       <property name="text">
        <string>管理者モード</string>
@@ -225,7 +199,73 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="5">
+    <item row="5" column="7">
+     <widget class="FileButton" name="inp_file_button">
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="toolTip">
+       <string>Ctrl+O</string>
+      </property>
+      <property name="text">
+       <string>入力ファイル</string>
+      </property>
+      <property name="icon">
+       <iconset theme="document-open"/>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="2">
+     <widget class="QCheckBox" name="log_checkbox">
+      <property name="text">
+       <string>LOG</string>
+      </property>
+      <property name="icon">
+       <iconset theme="go-down"/>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="8">
+     <widget class="QLineEdit" name="inp_line">
+      <property name="placeholderText">
+       <string>入力(1行)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0" colspan="2">
+     <widget class="QLabel" name="credit">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;color:tomato&quot;&gt;EAD7 (C) 2025 yy981&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0" colspan="8">
+     <widget class="QProgressBar" name="progressBar">
+      <property name="maximum">
+       <number>981</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="textVisible">
+       <bool>true</bool>
+      </property>
+      <property name="invertedAppearance">
+       <bool>false</bool>
+      </property>
+      <property name="format">
+       <string> %v/%m - %p%</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLabel" name="label_chunksize">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;ChunkSize:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="7">
      <widget class="FileButton" name="dst_file">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -248,36 +288,50 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0" colspan="4">
-     <widget class="QLineEdit" name="inp_file_path"/>
+    <item row="6" column="7">
+     <widget class="QPushButton" name="run">
+      <property name="layoutDirection">
+       <enum>Qt::LayoutDirection::LeftToRight</enum>
+      </property>
+      <property name="text">
+       <string>実行</string>
+      </property>
+      <property name="icon">
+       <iconset theme="media-playback-start"/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QCheckBox" name="adminPanel">
+      <property name="text">
+       <string>管理パネル</string>
+      </property>
+      <property name="icon">
+       <iconset theme="utilities-system-monitor"/>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0" colspan="7">
+     <widget class="QComboBox" name="selectKey">
+      <property name="labelDrawingMode">
+       <enum>QComboBox::LabelDrawingMode::UseDelegate</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="3" colspan="3">
+     <widget class="QPushButton" name="clear">
+      <property name="toolTip">
+       <string>Ctrl+X</string>
+      </property>
+      <property name="text">
+       <string>削除</string>
+      </property>
+      <property name="icon">
+       <iconset theme="edit-clear"/>
+      </property>
+     </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>33</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menu_setting">
-    <property name="title">
-     <string>設定</string>
-    </property>
-    <addaction name="action_3"/>
-    <addaction name="action_2"/>
-   </widget>
-   <widget class="QMenu" name="menu_help">
-    <property name="title">
-     <string>Help</string>
-    </property>
-    <addaction name="action_version"/>
-    <addaction name="action_keyborad"/>
-   </widget>
-   <addaction name="menu_setting"/>
-   <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="sizeGripEnabled">
@@ -296,41 +350,6 @@
    </attribute>
    <widget class="QWidget" name="adminWidget"/>
   </widget>
-  <action name="action">
-   <property name="text">
-    <string>ググレカス</string>
-   </property>
-  </action>
-  <action name="actionggrks">
-   <property name="text">
-    <string>ggrks = ググレカス</string>
-   </property>
-  </action>
-  <action name="actionggrks_2">
-   <property name="text">
-    <string>ggrks = ググレカス</string>
-   </property>
-  </action>
-  <action name="action_version">
-   <property name="text">
-    <string>バージョン情報</string>
-   </property>
-  </action>
-  <action name="action_keyborad">
-   <property name="text">
-    <string>キー操作一覧</string>
-   </property>
-  </action>
-  <action name="action_3">
-   <property name="text">
-    <string>設定(一般)</string>
-   </property>
-  </action>
-  <action name="action_2">
-   <property name="text">
-    <string>設定(管理者)</string>
-   </property>
-  </action>
  </widget>
  <customwidgets>
   <customwidget>
