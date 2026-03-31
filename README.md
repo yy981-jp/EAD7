@@ -1,3 +1,6 @@
+{: align="center"}
+!["logo"](logo.png)
+
 # EAD7 — Encryption And Decryption ver.7
 
 AES-256-GCM をベースとした階層型鍵管理暗号化ツール。  
