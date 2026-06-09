@@ -25,6 +25,8 @@
 #include "widgets/fileButton.h"
 #include "widgets/mainWindow.h"
 
+bool reloadWindow = false;
+
 
 void loadKeyCombobox() {
 	if (!fs::exists(path::p_kek)) {
@@ -37,7 +39,13 @@ void loadKeyCombobox() {
 		fb->setFont(f);
 		fb->adjustSize();
 		fb->show();
-		CN(fb, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr,true);});
+		CN(fb, &FileButton::fileSelected, [](const QString& qstr){
+			try {
+				mw::import_dst_kek(qstr,true);
+			} catch (const std::runtime_error& e) {
+				reloadWindow = true;
+			}
+		});
 		return;
 	}
 	PKEK = readJson(path::p_kek);
@@ -57,6 +65,8 @@ void loadKeyCombobox() {
 
 
 void GUI() {
+	reloadWindow = false;
+
 	ui->log->setVisible(false);
 	w->show();
 	
@@ -93,7 +103,13 @@ void GUI() {
 	});
 	
 	CN(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
-	CN(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){mw::import_dst_kek(qstr);});
+	CN(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){
+		try {
+			mw::import_dst_kek(qstr,true);
+		} catch (const std::runtime_error& e) {
+			reloadWindow = true;
+		}
+	});
 	CN(ui->resizeWindow, &QPushButton::clicked, []{w->resize(730,500);});
 	CN(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
 		mw::inp_from = ui->inp_from->itemData(index).value<INP_FROM>();
@@ -167,9 +183,10 @@ void GUI() {
 
 	// ### AdminUI KEK
 	CN(aui->KEK_load, QPushButton::clicked, awv::KEK_KIDLoad);
+	CN(aui->KEK_write, QPushButton::clicked, awv::KEK_write);
+	CN(aui->OT_dst_run, QPushButton::clicked, awv::OT_DST);
 	
-	
-	awv::MK_load();
+		awv::MK_load();
 	// restore window
 	if (fs::exists(windowSave::settingFile)) windowSave::load();
 
@@ -177,6 +194,8 @@ void GUI() {
 	u::log("ui setup完了");
 	
 	ui->inp_line->setFocus();
+
+	if (reloadWindow) QApplication::quit();
 	
 }
 

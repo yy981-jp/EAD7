@@ -41,3 +41,7 @@ bool isJson(const std::string& input);
 FDat getJsonType(const json& j);
 FDat getFileType(const fs::path& file);
 FDat getFileType(std::string& file);
+
+inline std::string getAdmKEKPath(const std::string& name) {
+	return SDMK + name + ".adm.kek.e7";
+}

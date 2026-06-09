@@ -8,15 +8,16 @@
 
 #include "awv.h"
 
+#include <iostream>
+
 namespace awv {
 	std::vector<uint8_t> MK_load() {
 		std::vector<uint8_t> result;
-		const std::vector<QComboBox*> comboBoxes = {
+		static const std::vector<QComboBox*> comboBoxes = {
 			aui->MK_unWrap_index,
 			aui->KID_create_index,
 			aui->KID_recal_index,
 			aui->KEK_index,
-			aui->OT_dst_index,
 			aui->OT_dec_mk_index
 		};
 
@@ -175,7 +176,48 @@ namespace awv {
 	}
 
 	void KEK_write() {
-		
+		std::string mkid_s = aui->KEK_index->currentText().toStdString();
+		std::string mkpass = aui->KEK_MKpass->text().toStdString();
+		std::string target = aui->KEK_target->currentText().toStdString();
+		if (mkid_s.empty() || mkpass.empty()) { u::stat("KEK_write: 入力が不足しています"); return; }
+		if (target.empty()) { u::stat("KEK_write: 保存先ファイル名を入力してください"); return; }
+
+		uint8_t mkid = std::stoi(mkid_s);
+		BIN mk = loadMK(mkid, mkpass);
+
+		// 選択されたラベル一覧を右ペインから取得
+		std::vector<std::string> selected = aui->KEK_rightTree->getFlatModel();
+		if (selected.empty()) { u::stat("KEK_write: 選択されたKIDがありません"); delm(mkpass); return; }
+
+		// KIDファイルを読み、ラベルに対応するエントリを抽出
+		json kid_body = loadKID(mk, mkid);
+		json kids_selected = json::object();
+
+		// std::cout << "D::body: " << kid_body.dump(4) << "\n\n";
+
+		for (const auto& label : selected) {
+			bool found = false;
+			for (auto &it : kid_body["kids"].items()) {
+				const std::string kid_b64 = it.key();
+				const json entry = it.value();
+				if (kid_b64 == label) {
+					kids_selected[kid_b64] = entry;
+					found = true;
+					break;
+				}
+			}
+			if (!found) u::stat(std::string("KEK_write: KIDが見つかりません: ") + label);
+		}
+
+		if (kids_selected.empty()) { u::stat("KEK_write: 有効なKIDが選択されていません"); delm(mkpass); return; }
+
+		// RAW と ADM 形式に変換して保存
+		json raw_kek = createRawKEK(mk, json::object(), kids_selected, mkid);
+		json adm_kek = encAdmKEK(mk, raw_kek, mkid);
+		writeJson(adm_kek, getAdmKEKPath(target));
+
+		u::sl("KEK_write: 完了");
+		delm(mkpass, raw_kek);
 	}
 
 	/// @param kid 
@@ -187,5 +229,73 @@ namespace awv {
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
 		return deriveKEK(mk, base::enc64(kid));
+	}
+
+
+	void OT_DST() {
+		std::string target = aui->OT_dst_index->text().toStdString();
+		std::string mkpass = aui->OT_dst_mkpass->text().toStdString();
+		std::string dst_pass = aui->OT_dst_pass->text().toStdString();
+		if (target.empty() || mkpass.empty() || dst_pass.empty()) {
+			u::stat("OT_DST: 入力が不足しています");
+			return;
+		}
+
+		if (target.ends_with(".adm.kek.e7")) {
+			target = target.substr(0, target.size() - std::string(".adm.kek.e7").size());
+		}
+
+		std::string adm_path = getAdmKEKPath(target);
+		if (!fs::exists(adm_path)) {
+			u::stat("OT_DST: ADM.KEKファイルが見つかりません");
+			return;
+		}
+
+		json adm_kek;
+		try {
+			adm_kek = readJson(adm_path);
+		} catch (const std::exception& e) {
+			u::stat(std::string("OT_DST: ADM.KEK読み込み失敗: ") + e.what());
+			return;
+		}
+
+		if (!adm_kek.contains("meta") || !adm_kek["meta"].contains("mkid")) {
+			u::stat("OT_DST: ADM.KEK形式が不正です");
+			delm(mkpass, dst_pass, adm_kek);
+			return;
+		}
+
+		uint8_t mkid = adm_kek["meta"]["mkid"].get<uint8_t>();
+		BIN mk;
+		try {
+			mk = loadMK(mkid, mkpass);
+		} catch (const std::exception& e) {
+			u::stat(std::string("OT_DST: MK読み込み失敗: ") + e.what());
+			delm(mkpass, dst_pass, adm_kek);
+			return;
+		}
+
+		json raw_kek;
+		try {
+			raw_kek = decAdmKEK(mk, adm_kek);
+		} catch (const std::exception& e) {
+			u::stat(std::string("OT_DST: ADM.KEK復号失敗: ") + e.what());
+			delm(mkpass, dst_pass, adm_kek);
+			return;
+		}
+
+		json dst_kek;
+		try {
+			dst_kek = encDstKEK(dst_pass, raw_kek);
+		} catch (const std::exception& e) {
+			u::stat(std::string("OT_DST: DST変換失敗: ") + e.what());
+			delm(mkpass, dst_pass, adm_kek, raw_kek);
+			return;
+		}
+
+		fs::path out_path = fs::current_path() / target;
+		writeJson(dst_kek, out_path.string() + ".dst.kek.e7");
+		u::sl("OT_DST: 完了");
+		delm(mkpass, dst_pass, adm_kek, raw_kek);
 	}
 }
