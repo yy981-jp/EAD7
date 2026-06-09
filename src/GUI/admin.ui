@@ -94,26 +94,6 @@
           <string>DST.KEKに変換</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_11">
-          <item row="0" column="1">
-           <widget class="QComboBox" name="OT_dst_index">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="placeholderText">
-             <string>対象のADM.KEKを選択</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLineEdit" name="OT_dst_mkpass">
-            <property name="placeholderText">
-             <string>MKIDのパスワードを入力</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="OT_dst_pass">
             <property name="sizePolicy">
@@ -127,6 +107,13 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="OT_dst_mkpass">
+            <property name="placeholderText">
+             <string>MKIDのパスワードを入力</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="2">
            <widget class="QPushButton" name="OT_dst_run">
             <property name="sizePolicy">
@@ -137,6 +124,13 @@
             </property>
             <property name="text">
              <string>実行</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="OT_dst_index">
+            <property name="placeholderText">
+             <string>対象のADM.KEKを選択</string>
             </property>
            </widget>
           </item>

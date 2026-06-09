@@ -1,4 +1,4 @@
-#include "master.h"
+#include "crypto.h"
 
 
 BIN deriveDEC(const BIN& kek, const BIN& nonce) {

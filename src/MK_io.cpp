@@ -7,7 +7,7 @@
 #include <cryptopp/base64.h>
 
 #include "def.h"
-#include "master.h"
+#include "mk.h"
 
 
 BIN loadMK(int index, const std::string& pass) {

@@ -5,6 +5,7 @@
 #include <sodium.h>
 #include <fstream>
 #include <string>
+#include <ctime>
 #include <boost/locale.hpp>
 
 #include "AES256GCM.h"
@@ -14,6 +15,18 @@ bool AESNI = true;
 
 std::wstring to_wstring(const std::string& u8) {
 	return boost::locale::conv::to_utf<wchar_t>(u8, "UTF-8");
+}
+
+std::string getMkid(const std::string &KIDPath) {
+	return std::to_string(std::stoi(KIDPath.substr(0, 2)));
+}
+
+int64_t getUnixTime() {
+	return static_cast<int64_t>(std::time(nullptr));
+}
+
+std::string getKIDFilePath(const uint8_t &mkid) {
+	return SDM + std::to_string(mkid) + ".kid.e7";
 }
 
 json readJson(const std::string& path) {

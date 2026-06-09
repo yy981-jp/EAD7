@@ -44,10 +44,6 @@ enum class KIDIndexType {
 
 KIDIndex createKIDIndex(const json& j, KIDIndexType t = KIDIndexType::label);
 
-inline std::string getAdmKEKPath(const std::string& name) {
-	return SDMK + name + ".adm.kek.e7";
-}
-
 inline uint8_t cmkid(const std::string& mkid_s) {
 	uint8_t mkid = std::stoi(mkid_s);
 	if (!(mkid>=0 || mkid<=255)) {throw std::runtime_error("MKIDは0~255である必要があります");}
