@@ -2,9 +2,9 @@
 #include <vector>
 #include <string>
 #include <windows.h>
-#include "../GUI/cui.h"
-#include "../def.h"
-#include "../base.h"
+#include "GUI/cui.h"
+#include "def.h"
+#include "base.h"
 
 extern std::vector<std::string> ca;
 extern int UI();
@@ -46,6 +46,6 @@ KIDIndex createKIDIndex(const json& j, KIDIndexType t = KIDIndexType::label);
 
 inline uint8_t cmkid(const std::string& mkid_s) {
 	uint8_t mkid = std::stoi(mkid_s);
-	if (!(mkid>=0 || mkid<=255)) {throw std::runtime_error("MKIDは0~255である必要があります");}
+	if (!(mkid>=0 || mkid<=255)) {throw std::runtime_error("MKIDは0~255である忁E��がありまい");}
 	return mkid;
 }

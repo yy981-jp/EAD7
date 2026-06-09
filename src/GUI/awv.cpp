@@ -1,10 +1,10 @@
 #include <QtGui/QStandardItemModel>
 
 #include "gui.h"
-#include "../master.h"
-#include "../base.h"
+#include "master.h"
+#include "base.h"
 #include "widgets/twoTreeView.h"
-#include "../UI/util.h"
+#include "UI/util.h"
 
 #include "awv.h"
 
@@ -47,7 +47,7 @@ namespace awv {
 	void MK_unWrap() {
 		QString mkid_qs = aui->MK_unWrap_index->currentText();
 		std::string mkpass = aui->MK_unWrap_pass->text().toStdString();
-		if (mkid_qs.isEmpty() || mkpass.empty()) {u::stat("MK_unWrap: 入力が不足しています");return;}
+		if (mkid_qs.isEmpty() || mkpass.empty()) {u::stat("MK_unWrap: 入力が不足してぁE��ぁE);return;}
 		uint8_t mkid = mkid_qs.toInt();
 		QString out_qs = QString::fromStdString(base::enc64(loadMK(mkid,mkpass)));
 		aui->MK_unWrap_out->setText(out_qs);
@@ -58,7 +58,7 @@ namespace awv {
 		uint8_t mkid = aui->MK_create_index->value();
 		std::string mkpass = aui->MK_create_pass->text().toStdString();
 		if (mkpass.empty()) {
-			u::stat("MK_create: 入力が不足しています");
+			u::stat("MK_create: 入力が不足してぁE��ぁE);
 			delm(mkpass);
 			return;
 		}
@@ -71,13 +71,13 @@ namespace awv {
 			try {
 				b64_bin = base::dec64(b64);
 			} catch (...) {
-				u::stat("MK_create: Base64URLSafeの形式が不正です");
+				u::stat("MK_create: Base64URLSafeの形式が不正でぁE);
 				delm(mkpass);
 				return;
 			}
 			createMK(mkid,mkpass,b64_bin);
 		}
-		u::sl("MK_create: 完了");
+		u::sl("MK_create: 完亁E);
 		delm(mkpass);
 	}
 	
@@ -93,14 +93,14 @@ namespace awv {
 		if (entry.b64.empty()) entry.b64 = base::enc64(randomBIN(16));
 		
 		if (mkid_qs.isEmpty() || mkpass.empty() || entry.label.empty()) {
-			u::stat("KID_create_write: 入力が不足しています");
+			u::stat("KID_create_write: 入力が不足してぁE��ぁE);
 			return;
 		}
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
 		json j = loadKID(mk,mkid);
 		if (!isBase64UrlSafe(entry.b64)) {
-			u::stat("KID_create_write: Base64URLSafeの形式が不正です");
+			u::stat("KID_create_write: Base64URLSafeの形式が不正でぁE);
 			return;
 		}
 
@@ -109,7 +109,7 @@ namespace awv {
 
 		saveKID(mk,mkid,j);
 		
-		u::sl("KID_create_write: 完了");
+		u::sl("KID_create_write: 完亁E);
 		delm(mkpass);
 	}
 
@@ -119,7 +119,7 @@ namespace awv {
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
 		if (aui->KID_create_label->text().isEmpty()) {
-			u::stat("KID_create_load: 入力が不足しています");
+			u::stat("KID_create_load: 入力が不足してぁE��ぁE);
 			return;
 		} 
 		ordered_json j = loadKID(mk,mkid);
@@ -142,7 +142,7 @@ namespace awv {
 		QString mkid_qs = aui->KID_recal_index->currentText();
 		std::string mkpass = aui->KID_recal_mkpass->text().toStdString();
 		if (mkid_qs.isEmpty() || mkpass.empty()) {
-			u::stat("KID_recal: 入力が不足しています");
+			u::stat("KID_recal: 入力が不足してぁE��ぁE);
 			return;
 		}
 		uint8_t mkid = mkid_qs.toInt();
@@ -151,7 +151,7 @@ namespace awv {
 		json j = readJson(getKIDFilePath(mkid)).at("body");
 		saveKID(mk,mkid,j);
 		
-		u::sl("KID_recal: 完了");
+		u::sl("KID_recal: 完亁E);
 		delm(mkpass);
 	}
 
@@ -179,13 +179,13 @@ namespace awv {
 		std::string mkid_s = aui->KEK_index->currentText().toStdString();
 		std::string mkpass = aui->KEK_MKpass->text().toStdString();
 		std::string target = aui->KEK_target->currentText().toStdString();
-		if (mkid_s.empty() || mkpass.empty()) { u::stat("KEK_write: 入力が不足しています"); return; }
-		if (target.empty()) { u::stat("KEK_write: 保存先ファイル名を入力してください"); return; }
+		if (mkid_s.empty() || mkpass.empty()) { u::stat("KEK_write: 入力が不足してぁE��ぁE); return; }
+		if (target.empty()) { u::stat("KEK_write: 保存�Eファイル名を入力してください"); return; }
 
 		uint8_t mkid = std::stoi(mkid_s);
 		BIN mk = loadMK(mkid, mkpass);
 
-		// 選択されたラベル一覧を右ペインから取得
+		// 選択されたラベル一覧を右ペインから取征E
 		std::vector<std::string> selected = aui->KEK_rightTree->getFlatModel();
 		if (selected.empty()) { u::stat("KEK_write: 選択されたKIDがありません"); delm(mkpass); return; }
 
@@ -209,14 +209,14 @@ namespace awv {
 			if (!found) u::stat(std::string("KEK_write: KIDが見つかりません: ") + label);
 		}
 
-		if (kids_selected.empty()) { u::stat("KEK_write: 有効なKIDが選択されていません"); delm(mkpass); return; }
+		if (kids_selected.empty()) { u::stat("KEK_write: 有効なKIDが選択されてぁE��せん"); delm(mkpass); return; }
 
-		// RAW と ADM 形式に変換して保存
+		// RAW と ADM 形式に変換して保孁E
 		json raw_kek = createRawKEK(mk, json::object(), kids_selected, mkid);
 		json adm_kek = encAdmKEK(mk, raw_kek, mkid);
 		writeJson(adm_kek, getAdmKEKPath(target));
 
-		u::sl("KEK_write: 完了");
+		u::sl("KEK_write: 完亁E);
 		delm(mkpass, raw_kek);
 	}
 
@@ -225,7 +225,7 @@ namespace awv {
 	BIN OT_dec(BIN kid) {
 		QString mkid_qs = aui->OT_dec_mk_index->currentText();
 		std::string mkpass = aui->OT_dec_mk_pass->text().toStdString();
-		if (mkid_qs.isEmpty() || mkpass.empty()) throw std::runtime_error("OT_dec: 入力が不足しています");
+		if (mkid_qs.isEmpty() || mkpass.empty()) throw std::runtime_error("OT_dec: 入力が不足してぁE��ぁE);
 		uint8_t mkid = mkid_qs.toInt();
 		BIN mk = loadMK(mkid,mkpass);
 		return deriveKEK(mk, base::enc64(kid));
@@ -237,7 +237,7 @@ namespace awv {
 		std::string mkpass = aui->OT_dst_mkpass->text().toStdString();
 		std::string dst_pass = aui->OT_dst_pass->text().toStdString();
 		if (target.empty() || mkpass.empty() || dst_pass.empty()) {
-			u::stat("OT_DST: 入力が不足しています");
+			u::stat("OT_DST: 入力が不足してぁE��ぁE);
 			return;
 		}
 
@@ -255,12 +255,12 @@ namespace awv {
 		try {
 			adm_kek = readJson(adm_path);
 		} catch (const std::exception& e) {
-			u::stat(std::string("OT_DST: ADM.KEK読み込み失敗: ") + e.what());
+			u::stat(std::string("OT_DST: ADM.KEK読み込み失敁E ") + e.what());
 			return;
 		}
 
 		if (!adm_kek.contains("meta") || !adm_kek["meta"].contains("mkid")) {
-			u::stat("OT_DST: ADM.KEK形式が不正です");
+			u::stat("OT_DST: ADM.KEK形式が不正でぁE);
 			delm(mkpass, dst_pass, adm_kek);
 			return;
 		}
@@ -270,7 +270,7 @@ namespace awv {
 		try {
 			mk = loadMK(mkid, mkpass);
 		} catch (const std::exception& e) {
-			u::stat(std::string("OT_DST: MK読み込み失敗: ") + e.what());
+			u::stat(std::string("OT_DST: MK読み込み失敁E ") + e.what());
 			delm(mkpass, dst_pass, adm_kek);
 			return;
 		}
@@ -279,7 +279,7 @@ namespace awv {
 		try {
 			raw_kek = decAdmKEK(mk, adm_kek);
 		} catch (const std::exception& e) {
-			u::stat(std::string("OT_DST: ADM.KEK復号失敗: ") + e.what());
+			u::stat(std::string("OT_DST: ADM.KEK復号失敁E ") + e.what());
 			delm(mkpass, dst_pass, adm_kek);
 			return;
 		}
@@ -288,14 +288,14 @@ namespace awv {
 		try {
 			dst_kek = encDstKEK(dst_pass, raw_kek);
 		} catch (const std::exception& e) {
-			u::stat(std::string("OT_DST: DST変換失敗: ") + e.what());
+			u::stat(std::string("OT_DST: DST変換失敁E ") + e.what());
 			delm(mkpass, dst_pass, adm_kek, raw_kek);
 			return;
 		}
 
 		fs::path out_path = fs::current_path() / target;
 		writeJson(dst_kek, out_path.string() + ".dst.kek.e7");
-		u::sl("OT_DST: 完了");
+		u::sl("OT_DST: 完亁E);
 		delm(mkpass, dst_pass, adm_kek, raw_kek);
 	}
 }

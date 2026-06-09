@@ -17,7 +17,7 @@ std::map<KStat,std::string> KStatMap = {
 };
 
 
-// HMAC-SHA256(key: 32B) → 32B
+// HMAC-SHA256(key: 32B) 結果32B
 inline BIN hmac_sha256(const BIN& key, const std::string& data) {
 	HMAC<SHA256> h(key.data(), key.size());
 	BIN mac(32);
@@ -26,7 +26,7 @@ inline BIN hmac_sha256(const BIN& key, const std::string& data) {
 	return mac;
 }
 
-// HMACKey = HKDF(MK, "EAD7|KIDLIST-HMAC") の派生
+// HMACKey = HKDF(MK, "EAD7|KIDLIST-HMAC") の派生キー
 inline BIN deriveKidlistHmacKey(const BIN& MK) {
 	return deriveKey(MK, "EAD7|KIDLIST-HMAC", 32);
 }
@@ -83,12 +83,10 @@ json loadKID(const BIN& mk, const uint8_t& mkid) {
 	std::string body_dump = body.dump();
 	BIN mac = hmac_sha256(hkey, body_dump);
 
-	// 後始末（MK→hkeyを消す）
-
 	// 比較
 	BIN mac_stored = base::dec64(hmac_b64);
 	if (mac_stored.size() != mac.size() || 0 != std::memcmp(mac_stored.data(), mac.data(), mac.size()))
-		throw std::runtime_error("KIDファイルHMAC検証失敗（改ざん or MK不一致）");
+		throw std::runtime_error("KIDファイルHMAC検証失敗（改ざん or MK不一致)");
 
 	return body;
 }
@@ -101,7 +99,7 @@ void saveKID(const BIN& mk, const uint8_t& mkid, const ordered_json& body) {
 	std::string body_dump = body.dump();
 	BIN mac = hmac_sha256(hkey, body_dump);
 
-	// JSON組み立て
+	// JSON構築
 	ordered_json j;
 	j["body"] = body;
 	j["hmac"] = base::enc64(mac);

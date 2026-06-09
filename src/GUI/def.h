@@ -1,5 +1,5 @@
 #pragma once
-#include "../def.h"
+#include "def.h"
 #include "ui_main.h"
 #include "ui_admin.h"
 #include "mainWindow.h"

@@ -7,13 +7,13 @@
 
 #include "ui.h"
 #include "text.h"
-#include "../master.h"
-#include "../base.h"
-#include "../GUI/CUI.h"
-#include "../UI/info.h"
+#include "master.h"
+#include "base.h"
+#include "GUI/cui.h"
+#include "UI/info.h"
 
 
-KIDIndex createKIDIndex(const json& j, KIDIndexType t) { // raw.kek必須
+KIDIndex createKIDIndex(const json& j, KIDIndexType t) { // raw.kek忁E��E
 	KIDIndex result;
 	for (auto& [key,value]: j["keks"].items()) {
 		switch (t) {
@@ -47,7 +47,7 @@ namespace ui {
 		if (!index.contains(label)) throw std::runtime_error("ラベル("+label+")がこのPCのKEKリストに存在しません");
 		std::string kid = index[label];
 		json entry = raw_kek["keks"][kid];
-		if (entry["status"] != "active") throw std::runtime_error("このKEKは現在有効ではありません");
+		if (entry["status"] != "active") throw std::runtime_error("こ�EKEKは現在有効ではありません");
 		uint8_t mkid = entry["mkid"].get<uint8_t>();
 			BIN kek = base::dec64(entry["kek"]);
 			BIN plaintext = conv::STRtoBIN(ca[3]);
@@ -62,7 +62,7 @@ namespace ui {
 		EAD7ST es(cipher);
 		json entry = raw_kek["keks"][base::enc64(es.kid)];
 		if (entry.empty()) {
-			std::cerr << "あなたはこのルームの鍵を持っていないため、解読できません\n";
+			std::cerr << "あなた�Eこ�Eルームの鍵を持ってぁE��ぁE��め、解読できません\n";
 			return;
 		}
 			BIN kek = base::dec64(entry["kek"]);
@@ -90,14 +90,14 @@ namespace ui {
 				FDat f = getFileType(p);
 				switch (f.type) {
 					case FSType::dst_kek: {
-						std::string pass = inp_s("DST.KEKファイルのパスワード: ");
+						std::string pass = inp_s("DST.KEKファイルのパスワーチE ");
 						json raw_kek = decDstKEK(pass,f.json);
 						json p_kek = encPKEK(raw_kek);
 						writeJson(p_kek,path::p_kek);
-						std::cout << "P.KEK更新完了\n";
+						std::cout << "P.KEK更新完亁En";
 						delm(pass,raw_kek);
 					} break;
-					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
+					default: throw std::runtime_error("E7ファイルではありますが、形式が不正でぁE);
 				}
 				return true;
 			}

@@ -5,10 +5,10 @@
 #include <QtCore/QTimer>
 
 #include "gui.h"
-#include "../UI/util.h"
-#include "../master.h"
-#include "../base.h"
-#include "../UI/info.h"
+#include "UI/util.h"
+#include "master.h"
+#include "base.h"
+#include "UI/info.h"
 
 #include "mw.h"
 #include "awv.h"
@@ -38,16 +38,16 @@ namespace mw {
 				FDat f = getFileType(p);
 				switch (f.type) {
 					case FSType::dst_kek: {
-						std::string pass = prompt("DST.KEKファイルのパスワード: ");
+						std::string pass = prompt("DST.KEKファイルのパスワーチE ");
 						json raw_kek = decDstKEK(pass,f.json);
 						json p_kek = encPKEK(raw_kek);
 						writeJson(p_kek,path::p_kek);
-						u::stat("P_KEK更新完了\n");
+						u::stat("P_KEK更新完亁En");
 						delm(pass,raw_kek);
 						if (from_kek_window) fb->close();
 						throw std::runtime_error("再起動信号(P_KEK再読み込み)");
 					} break;
-					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
+					default: throw std::runtime_error("E7ファイルではありますが、形式が不正でぁE);
 				}
 			}
 		}
@@ -59,7 +59,7 @@ namespace mw {
 		THEADER t;
 		std::memcpy(&t, bin.data(),sizeof(THEADER));
 		std::stringstream ss;
-		ss << "[情報]\n"
+		ss << "[惁E��]\n"
 		   << "ver: " << std::to_string(t.ver)
 		   << "\nMK-ID: " << std::to_string(t.mkid)
 		   << "\nKEK-ID: " << base::enc64(conv::ARRtoBIN(t.kid))
@@ -70,7 +70,7 @@ namespace mw {
 	void fileInfo(const std::string& path) {
 		FDat f = getFileType(fs::path(path));
 		std::string str = getFileInfo(true, f);
-		ui->out->setPlainText(QString::fromStdString("[情報] - " + str));
+		ui->out->setPlainText(QString::fromStdString("[惁E��] - " + str));
 	}
 
 	void textProc(const std::string& text) {
@@ -87,7 +87,7 @@ namespace mw {
 
 			std::string kid = ui->selectKey->itemData(index).toString().toStdString();
 			uint8_t mkid = raw_kek["keks"][kid]["mkid"];
-			if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
+			if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管琁E��E��ード手動�E力対忁E
 			if (kid.empty()) {
 				u::stat("使用する鍵を選択してください");
 				return;
@@ -95,7 +95,7 @@ namespace mw {
 			BIN kek = base::dec64(raw_kek["keks"][kid]["kek"]);
 			BIN outb = EAD7::enc(kek,conv::STRtoBIN(text),mkid,base::dec64(kid));
 			out = base::enc64(outb);
-			u::stat("暗号化処理完了");
+			u::stat("暗号化�E琁E��亁E);
 
 		} else if (ui->decMode->isChecked()) {
 
@@ -103,13 +103,13 @@ namespace mw {
 			try {
 				inputBin = base::dec64(text);
 			} catch (const exception) {
-				u::stat("復号モードの入力がBase64URLSafe形式ではないので処理を中止しました");
+				u::stat("復号モード�E入力がBase64URLSafe形式ではなぁE�Eで処琁E��中止しました");
 				delm(raw_kek);
 				return;
 			}
 			
 			if (inputBin.size() < 3 + 16) {
-				u::stat("復号モードの入力が不正です（データ長不足）");
+				u::stat("復号モード�E入力が不正です（データ長不足�E�E);
 				delm(raw_kek);
 				return;
 			}
@@ -125,7 +125,7 @@ namespace mw {
 				kek = awv::OT_dec(base::dec64(kid));
 			} else {
 				if (!raw_kek["keks"].contains(kid)) {
-					u::stat("指定されたKIDは鍵リストに存在しません");
+					u::stat("持E��されたKIDは鍵リストに存在しません");
 					delm(raw_kek);
 					return;
 				}				
@@ -137,7 +137,7 @@ namespace mw {
 			BIN outb = EAD7::dec(kek,inputBin);
 			out = conv::BINtoSTR(outb);
 
-			u::stat("復号処理完了 使用した鍵: " + key_label);
+			u::stat("復号処琁E��亁E使用した鍵: " + key_label);
 
 		} else out = mw::textInfo(text);
 		ui->out->setPlainText(QString::fromStdString(out));
@@ -146,14 +146,14 @@ namespace mw {
 	
 	void fileProc(const std::string& path) {
 		if (!fs::exists(path)) {
-			u::stat("指定されたファイルが存在しません");
+			u::stat("持E��されたファイルが存在しません");
 			return;
 		}
 
 		
 		if (ui->encMode->isChecked()) {
 			if (fileProcessing) {
-				u::stat("ファイルを処理中です");
+				u::stat("ファイルを�E琁E��でぁE);
 				return;
 			}
 			fileProcessing = true;
@@ -176,7 +176,7 @@ namespace mw {
 
 			int index = ui->selectKey->currentIndex();
 			std::string kid = ui->selectKey->itemData(index).toString().toStdString();
-			if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管理者モード手動入力対応
+			if (kid.empty()) kid = ui->selectKey->currentText().toStdString(); // 管琁E��E��ード手動�E力対忁E
 			if (kid.empty()) {
 				u::stat("使用する鍵を選択してください");
 				return;
@@ -196,7 +196,7 @@ namespace mw {
 				ui->progressBar->setValue(static_cast<int>(mw::currentChunkNumber.load()));
 				if (mw::currentChunkNumber.load() >= totalChunkNumber) {
 					uint64_t procTime = getUnixTime() - fileProcStartUnixTime;
-					u::stat("ファイルの暗号化を正常に終了しました (" + formatSeconds(procTime) + ")");
+					u::stat("ファイルの暗号化を正常に終亁E��ました (" + formatSeconds(procTime) + ")");
 					progressTimer->stop();
 					fileProcessing = false;
 				}
@@ -207,7 +207,7 @@ namespace mw {
 
 		} else if (ui->decMode->isChecked()) {
 			if (fileProcessing) {
-				u::stat("ファイルを処理中です");
+				u::stat("ファイルを�E琁E��でぁE);
 				return;
 			}
 			fileProcessing = true;
@@ -242,7 +242,7 @@ namespace mw {
 				kek = awv::OT_dec(kid);
 			} else {
 				if (!raw_kek["keks"].contains(base::enc64(kid))) {
-					u::stat("指定されたKIDは鍵リストに存在しません");
+					u::stat("持E��されたKIDは鍵リストに存在しません");
 					delm(raw_kek);
 					return;
 				}				
@@ -260,7 +260,7 @@ namespace mw {
 				if (mw::currentChunkNumber.load() >= totalChunkNumber) {
 					uint64_t procTime = getUnixTime() - fileProcStartUnixTime;
 					if (errorChunks.empty()) {
-						u::stat("ファイルの復号を正常に終了しました (" + formatSeconds(procTime) + ")");
+						u::stat("ファイルの復号を正常に終亁E��ました (" + formatSeconds(procTime) + ")");
 					} else {
 						u::stat("ファイルの復号中にエラーが発生しました 詳細はログを確認してください (" + formatSeconds(procTime) + ")");
 						std::string result;
@@ -281,7 +281,7 @@ namespace mw {
 	void run() {
 		std::string text;
 		switch (inp_from) {
-			case INP_FROM::null: u::stat("入力元が特定できません"); return;
+			case INP_FROM::null: u::stat("入力�Eが特定できません"); return;
 			case INP_FROM::line: text = ui->inp_line->text().toStdString(); break;
 			case INP_FROM::multi: text = ui->inp_multi->toPlainText().toStdString(); break;
 			case INP_FROM::file: text = ui->inp_file_path->text().toStdString(); break;

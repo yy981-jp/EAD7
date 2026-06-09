@@ -67,7 +67,7 @@ namespace EAD7 {
 	BIN dec(const BIN& kek, const BIN& blob) {
 		if (blob.size() < HEADER::all) throw std::runtime_error("EAD7::dec()");;
 
-		// 切り出し
+		// 刁E��出ぁE
 		size_t pos = 0;
 		byte magic = blob[pos++];
 		byte ver = blob[pos++];
@@ -80,7 +80,7 @@ namespace EAD7 {
 		pos += cipher_size;
 		BIN tag(blob.data() + pos, 16);
 
-		if (magic != HEADER::magicData // 明らかに違うデータ
+		if (magic != HEADER::magicData // 明らかに違うチE�Eタ
 		|| ver != HEADER::verData // 未対応バージョン
 		|| blob.size() < pos + HEADER::tag) // 不正長
 			throw std::runtime_error("EAD7::dec()");

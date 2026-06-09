@@ -2,9 +2,9 @@
 
 #include <yy981/env.h>
 
-#include "../master.h"
+#include "master.h"
 #include "gui.h"
-#include "../UI/util.h"
+#include "UI/util.h"
 #include "../CUI/text.h"
 #include "ui_main.h"
 

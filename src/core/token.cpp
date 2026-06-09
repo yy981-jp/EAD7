@@ -6,13 +6,13 @@
 
 
 void saveToken(const BIN& token) {
-	// 資格情報エントリを構築
+	// 賁E��惁E��エントリを構篁E
 	CREDENTIALW cred = {0};
-	cred.Type = CRED_TYPE_GENERIC; 						// 汎用資格情報
+	cred.Type = CRED_TYPE_GENERIC; 						// 汎用賁E��惁E��
 	cred.TargetName = const_cast<LPWSTR>(L"yy981::EAD7_token");
 	cred.CredentialBlobSize = token.size();
 	cred.CredentialBlob = (LPBYTE)token.data();
-	cred.Persist = CRED_PERSIST_LOCAL_MACHINE;			// 恒久的に保存 このユーザー専用
+	cred.Persist = CRED_PERSIST_LOCAL_MACHINE;			// 恒乁E��に保孁Eこ�Eユーザー専用
 
 	// 書き込み
 	if (!CredWriteW(&cred, 0)) throw std::runtime_error("saveToken()::CredWrite failed: " + GetLastError());

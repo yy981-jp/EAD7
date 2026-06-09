@@ -15,7 +15,7 @@
 		setDropIndicatorShown(true);
 		if (isLeft) {
 			setDragDropMode(QAbstractItemView::InternalMove);
-			// 親ノード（1層目）はドラッグ不可
+			// 親ノ�Eド！E層目�E��EドラチE��不可
 			for (int i = 0; i < model->rowCount(); ++i) {
 				QStandardItem *item = model->item(i);
 				item->setFlags(item->flags() & ~Qt::ItemIsDragEnabled);
@@ -81,16 +81,16 @@
 	void TwoTreeView::dragMoveEvent(QDragMoveEvent *event) {
 		QModelIndex idx = indexAt(event->position().toPoint());
 		if (isLeft) {
-			// 左側: ドロップ不可（並び替えは許可）
+			// 左側: ドロチE�E不可�E�並び替え�E許可�E�E
 			if (event->source() == this) {
-				event->acceptProposedAction(); // 自分内の並び替えOK
+				event->acceptProposedAction(); // 自刁E�Eの並び替ぁEK
 			} else {
-				event->ignore(); // 他からのドロップNG
+				event->ignore(); // 他から�EドロチE�ENG
 			}
 		} else {
-			// 右側: 1層まで（子を持てない）
+			// 右側: 1層まで�E�子を持てなぁE��E
 			if (idx.isValid()) {
-				// すでにアイテムがある位置へのドロップ禁止
+				// すでにアイチE��がある位置へのドロチE�E禁止
 				event->ignore();
 			} else {
 				event->acceptProposedAction();
@@ -101,11 +101,11 @@
 	void TwoTreeView::dropEvent(QDropEvent *event) {
 		if (isLeft) {
 			std::cout << "D: dropEvent.left\n";
-			// 左にドロップされたら右側から削除
+			// 左にドロチE�Eされたら右側から削除
 			if (event->source() != this) {
 				event->acceptProposedAction();
 
-				// 右側モデルから削除処理
+				// 右側モチE��から削除処琁E
 				auto src = qobject_cast<QTreeView*>(event->source());
 				if (src) {
 					QModelIndex idx = src->currentIndex();
@@ -122,7 +122,7 @@
 			} else std::cout << "D: if event->source else\n";
 		} else {
 			std::cout << "D: dropEvent.right\n";
-			// 通常ドロップ処理
+			// 通常ドロチE�E処琁E
 			QTreeView::dropEvent(event);
 		}
 	}

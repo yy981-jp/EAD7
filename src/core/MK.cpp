@@ -7,8 +7,8 @@
 #include "base.h"
 
 
-// パラメータ（実運用で調整可能）
-// libsodium 定義を使うのが簡単: MODERATE / SENSITIVE など
+// パラメータ�E�実運用で調整可能�E�E
+// libsodium 定義を使ぁE�Eが簡十E MODERATE / SENSITIVE など
 const unsigned long long PW_OPSLIMIT = crypto_pwhash_OPSLIMIT_MODERATE;
 const size_t PW_MEMLIMIT = crypto_pwhash_MEMLIMIT_MODERATE;
 

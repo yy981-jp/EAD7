@@ -44,13 +44,13 @@ void writeJson(const json& j, const std::string& path) {
 }
 
 CryptoGCM encAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& AAD) {
-	if (AESNI) return encAES256GCM_sodium(key, nonce, text, AAD);		// AES-NI在り 高速
-	else		return encAES256GCM_cryptopp(key, nonce, text, AAD);	// AES-NI無し 低速
+	if (AESNI) return encAES256GCM_sodium(key, nonce, text, AAD);		// AES-NI在めE高送E
+	else		return encAES256GCM_cryptopp(key, nonce, text, AAD);	// AES-NI無い低送E
 }
 
 BIN decAES256GCM(const BIN& key, const BIN& nonce, const BIN& text, const BIN& tag, const BIN& AAD) {
-	if (AESNI) return decAES256GCM_sodium(key, nonce, text, AAD, tag);		// AES-NI在り 高速
-	else		return decAES256GCM_cryptopp(key, nonce, text, AAD, tag);	// AES-NI無し 低速
+	if (AESNI) return decAES256GCM_sodium(key, nonce, text, AAD, tag);		// AES-NI在めE高送E
+	else		return decAES256GCM_cryptopp(key, nonce, text, AAD, tag);	// AES-NI無い低送E
 }
 
 BIN deriveKey(const BIN& ikm, const std::string &info, size_t keyLen, const BIN& salt) {

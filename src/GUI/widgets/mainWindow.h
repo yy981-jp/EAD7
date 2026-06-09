@@ -2,7 +2,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QWidget>
 
-#include "../def.h"
+#include "def.h"
 
 
 class MainWindow : public QMainWindow {

@@ -18,7 +18,7 @@ CryptoGCM encAES256GCM_sodium(const BIN& key, const BIN& nonce, const BIN& plain
 	crypto_aead_aes256gcm_encrypt_detached(
 		result.cipher.data(), result.tag.data(), nullptr,
 		plaintext.data(), plaintext.size(),
-		aad.data(), aad.size(),  // ←ここで AAD を渡す
+		aad.data(), aad.size(),  // ←ここで AAD を渡ぁE
 		nullptr, nonce.data(), key.data()
 	);
 
@@ -53,16 +53,16 @@ CryptoGCM encAES256GCM_cryptopp(const BIN& key, const BIN& iv, const BIN& plaint
 	GCM<AES>::Encryption enc;
 	enc.SetKeyWithIV(key, key.size(), iv, iv.size());
 
-	// AADを先にProcessData
+	// AADを�EにProcessData
 	enc.SpecifyDataLengths(aad.size(), plaintext.size(), 0);
 
-	// 認証タグ生成にAADを加える
+	// 認証タグ生�EにAADを加える
 	enc.Update(aad.data(), aad.size());
 
 	result.cipher.CleanNew(plaintext.size());
 	enc.ProcessData(result.cipher, plaintext, plaintext.size());
 
-	// 認証タグを取り出す
+	// 認証タグを取り�EぁE
 	result.tag.CleanNew(16);
 	enc.TruncatedFinal(result.tag, result.tag.size());
 	
@@ -74,7 +74,7 @@ BIN decAES256GCM_cryptopp(const BIN& key, const BIN& iv, const BIN& ciphertext, 
 	GCM<AES>::Decryption dec;
 	dec.SetKeyWithIV(key, key.size(), iv, iv.size());
 
-	// 平文サイズ指定
+	// 平斁E��イズ持E��E
 	dec.SpecifyDataLengths(aad.size(), ciphertext.size(), 0);
 
 	// 認証タグにAADを加える

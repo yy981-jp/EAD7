@@ -13,12 +13,12 @@
 
 #include "cui.h"
 #include "gui.h"
-#include "../master.h"
+#include "master.h"
 
 
 std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
 	QDialog dialog;
-	dialog.setWindowTitle("選択");
+	dialog.setWindowTitle("選抁E);
 
 	QVBoxLayout *layout = new QVBoxLayout(&dialog);
 	QListWidget *listWidget = new QListWidget;
@@ -54,14 +54,14 @@ std::vector<std::string> selectItem(const std::vector<Entry>& entries) {
 				result.push_back(item->data(Qt::UserRole).toString().toStdString());
 			}
 		}
-	} else std::runtime_error("selectItem():選択無し");
+	} else std::runtime_error("selectItem():選択無い);
 	return result;
 }
 
 std::string prompt(const std::string& placeholderText) {
 	bool ok = false;
 	QString text = QInputDialog::getText(
-		nullptr,"入力",
+		nullptr,"入劁E,
 		QString::fromStdString(placeholderText),
 		QLineEdit::Normal,"",&ok
 	);

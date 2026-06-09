@@ -8,16 +8,16 @@
 
 #include <yy981/env.h>
 
-#include "../master.h"
+#include "master.h"
 #include "def.h"
 #include "cui.h"
 #include "gui.h"
 #include "ui_main.h"
-#include "../UI/util.h"
-#include "../CUI/ui.h"
+#include "UI/util.h"
+#include "CUI/ui.h"
 #include "../CUI/text.h"
 #include "windowSave.h"
-#include "../version.h"
+#include "version.h"
 
 #include "mw.h"
 #include "awv.h"
@@ -32,7 +32,7 @@ void loadKeyCombobox() {
 	if (!fs::exists(path::p_kek)) {
 		w->close();
 		delete fb;
-		fb = new FileButton("配布KEKファイルを\n選択");
+		fb = new FileButton("配布KEKファイルを\n選抁E);
 		QFont f = fb->font();
 		f.setPointSize(72);
 		f.setWeight(QFont::Bold);
@@ -51,7 +51,7 @@ void loadKeyCombobox() {
 	PKEK = readJson(path::p_kek);
 	
 	json raw_kek = decPKEK(PKEK);
-	u::log("Keyリスト(P_KEK)読み込み完了   最終更新日時: " + convUnixTime(raw_kek["meta"]["last_updated"].get<uint64_t>()));
+	u::log("KeyリスチEP_KEK)読み込み完亁E  最終更新日晁E " + convUnixTime(raw_kek["meta"]["last_updated"].get<uint64_t>()));
 	for (auto [kid,entry]: raw_kek["keks"].items()) {
 		std::string mkidAndLabel = "MK-ID: " + std::to_string(entry["mkid"].get<uint8_t>())
 									+ "\t|" + convUnixTime(entry["created"].get<uint64_t>()) 
@@ -117,11 +117,11 @@ void GUI() {
 	CN(ui->copy, &QPushButton::clicked, []{
 		QString qstring = ui->out->toPlainText();
 		if (qstring.isEmpty()) {
-			u::stat("出力内容が空です");
+			u::stat("出力�E容が空でぁE);
 			return;
 		}
 		clipboard->setText(qstring);
-		u::stat("出力内容をクリップボードにコピーしました");
+		u::stat("出力�E容をクリチE�Eボ�Eドにコピ�Eしました");
 	});
 	CN(ui->clear, &QPushButton::clicked, ui->out, &QPlainTextEdit::clear);
 
@@ -191,7 +191,7 @@ void GUI() {
 	if (fs::exists(windowSave::settingFile)) windowSave::load();
 
 	u::log(std::string("AES-NI 高速化: ") + (AESNI? "有効": "無効"));
-	u::log("ui setup完了");
+	u::log("ui setup完亁E);
 	
 	ui->inp_line->setFocus();
 
@@ -208,17 +208,17 @@ int GUI_interface() {
 			delete w;	w = nullptr;
 			delete ui;	ui = nullptr;
 			w = new MainWindow;
-			if (!crashed) u::log("EAD7 GUI 起動"); else {
+			if (!crashed) u::log("EAD7 GUI 起勁E); else {
 				crashed = false;
 				ui->log->setPlainText(log);
-				ui->statusbar->showMessage(statText,60*1000); // 1分
+				ui->statusbar->showMessage(statText,60*1000); // 1刁E
 				u::stat("RuntimeError: " + err);
 				u::log("RuntimeError: " + err);
-				u::log("EAD7 GUI 再起動");
+				u::log("EAD7 GUI 再起勁E);
 			}
 			GUI(); // Core
 			int result = app->exec();
-			delete w; // QThreadStorageエラー対策 (できてない)
+			delete w; // QThreadStorageエラー対筁E(できてなぁE
 			return result;
 		} catch (const std::runtime_error& e) {
 			crashed = true;
@@ -228,13 +228,13 @@ int GUI_interface() {
 			w->close();
 			continue;
 		} catch (const std::exception& e) {
-			crashReport("深刻な例外が発生したため、プログラムを終了しました\nstd::exception::what(): " + std::string(e.what()));
+			crashReport("深刻な例外が発生したため、�Eログラムを終亁E��ました\nstd::exception::what(): " + std::string(e.what()));
 			return 1;
 		} catch (...) {
-			crashReport("不明な例外が発生したため、プログラムを終了しました");
+			crashReport("不�Eな例外が発生したため、�Eログラムを終亁E��ました");
 			return 2;
 		}
 	}
-	crashReport("RuntimeErrorが100回発生したため明らかな異常と判断し、プログラムを終了しました");
+	crashReport("RuntimeErrorぁE00回発生したため�Eらかな異常と判断し、�Eログラムを終亁E��ました");
 	return 50;
 }

@@ -6,8 +6,8 @@
 
 #include <windows.h>
 
-#include "../master.h"
-#include "../base.h"
+#include "master.h"
+#include "base.h"
 
 std::string formatBytes(uint64_t bytes);
 std::string formatSeconds(uint64_t totalSeconds);

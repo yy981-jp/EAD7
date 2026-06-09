@@ -38,7 +38,7 @@ signals:
 
 public slots:
 	void onPressed() {
-		QString filePath = QFileDialog::getOpenFileName(this, tr("ファイルを選択"));
+		QString filePath = QFileDialog::getOpenFileName(this, tr("ファイルを選抁E));
 		if (!filePath.isEmpty()) emit fileSelected(filePath);
 	}
 };

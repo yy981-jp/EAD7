@@ -1,7 +1,7 @@
 #include "del.h"
 
 
-// 文字列の安全ゼロ化
+// 斁E���Eの安�Eゼロ匁E
 static void secure_zero_string(std::string& s) {
 	if (!s.empty()) {
 		sodium_memzero(const_cast<char*>(s.data()), s.size());
@@ -10,7 +10,7 @@ static void secure_zero_string(std::string& s) {
 	}
 }
 
-// バイナリ (vector<uint8_t>) の安全ゼロ化
+// バイナリ (vector<uint8_t>) の安�Eゼロ匁E
 static void secure_zero_vector(std::vector<std::uint8_t>& v) {
 	if (!v.empty()) {
 		sodium_memzero(v.data(), v.size());
@@ -19,12 +19,12 @@ static void secure_zero_vector(std::vector<std::uint8_t>& v) {
 	}
 }
 
-// json を再帰的に走査して "消すべき中身" をゼロ化する。
-// clear_structure = true にすると最後にそのオブジェクト自体を clear() して構造も消す。
+// json を�E帰皁E��走査して "消すべき中身" をゼロ化する、E
+// clear_structure = true にすると最後にそ�Eオブジェクト�E体を clear() して構造も消す、E
 void secure_clear_json(json& j, bool clear_structure) {
-	// 文字列
+	// 斁E���E
 	if (j.is_string()) {
-		// get_ref<T&>() で内部の string を参照で取り出せる
+		// get_ref<T&>() で冁E��の string を参照で取り出せる
 		try {
 			auto& s = j.get_ref<std::string&>();
 			secure_zero_string(s);
@@ -33,7 +33,7 @@ void secure_clear_json(json& j, bool clear_structure) {
 		return;
 	}
 
-	// binary（json::binary_t == std::vector<uint8_t>）
+	// binary�E�Eson::binary_t == std::vector<uint8_t>�E�E
 	if (j.is_binary()) {
 		try {
 			auto& b = j.get_ref<json::binary_t&>();
@@ -43,7 +43,7 @@ void secure_clear_json(json& j, bool clear_structure) {
 		return;
 	}
 
-	// 配列
+	// 配�E
 	if (j.is_array()) {
 		for (auto& el : j) {
 			secure_clear_json(el, true);
@@ -52,9 +52,9 @@ void secure_clear_json(json& j, bool clear_structure) {
 		return;
 	}
 
-	// オブジェクト
+	// オブジェクチE
 	if (j.is_object()) {
-		// イテレータ経由で値の参照をとる（コピーを避ける）
+		// イチE��ータ経由で値の参�Eをとる（コピ�Eを避ける�E�E
 		for (auto it = j.begin(); it != j.end(); ++it) {
 			secure_clear_json(it.value(), true);
 		}
@@ -62,6 +62,6 @@ void secure_clear_json(json& j, bool clear_structure) {
 		return;
 	}
 
-	// その他
+	// そ�E仁E
 	if (clear_structure) j.clear();
 }

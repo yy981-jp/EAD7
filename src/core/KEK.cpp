@@ -52,7 +52,7 @@ json convert_kid_kek(const BIN& mk, const json& kid_json, const uint8_t& mkid) {
 	return keks;
 }
 
-json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const uint8_t& mkid) { // kek_json:全体 kid_json:kidsのみ
+json createRawKEK(const BIN& mk, json kek_json, const json& kid_json, const uint8_t& mkid) { // kek_json:全佁Ekid_json:kidsのみ
 	int64_t unix_now = getUnixTime();
 	if (!kek_json.contains("version")) {
 		kek_json["meta"]["created"] = unix_now;
@@ -214,7 +214,7 @@ json decAdmKEK(const BIN& mk, const json& adm_json) {
 json encPKEK(const json& raw_json) {
 	int64_t unix_now = getUnixTime();
 
-	// --- 1) AAD作成 ---
+	// --- 1) AAD作�E ---
 	ordered_json aad_obj;
 	aad_obj["version"] = raw_json.at("version");
 	aad_obj["type"] = "p";
@@ -225,11 +225,11 @@ json encPKEK(const json& raw_json) {
 	std::string aad_str = aad_obj.dump();
 	BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
 
-	// --- 2) 暗号対象データ (raw_json["keks"])
+	// --- 2) 暗号対象チE�Eタ (raw_json["keks"])
 	std::string keks_str = raw_json["keks"].dump();
 	BIN keks_bin(reinterpret_cast<const byte*>(keks_str.data()), keks_str.size());
 
-	// --- 3) salt と nonce 生成
+	// --- 3) salt と nonce 生�E
 	BIN salt = randomBIN(16);
 	BIN nonce = randomBIN(12);
 
@@ -237,15 +237,15 @@ json encPKEK(const json& raw_json) {
 	std::string info = "EAD7|KEK|v1";
 	BIN file_key = deriveKey(loadToken(), info, 32, salt);
 
-	// --- 5) AES256-GCM で暗号化
+	// --- 5) AES256-GCM で暗号匁E
 	CryptoGCM cg;
 	try {
 		cg = encAES256GCM(file_key, nonce, keks_bin, aad_bin);
 	} catch (const std::runtime_error& err) {
-		std::cerr << "tokenかp.kekが破損している可能性が高いです 移植は正規の手順に則って行ってください";
+		std::cerr << "tokenかp.kekが破損してぁE��可能性が高いでぁE移植�E正規�E手頁E��剁E��て行ってください";
 		throw err;
 	}
-	// --- 6) JSON 出力
+	// --- 6) JSON 出劁E
 	json p;
 	p["version"] = aad_obj["version"];
 	p["type"] = aad_obj["type"];
@@ -257,14 +257,14 @@ json encPKEK(const json& raw_json) {
 		{"nonce", base::enc64(nonce)}
 	};
 
-	// --- 7) センシティブデータ削除
+	// --- 7) センシチE��ブデータ削除
 
 
 	return p;
 }
 
 json decPKEK(const json& p_json) {
-	// --- 1) AAD 再構築 ---
+	// --- 1) AAD 再構篁E---
 	ordered_json aad_obj;
 	aad_obj["version"] = p_json.at("version");
 	aad_obj["type"] = p_json.at("type");
@@ -272,7 +272,7 @@ json decPKEK(const json& p_json) {
 	std::string aad_str = aad_obj.dump();
 	BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
 
-	// --- 2) enc 部分を取得 ---
+	// --- 2) enc 部刁E��取征E---
 	if (!p_json.contains("enc")) {
 		throw std::runtime_error("p.kek missing enc field");
 	}
@@ -282,7 +282,7 @@ json decPKEK(const json& p_json) {
 	BIN tag   = base::dec64(enc.at("tag").get<std::string>());
 	BIN nonce = base::dec64(enc.at("nonce").get<std::string>());
 
-	// --- 3) 鍵を導出 ---
+	// --- 3) 鍵を導�E ---
 	std::string info = "EAD7|KEK|v1";
 	BIN file_key = deriveKey(loadToken(), info, 32, salt);
 
@@ -291,22 +291,22 @@ json decPKEK(const json& p_json) {
 	try {
 		plain = decAES256GCM(file_key, nonce, ct, tag, aad_bin);
 	} catch (const std::runtime_error& err) {
-		std::cerr << "tokenかp.kekが破損している可能性が高いです 移植は正規の手順に則って行ってください";
+		std::cerr << "tokenかp.kekが破損してぁE��可能性が高いでぁE移植�E正規�E手頁E��剁E��て行ってください";
 		throw err;
 	}
 
-	// --- 5) 平文を JSON として復元 ---
+	// --- 5) 平斁E�� JSON として復允E---
 	std::string plain_str(reinterpret_cast<const char*>(plain.data()), plain.size());
 	json keks = json::parse(plain_str);
 
-	// --- 6) 出力 JSON 構築 (raw に近い形に戻す)
+	// --- 6) 出劁EJSON 構篁E(raw に近い形に戻ぁE
 	json raw;
 	raw["version"] = p_json.at("version");
-	raw["type"] = "raw"; // decrypt後は生のKEK構造に戻る
+	raw["type"] = "raw"; // decrypt後�E生�EKEK構造に戻めE
 	raw["meta"] = p_json.at("meta");
 	raw["keks"] = keks;
 
-	// --- 7) センシティブデータ削除 ---
+	// --- 7) センシチE��ブデータ削除 ---
 
 
 	return raw;
@@ -314,27 +314,27 @@ json decPKEK(const json& p_json) {
 
 
 
-// p形式: keks丸ごと暗号化 dst作成
+// p形弁E keks丸ごと暗号匁Edst作�E
 json encDstKEK(const std::string &password, const json &raw_json, unsigned long long opslimit, size_t memlimit) {
 	if (!raw_json.is_object()) throw std::runtime_error("raw_json must be an object");
 
 	int64_t unix_now = getUnixTime();
 
-	// ファイルレベルのsalt生成
+	// ファイルレベルのsalt生�E
 	BIN file_salt = randomBIN(16);
 
-	// password + file_salt から fileKeyを導出
+	// password + file_salt から fileKeyを導�E
 	const size_t KEY_LEN = 32;
 	BIN fileKey = derivekey_password(password, file_salt, KEY_LEN, opslimit, memlimit);
 
-	// keksを丸ごと暗号化
+	// keksを丸ごと暗号匁E
 	std::string keks_str = raw_json.at("keks").dump();
 	BIN keks_bin(reinterpret_cast<const byte*>(keks_str.data()), keks_str.size());
 
-	// nonce生成（ファイル単位）
+	// nonce生�E�E�ファイル単位！E
 	BIN nonce = randomBIN(12);
 
-	// AAD構築 (version/type/meta/kdf)
+	// AAD構篁E(version/type/meta/kdf)
 	ordered_json aad_obj;
 	aad_obj["version"] = raw_json.at("version");
 	aad_obj["type"] = "dst";
@@ -350,10 +350,10 @@ json encDstKEK(const std::string &password, const json &raw_json, unsigned long 
 	std::string aad_str = aad_obj.dump();
 	BIN aad_bin(reinterpret_cast<const byte*>(aad_str.data()), aad_str.size());
 
-	// 暗号化
+	// 暗号匁E
 	CryptoGCM cg = encAES256GCM(fileKey, nonce, keks_bin, aad_bin);
 
-	// dst JSON構築
+	// dst JSON構篁E
 	json dst;
 	dst["version"] = raw_json.at("version");
 	dst["type"] = "dst";
@@ -372,20 +372,20 @@ json encDstKEK(const std::string &password, const json &raw_json, unsigned long 
 		{"nonce", base::enc64(nonce)}
 	};
 
-	// ゼロ化
+	// ゼロ匁E
 
 
 	return dst;
 }
 
-// p形式: keks丸ごと復号
+// p形弁E keks丸ごと復号
 json decDstKEK(const std::string &password, const json &dst_json) {
 	if (sodium_init() < 0) throw std::runtime_error("sodium_init failed");
 	if (!dst_json.is_object()) throw std::runtime_error("dst_json must be an object");
 
 	int64_t unix_now = getUnixTime();
 
-	// kdf 情報
+	// kdf 惁E��
 	if (!dst_json.contains("kdf") || !dst_json["kdf"].is_object()) {
 		throw std::runtime_error("dst_json missing kdf object");
 	}
@@ -413,7 +413,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	BIN tag	= base::dec64(tag_b64);
 	BIN nonce  = base::dec64(nonce_b64);
 
-	// AAD構築（dst作成時と同様）
+	// AAD構築！Est作�E時と同様！E
 	ordered_json aad_obj;
 	aad_obj["version"] = dst_json.at("version");
 	aad_obj["type"] = dst_json.at("type");
@@ -438,7 +438,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 		throw std::runtime_error(std::string("dst decryption failed: ") + e.what());
 	}
 
-	// JSONに戻す
+	// JSONに戻ぁE
 	std::string keks_str(reinterpret_cast<const char*>(keks_bin.data()), keks_bin.size());
 	json raw_keks = json::parse(keks_str);
 
@@ -451,7 +451,7 @@ json decDstKEK(const std::string &password, const json &dst_json) {
 	};
 	raw["keks"] = raw_keks;
 
-	// ゼロ化
+	// ゼロ匁E
 
 
 	return raw;

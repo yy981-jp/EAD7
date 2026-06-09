@@ -41,7 +41,7 @@ void createMK(int index, const std::string& pass, BIN mk) {
 	json jsondat;
 	ifile >> jsondat;
 	ifile.close();
-	if (jsondat.contains(sindex)) throw std::runtime_error("インデックスに既にMKが存在するので処理を終了しました 削除などの編集は管理画面から行ってください");
+	if (jsondat.contains(sindex)) throw std::runtime_error("インチE��クスに既にMKが存在するので処琁E��終亁E��ました 削除などの編雁E�E管琁E��面から行ってください");
 	
 	MKEntryB64 entry = createMKCore(pass);
 	jsondat[sindex] = {

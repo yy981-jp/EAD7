@@ -4,8 +4,8 @@
 #include <QtWidgets/QRadioButton>
 
 #include "windowSave.h"
-#include "../master.h"
-#include "../def.h"
+#include "master.h"
+#include "def.h"
 #include "def.h"
 
 

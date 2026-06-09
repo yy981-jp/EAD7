@@ -10,12 +10,12 @@ MainWindow::MainWindow() {
 	if (!ui) crashReport("MainWindow::MainWindow()::ui==nullptr");
 	// resize(800,600);
 
-	// 右パネルを作成
+	// 右パネルを作�E
 	aui = new Ui::AdminWindow;
 	aui->setupUi(ui->adminWidget);
 	ui->adminWidgetDock->hide(); // 初期は非表示
 
-	// トグルボタンに接続（UI内のボタンを想定）
+	// トグルボタンに接続！EI冁E�Eボタンを想定！E
 	connect(ui->adminPanel, &QCheckBox::checkStateChanged, this, &MainWindow::toggleRightPanel);
 }
 

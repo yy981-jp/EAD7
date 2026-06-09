@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-#include "../def.h"
+#include "def.h"
 
 
 namespace windowSave {

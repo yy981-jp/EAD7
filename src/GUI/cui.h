@@ -9,7 +9,7 @@ extern QApplication* app;
 
 struct Entry {
 	std::string label; // 表示用
-	std::string id;	// 内部用
+	std::string id;	// 冁E��用
 	bool checked;
 	Entry(const std::string& label, const std::string& id, bool checked = false): label(label), id(id), checked(checked) {}
 };

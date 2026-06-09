@@ -4,7 +4,7 @@
 #include <cryptopp/filters.h>
 #include <conio.h>
 #include "ui.h"
-#include "../master.h"
+#include "master.h"
 
 
 namespace env {
@@ -50,10 +50,10 @@ std::string inp_s(const std::string& out) {
 }
 
 void out_s(const std::string& out) {
-	std::cout << "spaceかenterを押して続行): "<< out;
+	std::cout << "spaceかenterを押して続衁E: "<< out;
 	while (true) {
-		int key = _getch(); // 1文字取得（表示しない）
-		if (key == ' ' || key == '\r') { // ' ' はスペース, '\r' はEnter
+		int key = _getch(); // 1斁E��取得（表示しなぁE��E
+		if (key == ' ' || key == '\r') { // ' ' はスペ�Eス, '\r' はEnter
 			break;
 		}
 	}
@@ -67,7 +67,7 @@ char choice(const std::string& message, const std::string& validChars) {
 	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
 	DWORD mode;
 
-	// 入力モードを保存
+	// 入力モードを保孁E
 	GetConsoleMode(hStdin, &mode);
 	SetConsoleMode(hStdin, mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT));
 
@@ -91,25 +91,25 @@ char choice(const std::string& message, const std::string& validChars) {
 						result = vc; // 戻り値は validChars に合わせる
 						std::cout << vc << "\n";
 						done = true;
-						break; // 内側の for を抜ける
+						break; // 冁E�Eの for を抜ける
 					}
 				}
 			}
 		}
 	}
 
-	// 入力モードを元に戻す
+	// 入力モードを允E��戻ぁE
 	SetConsoleMode(hStdin, mode);
 	return result;
 }
 
 std::string toUTF8(const std::string& s) {
-	// CP932 → UTF-16
+	// CP932 ↁEUTF-16
 	int wlen = MultiByteToWideChar(env::cp, 0, s.c_str(), (int)s.size(), nullptr, 0);
 	std::wstring wbuf(wlen, 0);
 	MultiByteToWideChar(env::cp, 0, s.c_str(), (int)s.size(), &wbuf[0], wlen);
 
-	// UTF-16 → UTF-8
+	// UTF-16 ↁEUTF-8
 	int len = WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), (int)wbuf.size(), nullptr, 0, nullptr, nullptr);
 	std::string out(len, 0);
 	WideCharToMultiByte(CP_UTF8, 0, wbuf.c_str(), (int)wbuf.size(), &out[0], len, nullptr, nullptr);
