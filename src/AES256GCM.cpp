@@ -1,5 +1,5 @@
 #include "AES256GCM.h"
-
+#include <sodium.h>
 #include <cryptopp/aes.h>
 #include <cryptopp/gcm.h>
 

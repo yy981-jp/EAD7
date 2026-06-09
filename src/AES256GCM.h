@@ -1,5 +1,5 @@
 #pragma once
-#include "master.h"
+#include "crypto.h"
 
 
 extern CryptoGCM encAES256GCM_sodium(const BIN& key, const BIN& nonce, const BIN& ciphertext, const BIN& aad);

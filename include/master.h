@@ -1,2 +1,2 @@
 #pragma once
-#incldue "../src/master.h"
+#include "../src/master.h"

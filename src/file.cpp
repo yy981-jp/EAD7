@@ -3,7 +3,9 @@
 #include <cryptopp/hmac.h>
 #include <cryptopp/sha.h>
 
-#include "master.h"
+#include "crypto.h"
+#include "ead7.h"
+#include "file.h"
 #include "base.h"
 #include <limits>
 

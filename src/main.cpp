@@ -15,7 +15,6 @@
 
 #include "def.h"
 #include "base.h"
-#include "master.h"
 #include "CUI/ui.h"
 #include "CUI/text.h"
 
