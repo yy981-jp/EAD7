@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <filesystem>
 #include <cryptopp/secblock.h>
 #include <nlohmann/json.hpp>
 

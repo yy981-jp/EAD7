@@ -9,7 +9,7 @@
 #include <yy981/return.h>
 
 #include "base.h"
-#include "master.h"
+#include "kid.h"
 
 
 std::map<KStat,std::string> KStatMap = {

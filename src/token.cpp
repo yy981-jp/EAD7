@@ -2,7 +2,7 @@
 #include <wincred.h>
 #include <tchar.h>
 
-#include "master.h"
+#include "token.h"
 
 
 void saveToken(const BIN& token) {

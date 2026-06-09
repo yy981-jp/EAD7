@@ -25,8 +25,6 @@
 #include "widgets/fileButton.h"
 #include "widgets/mainWindow.h"
 
-bool reloadWindow = false;
-
 
 void loadKeyCombobox() {
 	if (!fs::exists(path::p_kek)) {
@@ -43,7 +41,6 @@ void loadKeyCombobox() {
 			try {
 				mw::import_dst_kek(qstr,true);
 			} catch (const std::runtime_error& e) {
-				reloadWindow = true;
 			}
 		});
 		return;
@@ -65,8 +62,6 @@ void loadKeyCombobox() {
 
 
 void GUI() {
-	reloadWindow = false;
-
 	ui->log->setVisible(false);
 	w->show();
 	
@@ -107,7 +102,6 @@ void GUI() {
 		try {
 			mw::import_dst_kek(qstr,true);
 		} catch (const std::runtime_error& e) {
-			reloadWindow = true;
 		}
 	});
 	CN(ui->resizeWindow, &QPushButton::clicked, []{w->resize(730,500);});
@@ -194,9 +188,6 @@ void GUI() {
 	u::log("ui setup完了");
 	
 	ui->inp_line->setFocus();
-
-	if (reloadWindow) QApplication::quit();
-	
 }
 
 int GUI_interface() {
