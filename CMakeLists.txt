@@ -9,14 +9,11 @@ add_compile_options(-fdiagnostics-color=always)
 
 set(CMAKE_CXX_STANDARD 23)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+# find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 find_package(Boost REQUIRED COMPONENTS locale)
 
-# MOC
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
+# QT
+# qt_standard_project_setup()
 
 file(GLOB_RECURSE SOURCES src/*.cpp src/*.ui)
 
@@ -35,7 +32,7 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE 
 	"${CMAKE_SOURCE_DIR}/include"
 	"${CMAKE_SOURCE_DIR}/src"
-	"${CMAKE_SOURCE_DIR}/src/GUI/widgets"
+	# "${CMAKE_SOURCE_DIR}/src/GUI/widgets"
 )
 
 # ライブラリ
@@ -43,7 +40,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	cryptopp
 	sodium
 	Boost::locale
-	Qt6::Core
-	Qt6::Gui
-	Qt6::Widgets
+	# Qt6::Core
+	# Qt6::Gui
+	# Qt6::Widgets
 )

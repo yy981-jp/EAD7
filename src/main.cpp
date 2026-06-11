@@ -1,0 +1,2 @@
+// dummy
+int main() {}

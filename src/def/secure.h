@@ -1,5 +1,3 @@
-#pragma once
-#include "def.h"
 #include <sodium.h>
 
 
@@ -12,15 +10,4 @@ concept HasDataAndSize = requires(T t) {
 template <HasDataAndSize Bin>
 inline void delm(Bin& bin) {
 	sodium_memzero(bin.data(), bin.size());
-}
-
-extern void secure_clear_json(json& j, bool clear_structure = true);
-
-inline void delm(json& j) {
-	secure_clear_json(j, true);
-}
-
-template <HasDataAndSize... Bins>
-void delm(Bins&... bins) {
-	(delm(bins), ...);
 }
