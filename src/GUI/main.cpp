@@ -38,10 +38,7 @@ void loadKeyCombobox() {
 		fb->adjustSize();
 		fb->show();
 		CN(fb, &FileButton::fileSelected, [](const QString& qstr){
-			try {
-				mw::import_dst_kek(qstr,true);
-			} catch (const std::runtime_error& e) {
-			}
+			mw::import_dst_kek(qstr,true);
 		});
 		return;
 	}
@@ -99,10 +96,7 @@ void GUI() {
 	
 	CN(ui->log_checkbox, &QCheckBox::checkStateChanged, ui->log, &QPlainTextEdit::setVisible);
 	CN(ui->dst_file, &FileButton::fileSelected, [](const QString& qstr){
-		try {
-			mw::import_dst_kek(qstr,true);
-		} catch (const std::runtime_error& e) {
-		}
+		mw::import_dst_kek(qstr/*,true*/);
 	});
 	CN(ui->resizeWindow, &QPushButton::clicked, []{w->resize(730,500);});
 	CN(ui->inp_from, &QComboBox::currentIndexChanged, [](const int& index){
@@ -134,7 +128,7 @@ void GUI() {
 			else ui->inp_multi->setFocus();
 	});
 	
-	loadKeyCombobox();
+	if (fs::exists(path::p_kek)) loadKeyCombobox();
 	
 	// ui.inp_from
 	ui->inp_from->setItemData(0, QVariant::fromValue(INP_FROM::null));

@@ -10,7 +10,7 @@
 
 namespace fs = std::filesystem;
 
-VER cver("../ver.csv");
+VER cver("ver.csv");
 const fs::path Dir = fs::current_path()/"..";
 const std::string TMP = getEnv("tmp");
 

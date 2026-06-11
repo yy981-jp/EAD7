@@ -31,8 +31,9 @@ namespace mw {
 	}
 	
 	void import_dst_kek(const QString& qstr, bool from_kek_window) {
+		// std::cout << "D: " << __LINE__ << "\n"
 		std::string str = qstr.toStdString();
-		if (str.ends_with(".e7")) {
+		if (str.ends_with(".e7") || str.ends_with(".e7\"")) {
 			fs::path p = str;
 			if (fs::exists(p)) {
 				FDat f = getFileType(p);
@@ -45,13 +46,12 @@ namespace mw {
 						u::stat("P_KEK更新完了\n");
 						delm(pass,raw_kek);
 						if (from_kek_window) fb->close();
-						throw std::runtime_error("再起動信号(P_KEK再読み込み)");
+						// throw std::runtime_error("再起動信号(P_KEK再読み込み)");
 					} break;
 					default: throw std::runtime_error("E7ファイルではありますが、形式が不正です");
 				}
 			}
-		}
-		u::stat("dst_kekとして入力されたファイルはe7ファイルではありません(ファイル拡張子で判断)");
+		} else u::stat("dst_kekとして入力されたファイルはe7ファイルではありません(ファイル拡張子で判断)");
 	}
 	
 	std::string textInfo(const std::string& text) {
