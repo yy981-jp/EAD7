@@ -1,5 +1,6 @@
 #pragma once
-#include "def/bin.h"
+#include <def/bin.h>
+#include <def/def.h>
 
 #include <sodium.h>
 #include <cryptopp/aes.h>
@@ -95,8 +96,8 @@ public:
 	}
 
 	Bin decAES256GCM(const Bin& key, const Bin& nonce, const Bin& text, const Bin& tag, const Bin& AAD) {
-		if (AESN_I) return decAES256GCM_sodium(key, nonce, text, AAD, tag);
-			else	return decAES256GCM_cryptopp(key, nonce, text, AAD, tag);
+		if (AES_NI) return dec_sodium(key, nonce, text, AAD, tag);
+			else	return dec_cryptopp(key, nonce, text, AAD, tag);
 	}
 
 };

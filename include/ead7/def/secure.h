@@ -1,4 +1,12 @@
 #include <sodium.h>
+#include <concepts>
+
+#include <ead7/def/def.h>
+#include <ead7/def/json.h>
+#include <ead7/def/bin.h>
+
+
+EAD7_BEGIN
 
 
 template <typename T>
@@ -11,3 +19,6 @@ template <HasDataAndSize Bin>
 inline void delm(Bin& bin) {
 	sodium_memzero(bin.data(), bin.size());
 }
+
+
+EAD7_END
